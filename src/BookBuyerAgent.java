@@ -21,6 +21,7 @@ public class BookBuyerAgent extends Agent{
     {
         // Hej fra Kristian
         // Hej igen
+        // Gejsdas
         // Hej fra peter
         // Hej fra Kasper 
         
