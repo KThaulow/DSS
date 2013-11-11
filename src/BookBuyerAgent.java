@@ -23,6 +23,7 @@ public class BookBuyerAgent extends Agent{
         // Hej igen
         // Hej igen igen
         // Hej fra peter
+        // Hej fra Kasper 
         
         System.out.println("Hello Hello! Buyer agent "+getAID().getName()+" is ready");
         
