@@ -20,6 +20,7 @@ public class BookBuyerAgent extends Agent{
     protected void setup()
     {
         // Hej fra Kristian
+        // Hej igen
         
         System.out.println("Hello Hello! Buyer agent "+getAID().getName()+" is ready");
         
