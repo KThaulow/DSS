@@ -19,7 +19,7 @@ public class BookBuyerAgent extends Agent{
     
     protected void setup()
     {
-        System.out.println("Hello! Buyer agent "+getAID().getName()+" is ready");
+        System.out.println("Hello Hello! Buyer agent "+getAID().getName()+" is ready");
         
         // Get the title of the book as a startup argument
         Object[] args = getArguments();
