@@ -7,7 +7,7 @@ import jade.domain.FIPAException;
 
 public class AirportAgent extends Agent {
 
-    
+    // test
     private static final String typeOfAgent = "airport";
     private static final String nameOfAgent = "airportAgent";
 
