@@ -1,18 +1,27 @@
 package Agents;
 
 
+import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
+import java.util.Hashtable;
 
 public class AirportAgent extends Agent {
 
-    // test
     private static final String typeOfAgent = "airport";
     private static final String nameOfAgent = "airportAgent";
 
+    int airportID;
+    double coordinateX;
+    double coordinateY;
+    Hashtable<AID, String> aircrafts;
+    
     protected void setup() {
         registerToDF();
 

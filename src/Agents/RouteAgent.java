@@ -15,6 +15,7 @@ public class RouteAgent extends Agent {
     private static final String typeOfAgent = "route";
     private static final String nameOfAgent = "routeAgent";
     private static final String conversationID = "reschedule";
+    private static final String agentToFind = "airport";
 
     private enum Reschedule {
 
@@ -22,6 +23,10 @@ public class RouteAgent extends Agent {
     }
 
     private int routeID;
+    private int soldTickets;
+    private AID departureAirport;
+    private AID arrivalAirport;
+    private AID aircraft;
 
     protected void setup() {
         System.out.println("Route-agent " + getAID().getName() + " is ready");
@@ -102,7 +107,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent("get all airplanes"); // Get all airplanes
+                        cfp.setContent("this airport"); // Send this airport
                         cfp.setConversationId(conversationID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);

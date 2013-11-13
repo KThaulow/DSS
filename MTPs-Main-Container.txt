@@ -1,1 +1,1 @@
-http://KP05.airsupport.local:7778/acc
+http://Kristian-Laptop:7778/acc
