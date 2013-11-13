@@ -13,19 +13,40 @@ import jade.lang.acl.ACLMessage;
 import jade.proto.AchieveREInitiator;
 
 /**
- *
+ * Represents a behaviour for creating and registering one or more new agents.
  * @author pla
  */
-public class CreateGenericAgentBehaviour extends OneShotBehaviour
+public class GenericAgentCreationBehaviour extends OneShotBehaviour
 {
     private String containerName;
     private String agentClassName;
     private String agentName;
     private int numOfAgents;
     
-    public CreateGenericAgentBehaviour(int numOfAgents, String containerName, String agentClassName, String agentName)
+    /**
+     * Constructs an agent creation behaviour, for the registration of multiple agents.
+     * @param numOfAgents The number of agents to be created.
+     * @param containerName The container name in which the agents are to be registered.
+     * @param agentClassName The class name of the agents to be created package.class.
+     * @param agentName The name of the agents to be created.
+     */
+    public GenericAgentCreationBehaviour(int numOfAgents, String containerName, String agentClassName, String agentName)
     {
         this.numOfAgents = numOfAgents;
+        this.containerName = containerName;
+        this.agentClassName = agentClassName;
+        this.agentName = agentName;
+    }
+    
+    /**
+     * Constructs an agent creation behaviour, for the registration of one agent.
+     * @param containerName The container name in which the agent is to be registered.
+     * @param agentClassName The class name of the agent to be created package.class.
+     * @param agentName The name of the agent to be created.
+     */
+    public GenericAgentCreationBehaviour(String containerName, String agentClassName, String agentName)
+    {
+        this.numOfAgents = 1;
         this.containerName = containerName;
         this.agentClassName = agentClassName;
         this.agentName = agentName;

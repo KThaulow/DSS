@@ -18,7 +18,7 @@ import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.lang.acl.ACLMessage;
 
 /**
- *
+ * Represents a factory for creating FIPA ACL messages, regarding the creation of a new agent via AMS.
  * @author pla
  */
 public class AgentCreationMsgFactory 
@@ -26,6 +26,11 @@ public class AgentCreationMsgFactory
     private AID ams;
     private ContentManager cm;
     
+    /**
+     * Constructs the AgentCreationMsgFactory using the owner agent's AMS and content manager.
+     * @param ams The owning agent's Agent Management System.
+     * @param cm The owning agent's Content Manager.
+     */
     public AgentCreationMsgFactory(AID ams, ContentManager cm)
     {
         this.ams = ams;

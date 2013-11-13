@@ -31,7 +31,7 @@ public class MainAgent extends Agent
             containerName = "Main-Container";
         }
         
-        addBehaviour(new CreateGenericAgentBehaviour(NUMBER_OF_AGENTS_TO_CREATE, containerName, "Agents.AircraftAgent", "acAgent"));
+        addBehaviour(new GenericAgentCreationBehaviour(NUMBER_OF_AGENTS_TO_CREATE, containerName, "Agents.AircraftAgent", "acAgent"));
     }
     
     protected void takeDown() 
