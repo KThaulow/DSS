@@ -1,3 +1,5 @@
+package Agents;
+
 
 import jade.core.Agent;
 import jade.domain.DFService;
@@ -5,10 +7,11 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 
-public class PlaneAgent extends Agent {
+public class AirportAgent extends Agent {
 
-    private static final String typeOfAgent = "plane";
-    private static final String nameOfAgent = "planeAgent";
+    // test
+    private static final String typeOfAgent = "airport";
+    private static final String nameOfAgent = "airportAgent";
 
     protected void setup() {
         registerToDF();
@@ -17,7 +20,7 @@ public class PlaneAgent extends Agent {
     }
 
     private void registerToDF() {
-        // Register the plane service in the yellow pages
+        // Register the airport service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -39,6 +42,6 @@ public class PlaneAgent extends Agent {
             fe.printStackTrace();
         }
 
-        System.out.println("Plane agent " + getAID().getName() + " terminating");
+        System.out.println("Airport agent " + getAID().getName() + " terminating");
     }
 }
