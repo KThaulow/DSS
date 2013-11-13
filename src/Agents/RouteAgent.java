@@ -150,7 +150,6 @@ public class RouteAgent extends Agent {
                 case ORDER_PLANE: // Send the reschedule order to the plane that provided the best offer 
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestPlane);
-                    order.setContent("arrivalAirport"); // TODO: Change to the name of this route???
                     order.setConversationId(conversationID);
                     order.setReplyWith(conversationID + System.currentTimeMillis());
                     myAgent.send(order);
@@ -169,12 +168,8 @@ public class RouteAgent extends Agent {
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             myAgent.doDelete();
                             step = Reschedule.IDLE;
-                        } 
-                        else if(reply.getPerformative() == ACLMessage.FAILURE)
-                        {
-                            
                         }
-                        
+
                     } else {
                         block();
                         System.out.println("No reschedule order reply received");
