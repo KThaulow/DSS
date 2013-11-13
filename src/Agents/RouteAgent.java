@@ -107,7 +107,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent("this airport"); // Send this airport
+                        cfp.setContent("departure airport"); // Send this airport
                         cfp.setConversationId(conversationID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
@@ -150,7 +150,7 @@ public class RouteAgent extends Agent {
                 case ORDER_PLANE: // Send the reschedule order to the plane that provided the best offer 
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestPlane);
-                    order.setContent("targetRoute"); // TODO: Change to the name of this route???
+                    order.setContent("arrivalAirport"); // TODO: Change to the name of this route???
                     order.setConversationId(conversationID);
                     order.setReplyWith(conversationID + System.currentTimeMillis());
                     myAgent.send(order);
@@ -168,8 +168,13 @@ public class RouteAgent extends Agent {
                             // Purchase succesful. We can terminate.
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             myAgent.doDelete();
+                            step = Reschedule.IDLE;
+                        } 
+                        else if(reply.getPerformative() == ACLMessage.FAILURE)
+                        {
+                            
                         }
-                        step = Reschedule.IDLE;
+                        
                     } else {
                         block();
                         System.out.println("No reschedule order reply received");

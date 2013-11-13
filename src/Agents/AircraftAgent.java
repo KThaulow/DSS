@@ -16,7 +16,10 @@ public class AircraftAgent extends Agent {
     
     int aircraftID;
     int capacity;
+    int coordinateX;
+    int coordinateY;
     double speed;
+    boolean aircraftAvailable; // Is the aircraft ready to fly
 
     protected void setup() {
         registerToDF();
@@ -94,11 +97,17 @@ public class AircraftAgent extends Agent {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 // Message received. Process it
-                String title = msg.getContent();
+                String arrivalAirport = msg.getContent();
                 ACLMessage reply = msg.createReply();
                 
-                reply.setPerformative(ACLMessage.INFORM);
-                reply.setContent(response);
+                if(aircraftAvailable)
+                {
+                    reply.setPerformative(ACLMessage.INFORM);
+                    System.out.println("Aircraft "+myAgent.getName() + " has been assigned to route " + msg.getSender());
+                } else {
+                    reply.setPerformative(ACLMessage.FAILURE);
+                    reply.setContent("not-available");
+                }
 
                 myAgent.send(reply);
             } else {
