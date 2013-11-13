@@ -20,10 +20,12 @@ import java.util.logging.Logger;
  */
 public class MainAgent extends Agent
 {
+    private static final int NUMBER_OF_AGENTS_TO_CREATE = 10;
+    
     protected void setup() 
     {
         System.out.println("Successfully initialized main agent.");
-        System.out.println(tryCreateTenAircraftAgents() ? "Successfully created all 10 agents!" : "FAIL!"); // Test, do delete again.
+        System.out.println(tryCreateAircraftAgents(NUMBER_OF_AGENTS_TO_CREATE) ? "Successfully created all" + NUMBER_OF_AGENTS_TO_CREATE+ " agents!" : "FAIL!"); // Test, do delete again.
     }
     
     protected void takeDown() 
@@ -31,13 +33,13 @@ public class MainAgent extends Agent
         System.out.println("shutting down main");
     }
     
-    private boolean tryCreateTenAircraftAgents()
+    private boolean tryCreateAircraftAgents(int numberOfAgents)
     {
         try
         {
             AgentCreationMsgFactory fact = new AgentCreationMsgFactory(getAMS(), getContentManager());
 
-            System.out.println("Creating 10 aircraft agents in the main container...");
+            System.out.println("Creating " + numberOfAgents + " aircraft agents in the main container...");
 
             String agentClassName = "Agents.AircraftAgent";
             String containerName;
@@ -51,9 +53,9 @@ public class MainAgent extends Agent
                 containerName = "Main-Container";
             }
 
-            for(int i = 0; i < 10; i++)
+            for(int agents = 0; agents < numberOfAgents; agents++)
             {
-                String agentName = "aircraftAgent" + i;
+                String agentName = "aircraftAgent" + agents;
                 ACLMessage agentCreationMsg = fact.createRequestMessage(agentClassName, agentName, containerName);
                 addBehaviour(createAgentCreationBehaviour(agentCreationMsg, agentClassName, agentName, containerName));
             }
