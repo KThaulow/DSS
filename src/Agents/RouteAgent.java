@@ -1,6 +1,5 @@
 package Agents;
 
-
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -18,7 +17,8 @@ public class RouteAgent extends Agent {
     private static final String conversationID = "reschedule";
 
     private enum Reschedule {
-        REQUEST_PLANES, GET_NUMBER_OF_PLANES, GET_PROPOSAL_FROM_PLANES, ORDER_PLANE, GET_RECEIPT, IDLE;
+
+        REQUEST_PLANES, GET_PROPOSAL_FROM_PLANES, ORDER_PLANE, GET_RECEIPT, IDLE;
     }
 
     private int routeID;
@@ -68,8 +68,8 @@ public class RouteAgent extends Agent {
     }
 
     /**
-     * This is the complex behaviour used by route agents to request plane agents
-     * available in the current airport from the airport agents
+     * This is the complex behaviour used by route agents to request plane
+     * agents available in the current airport from the airport agents
      */
     private class RequestReschedule extends Behaviour {
 
@@ -81,30 +81,34 @@ public class RouteAgent extends Agent {
 
         public void action() {
             int planes = 0;
-            AID currentAirport;
+            AID[] aircrafts;
             switch (step) {
-                case REQUEST_PLANES: // Send the CFP (Call For Proposal) to the current airport
+                case REQUEST_PLANES: // Send the CFP (Call For Proposal) to all aircrafts
 
-                    // Template for getting the current airport agent
+                    // Template for getting all aircraft agent
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType("this airport"); // Get this airport
+                    sd.setType("all aircrafts"); // Get all aircrafts
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
-                        currentAirport = new AID();
-                        currentAirport = results[0].getName();
+                        aircrafts = new AID[results.length];
+                        for (int i = 0; i < results.length; ++i) {
+                            aircrafts[i] = results[i].getName();
+                        }
 
                         // Sent message to airport
                         ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-                        cfp.addReceiver(currentAirport); // this airport
-                        cfp.setContent("get all airplanes in this airport"); // Get all airplanes in current airport
+                        for (int i = 0; i < aircrafts.length; ++i) {
+                            cfp.addReceiver(aircrafts[i]);
+                        }
+                        cfp.setContent("get all airplanes"); // Get all airplanes
                         cfp.setConversationId(conversationID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
                         mt = MessageTemplate.and(MessageTemplate.MatchConversationId(conversationID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-                        step = Reschedule.GET_NUMBER_OF_PLANES;
+                        step = Reschedule.GET_PROPOSAL_FROM_PLANES;
 
                         System.out.println("CFP send to current airport");
                     } catch (FIPAException fe) {
@@ -112,25 +116,8 @@ public class RouteAgent extends Agent {
                     }
                     break;
 
-                case GET_NUMBER_OF_PLANES: // Receive number of planes in airport
-                    ACLMessage reply = myAgent.receive(mt);
-                    if (reply != null) {
-                        // Reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
-
-                            planes = Integer.parseInt(reply.getContent());
-
-                            System.out.println("Planes in current (" + reply.getSender().getName() + ")  airport: " + planes);
-                        }
-                        step = Reschedule.GET_PROPOSAL_FROM_PLANES;
-                    } else {
-                        System.out.println("No information received");
-                        block();
-                    }
-                    break;
-
                 case GET_PROPOSAL_FROM_PLANES:  // Receive all proposals from the planes in the current airport
-                    reply = myAgent.receive(mt);
+                    ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
