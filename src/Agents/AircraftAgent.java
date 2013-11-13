@@ -13,6 +13,10 @@ public class AircraftAgent extends Agent {
 
     private static final String typeOfAgent = "aircraft";
     private static final String nameOfAgent = "aircraftAgent";
+    
+    int aircraftID;
+    int capacity;
+    double speed;
 
     protected void setup() {
         registerToDF();
@@ -47,14 +51,18 @@ public class AircraftAgent extends Agent {
         System.out.println("Plane agent " + getAID().getName() + " terminating");
     }
 
+    /**
+     * Serves the reschedule request from the RouteAgent
+     */
     private class RescheduleRequestsServer extends CyclicBehaviour {
 
         public void action() {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+            
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 // Message received. Process it
-                String title = msg.getContent();
+                String airport = msg.getContent();
                 ACLMessage reply = msg.createReply();
 
                 String response = "";
@@ -66,6 +74,30 @@ public class AircraftAgent extends Agent {
                  */
                 
                 reply.setPerformative(ACLMessage.PROPOSE);
+                reply.setContent(response);
+
+                myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+    
+    /**
+     * Serves the reschedule order from the RouteAgent
+     */
+    private class RescheduleOrderServer extends CyclicBehaviour {
+
+        public void action() {
+            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
+            
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                // Message received. Process it
+                String title = msg.getContent();
+                ACLMessage reply = msg.createReply();
+                
+                reply.setPerformative(ACLMessage.INFORM);
                 reply.setContent(response);
 
                 myAgent.send(reply);
