@@ -68,7 +68,7 @@ public class RouteAgent extends Agent {
     }
 
     /**
-     * This is the behaviour used by route agents to request plane agents
+     * This is the complex behaviour used by route agents to request plane agents
      * available in the current airport from the airport agents
      */
     private class RequestReschedule extends Behaviour {
