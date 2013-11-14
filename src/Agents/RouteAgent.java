@@ -54,8 +54,11 @@ public class RouteAgent extends Agent {
 
             registerToDF();
 
-            addBehaviour(new RequestAirports());
-            addBehaviour(new RequestReschedule());
+            addBehaviour(new RequestAirports()); // Request associated airports
+            
+            addBehaviour(new RequestAircraft()); // Request associated aircraft
+            
+            addBehaviour(new RequestReschedule()); // Request reschedule of flight
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -122,6 +125,29 @@ public class RouteAgent extends Agent {
                 ex.printStackTrace();
             }
         }
+    }
+    
+    /**
+     * One shot behaviour for getting associated aircraft
+     */
+    private class RequestAircraft extends OneShotBehaviour {
+
+        @Override
+        public void action() {
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setName("aircraftAgent" + aircraftID); // Get departure airport AID
+            template.addServices(sd);
+
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                aircraft = results[0].getName();
+                System.out.println("Route "+myAgent.getLocalName() + " has aircraft agent " + aircraft.getLocalName());
+            } catch (FIPAException ex) {
+                ex.printStackTrace();
+            }
+        }
+        
     }
 
     /**

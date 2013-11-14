@@ -17,21 +17,36 @@ public class AircraftAgent extends Agent {
     private static final String nameOfAgent = "aircraftAgent";
 
     int aircraftID;
-    int capacity;
     int coordinateX;
     int coordinateY;
-    double speed;
+    int capacity;
+    int speed;
     boolean aircraftAvailable; // Is the aircraft ready to fly
 
     protected void setup() {
         System.out.println("Aircraft-agent " + getAID().getName() + " is ready");
-        
-        registerToDF();
-        
 
-        addBehaviour(new RescheduleRequestsServerBehaviour()); // Serve the reschedule request
-        
-        addBehaviour(new RescheduleOrderServerBehaviour()); // Serve the reschedule order
+        // Get the ID of the route as a startup argument
+        Object[] args = getArguments();
+        if (args != null && args.length > 0) {
+            aircraftID = (Integer) args[0];
+            capacity = (Integer) args[1];
+            speed = (Integer) args[2];
+
+            System.out.println("Aircraft " + getAID().getLocalName() + " has ID " + aircraftID);
+            System.out.println("Aircraft " + getAID().getLocalName() + " has capacity " + capacity);
+            System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
+
+            registerToDF();
+
+            addBehaviour(new RescheduleRequestsServerBehaviour()); // Serve the reschedule request
+
+            addBehaviour(new RescheduleOrderServerBehaviour()); // Serve the reschedule order
+        } else {
+            System.out.println("No arguments specified specified");
+            doDelete();
+        }
+
     }
 
     private void registerToDF() {
@@ -40,7 +55,7 @@ public class AircraftAgent extends Agent {
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent);
+        sd.setName(nameOfAgent+aircraftID);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -59,8 +74,6 @@ public class AircraftAgent extends Agent {
 
         System.out.println("Plane agent " + getAID().getName() + " terminating");
     }
-
-    
 
     /**
      * Serves the reschedule request from the RouteAgent
@@ -90,7 +103,7 @@ public class AircraftAgent extends Agent {
             }
         }
     }
-    
+
     /**
      * Serves the reschedule order from the RouteAgent
      */
