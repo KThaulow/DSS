@@ -1,25 +1,16 @@
 
 import jade.core.Agent;
-import AgentBehaviours.*;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/**
- *
- * @author pla
- */
 public class MainAgent extends Agent
 {
     private static final int NUMBER_OF_AIRCRAFT_AGENTS = 3;
     private static final int NUMBER_OF_AIRPORT_AGENTS = 3;
     private static final int NUMBER_OF_ROUTE_AGENTS = 1;
     
+    @Override
     protected void setup() 
     {
         System.out.println("Successfully initialized main agent.");
@@ -86,8 +77,9 @@ public class MainAgent extends Agent
         ((AgentController)getContainerController().createNewAgent(agentName,className,args)).start();
     }
     
+    @Override
     protected void takeDown() 
     {
-        System.out.println("shutting down main");
+        System.out.println("Shutting down main");
     }
 }

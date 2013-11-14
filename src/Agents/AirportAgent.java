@@ -24,6 +24,7 @@ public class AirportAgent extends Agent {
     int coordinateY;
     Hashtable<AID, String> aircrafts;
     
+    @Override
     protected void setup() {  
         System.out.println("Airport-agent " + getAID().getName() + " is ready");
         
@@ -58,6 +59,7 @@ public class AirportAgent extends Agent {
         }
     }
 
+    @Override
     protected void takeDown() {
         // Deregister from the yellow pages
         try {
@@ -75,6 +77,7 @@ public class AirportAgent extends Agent {
      */
     private class LocationRequestsServerBehaviour extends CyclicBehaviour {
 
+        @Override
         public void action() {
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(locationID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 

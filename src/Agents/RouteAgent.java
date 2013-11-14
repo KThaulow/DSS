@@ -3,7 +3,6 @@ package Agents;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -11,19 +10,19 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RouteAgent extends Agent {
 
     private static final String typeOfAgent = "route";
     private static final String nameOfAgent = "routeAgent";
-    private static final String rescheduleID = "reschedule";
+    private static final String bestAircraftID = "bestAircraft";
     private static final String agentToFind = "airport";
 
     private enum Reschedule {
 
-        REQUEST_PLANES, GET_PROPOSAL_FROM_PLANES, ORDER_PLANE, GET_RECEIPT, IDLE;
+        REQUEST_AIRCRAFT, GET_PROPOSAL_FROM_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, IDLE;
     }
 
     private int routeID;
@@ -46,19 +45,19 @@ public class RouteAgent extends Agent {
             aircraftID = (Integer) args[3];
             soldTickets = (Integer) args[4];
 
-            System.out.println("Route "+getAID().getLocalName()+" has ID " + routeID);
-            System.out.println("Route "+getAID().getLocalName()+ " has departure airport " + departureAirportID);
-            System.out.println("Route "+getAID().getLocalName()+" has arrival airport " + arrivalAirportID);
-            System.out.println("Route "+getAID().getLocalName()+" has aircraft " + aircraftID);
-            System.out.println("Route "+getAID().getLocalName()+" has " + soldTickets + " sold tickets");
+            System.out.println("Route " + getAID().getLocalName() + " has ID " + routeID);
+            System.out.println("Route " + getAID().getLocalName() + " has departure airport " + departureAirportID);
+            System.out.println("Route " + getAID().getLocalName() + " has arrival airport " + arrivalAirportID);
+            System.out.println("Route " + getAID().getLocalName() + " has aircraft " + aircraftID);
+            System.out.println("Route " + getAID().getLocalName() + " has " + soldTickets + " sold tickets");
 
             registerToDF();
 
-            addBehaviour(new RequestAirports()); // Request associated airports
-            
-            addBehaviour(new RequestAircraft()); // Request associated aircraft
-            
-            addBehaviour(new RequestReschedule()); // Request reschedule of flight
+            addBehaviour(new RequestAssignedAirports()); // Request associated airports
+
+            addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft
+
+            addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -80,6 +79,7 @@ public class RouteAgent extends Agent {
         }
     }
 
+    @Override
     public void takeDown() {
         // Deregister from the yellow pages
         try {
@@ -94,7 +94,7 @@ public class RouteAgent extends Agent {
     /**
      * One shot behaviour for getting associated airports
      */
-    private class RequestAirports extends OneShotBehaviour {
+    private class RequestAssignedAirports extends OneShotBehaviour {
 
         @Override
         public void action() {
@@ -107,7 +107,7 @@ public class RouteAgent extends Agent {
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);
                 departureAirport = results[0].getName();
-                System.out.println("Route "+myAgent.getLocalName() + " has departure airport agent " + departureAirport.getLocalName());
+                System.out.println("Route " + myAgent.getLocalName() + " has departure airport agent " + departureAirport.getLocalName());
             } catch (FIPAException ex) {
                 ex.printStackTrace();
             }
@@ -120,17 +120,17 @@ public class RouteAgent extends Agent {
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);
                 arrivalAirport = results[0].getName();
-                System.out.println("Route "+myAgent.getLocalName() + " has arrival airport agent " + arrivalAirport.getLocalName());
+                System.out.println("Route " + myAgent.getLocalName() + " has arrival airport agent " + arrivalAirport.getLocalName());
             } catch (FIPAException ex) {
                 ex.printStackTrace();
             }
         }
     }
-    
+
     /**
      * One shot behaviour for getting associated aircraft
      */
-    private class RequestAircraft extends OneShotBehaviour {
+    private class RequestAssignedAircraft extends OneShotBehaviour {
 
         @Override
         public void action() {
@@ -142,37 +142,39 @@ public class RouteAgent extends Agent {
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);
                 aircraft = results[0].getName();
-                System.out.println("Route "+myAgent.getLocalName() + " has aircraft agent " + aircraft.getLocalName());
+                System.out.println("Route " + myAgent.getLocalName() + " has aircraft agent " + aircraft.getLocalName());
             } catch (FIPAException ex) {
                 ex.printStackTrace();
             }
         }
-        
+
     }
 
     /**
      * This is the complex behaviour used by route agents to request plane
-     * agents available in the current airport from the airport agents
+     * agents to be assigned to fly this route
      */
-    private class RequestReschedule extends Behaviour {
+    private class RequestBestAircraft extends Behaviour {
 
         private AID bestPlane; // The agent who provides the best offer
         private int lowestCost; // The lowest cost
         private int repliesCnt = 0; // The counter of replies from plane agents
         private MessageTemplate mt; // The template to receive replies
-        private Reschedule step = Reschedule.REQUEST_PLANES;
+        private Reschedule step = Reschedule.REQUEST_AIRCRAFT;
+        private List<AID> unavailableAircrafts = new ArrayList<>(); 
 
         @Override
         public void action() {
             int planes = 0;
             AID[] aircrafts;
+            
             switch (step) {
-                case REQUEST_PLANES: // Send the CFP (Call For Proposal) to all aircrafts
+                case REQUEST_AIRCRAFT: // Send the CFP (Call For Proposal) to all aircrafts
 
-                    // Template for getting all aircraft agent
+                    // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType("all aircrafts"); // Get all aircrafts
+                    sd.setType("aircraft"); // Get all aircrafts
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
@@ -186,23 +188,28 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent("departure airport"); // Send this airport
-                        cfp.setConversationId(rescheduleID);
+                        cfp.setContent(departureAirport.toString()); // Send the departure airport
+                        cfp.setConversationId(bestAircraftID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(rescheduleID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-                        step = Reschedule.GET_PROPOSAL_FROM_PLANES;
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                        step = Reschedule.GET_PROPOSAL_FROM_AIRCRAFTS;
 
-                        System.out.println("CFP send to current airport");
+                        System.out.println("CFP for best fitted aircraft send to all aircrafts");
                     } catch (FIPAException fe) {
                         fe.printStackTrace();
                     }
                     break;
 
-                case GET_PROPOSAL_FROM_PLANES:  // Receive all proposals from the planes in the current airport
+                case GET_PROPOSAL_FROM_AIRCRAFTS:  // Receive all proposals from the planes in the current airport
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
+                        if (unavailableAircrafts != null) {
+                            if (unavailableAircrafts.contains(reply.getSender())) { // Break if plane is not functional
+                                break;
+                            }
+                        }
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
@@ -217,7 +224,7 @@ public class RouteAgent extends Agent {
                         repliesCnt++;
                         if (repliesCnt >= planes) {
                             // We received all replies
-                            step = Reschedule.ORDER_PLANE;
+                            step = Reschedule.ORDER_AIRCRAFT;
                         }
 
                     } else {
@@ -226,19 +233,19 @@ public class RouteAgent extends Agent {
                     }
                     break;
 
-                case ORDER_PLANE: // Send the reschedule order to the plane that provided the best offer 
+                case ORDER_AIRCRAFT: // Send the reschedule order to the plane that provided the best offer 
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestPlane);
-                    order.setConversationId(rescheduleID);
-                    order.setReplyWith(rescheduleID + System.currentTimeMillis());
+                    order.setConversationId(bestAircraftID);
+                    order.setReplyWith(bestAircraftID + System.currentTimeMillis());
                     myAgent.send(order);
-                    // Prepare the template to get the purchase order reply
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(rescheduleID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    // Prepare the template to get the order reply
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
                     step = Reschedule.GET_RECEIPT;
                     System.out.println("Send reschedule order to plane " + bestPlane.getName());
                     break;
 
-                case GET_RECEIPT: // Receive the reschedule order reply
+                case GET_RECEIPT: // Receive the best aircraft order reply
                     reply = myAgent.receive(mt);
                     if (reply != null) {
                         // Reschedule order reply received
@@ -247,6 +254,8 @@ public class RouteAgent extends Agent {
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             myAgent.doDelete();
                             step = Reschedule.IDLE;
+                        } else if (reply.getPerformative() == ACLMessage.CANCEL) {
+                            unavailableAircrafts.add(bestPlane);
                         }
 
                     } else {
@@ -257,8 +266,9 @@ public class RouteAgent extends Agent {
             }
         }
 
+        @Override
         public boolean done() {
-            return ((step == Reschedule.ORDER_PLANE && bestPlane == null) || step == Reschedule.IDLE);
+            return ((step == Reschedule.ORDER_AIRCRAFT && bestPlane == null) || step == Reschedule.IDLE);
         }
     }
 
