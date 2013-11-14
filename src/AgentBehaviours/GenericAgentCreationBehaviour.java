@@ -22,6 +22,7 @@ public class GenericAgentCreationBehaviour extends OneShotBehaviour
     private String agentClassName;
     private String agentName;
     private int numOfAgents;
+    private String args[];
     
     /**
      * Constructs an agent creation behaviour, for the registration of multiple agents.
@@ -29,13 +30,15 @@ public class GenericAgentCreationBehaviour extends OneShotBehaviour
      * @param containerName The container name in which the agents are to be registered.
      * @param agentClassName The class name of the agents to be created package.class.
      * @param agentName The name of the agents to be created.
+     * @param args The arguments for the agents 
      */
-    public GenericAgentCreationBehaviour(int numOfAgents, String containerName, String agentClassName, String agentName)
+    public GenericAgentCreationBehaviour(int numOfAgents, String containerName, String agentClassName, String agentName, String args[])
     {
         this.numOfAgents = numOfAgents;
         this.containerName = containerName;
         this.agentClassName = agentClassName;
         this.agentName = agentName;
+        this.args = args;
     }
     
     /**
@@ -43,13 +46,15 @@ public class GenericAgentCreationBehaviour extends OneShotBehaviour
      * @param containerName The container name in which the agent is to be registered.
      * @param agentClassName The class name of the agent to be created package.class.
      * @param agentName The name of the agent to be created.
+     * @param args The arguments for the agent 
      */
-    public GenericAgentCreationBehaviour(String containerName, String agentClassName, String agentName)
+    public GenericAgentCreationBehaviour(String containerName, String agentClassName, String agentName, String args[])
     {
         this.numOfAgents = 1;
         this.containerName = containerName;
         this.agentClassName = agentClassName;
         this.agentName = agentName;
+        this.args = args;
     }
     
     @Override

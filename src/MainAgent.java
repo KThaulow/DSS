@@ -1,6 +1,8 @@
 
 import jade.core.Agent;
 import AgentBehaviours.*;
+import jade.wrapper.AgentController;
+import jade.wrapper.StaleProxyException;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -14,7 +16,8 @@ import AgentBehaviours.*;
  */
 public class MainAgent extends Agent
 {
-    private static final int NUMBER_OF_AGENTS_TO_CREATE = 10;
+    private static final int NUMBER_OF_AIRCRAFT_AGENTS = 10;
+    private static final int NUMBER_OF_AIRPORT_AGENTS = 3;
     
     protected void setup() 
     {
@@ -30,8 +33,51 @@ public class MainAgent extends Agent
         {
             containerName = "Main-Container";
         }
+
+        setupAllAgents();
+    }
+    
+    /***
+     * Creates and sets up all the agents
+     */
+    private void setupAllAgents(){
+        String aircraftArguments[] = {};
+        for(int i=0; i<NUMBER_OF_AIRCRAFT_AGENTS; i++){
+            createAgent("acAgent", "Agents.AircraftAgent", aircraftArguments);
+        }
         
-        addBehaviour(new GenericAgentCreationBehaviour(NUMBER_OF_AGENTS_TO_CREATE, containerName, "Agents.AircraftAgent", "acAgent"));
+        String airportArguments[][] = {{"2","3"}, {"5","6"}, {"8","10"}};
+        for(int i=0; i<NUMBER_OF_AIRPORT_AGENTS; i++){
+            createAgent("acAgent", "Agents.AircraftAgent", airportArguments[i]);
+        }
+    }
+    
+    /**
+     * Creates an agent safely
+     * @param agentName Name of the agent
+     * @param className Class name of the agent
+     * @param args Arguments of the agent
+     */
+    private void createAgent(String agentName,String className,Object[] args)
+    {
+        try {
+            setUpAgent(agentName,className,args);
+        }
+        catch (StaleProxyException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    /**
+     * Sets up an agent
+     * @param agentName Name of the agent
+     * @param className Class name of the agent
+     * @param args Arguments for the agent
+     * @throws StaleProxyException 
+     */
+    private void setUpAgent(String agentName,String className,Object[] args) throws StaleProxyException 
+    {
+        ((AgentController)getContainerController().createNewAgent(agentName,className,args)).start();
     }
     
     protected void takeDown() 
