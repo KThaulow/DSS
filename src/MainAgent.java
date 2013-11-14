@@ -46,7 +46,7 @@ public class MainAgent extends Agent
             createAgent("acAgent", "Agents.AircraftAgent", aircraftArguments);
         }
         
-        String airportArguments[][] = {{"2","3"}, {"5","6"}, {"8","10"}};
+        String airportArguments[][] = {{"1","2","3"}, {"2","5","6"}, {"3","8","10"}};
         for(int i=0; i<NUMBER_OF_AIRPORT_AGENTS; i++){
             createAgent("acAgent", "Agents.AircraftAgent", airportArguments[i]);
         }

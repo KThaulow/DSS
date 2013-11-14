@@ -24,19 +24,21 @@ public class AirportAgent extends Agent {
     double coordinateY;
     Hashtable<AID, String> aircrafts;
     
-    protected void setup() {
-        
-        registerToDF();  
-        
+    protected void setup() {  
         // Get the identifier of the cross and add behaviours
         Object[] args = getArguments();
         if ( args!=null && args.length>0 ) {
-            coordinateX = (Integer) args[0];
-            coordinateY = (Integer) args[0];
+            airportID = (Integer) args[0];
+            coordinateX = (Integer) args[1];
+            coordinateY = (Integer) args[2];
              
+            registerToDF(); 
             
             addBehaviour(new LocationRequestsServerBehaviour());
-        }   
+        } else {
+            System.out.println("No arguments specified specified");
+            doDelete();
+        }
     }
 
     private void registerToDF() {
