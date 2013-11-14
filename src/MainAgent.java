@@ -18,6 +18,7 @@ public class MainAgent extends Agent
 {
     private static final int NUMBER_OF_AIRCRAFT_AGENTS = 10;
     private static final int NUMBER_OF_AIRPORT_AGENTS = 3;
+    private static final int NUMBER_OF_ROUTE_AGENTS = 1;
     
     protected void setup() 
     {
@@ -43,12 +44,17 @@ public class MainAgent extends Agent
     private void setupAllAgents(){
         String aircraftArguments[] = {};
         for(int i=0; i<NUMBER_OF_AIRCRAFT_AGENTS; i++){
-            createAgent("acAgent", "Agents.AircraftAgent", aircraftArguments);
+            createAgent("acAgent"+i, "Agents.AircraftAgent", aircraftArguments);
         }
         
-        String airportArguments[][] = {{"1","2","3"}, {"2","5","6"}, {"3","8","10"}};
+        Integer airportArguments[][] = {{0,2,3}, {1,5,6}, {2,8,10}};
         for(int i=0; i<NUMBER_OF_AIRPORT_AGENTS; i++){
-            createAgent("acAgent", "Agents.AircraftAgent", airportArguments[i]);
+            createAgent("apAgent"+i, "Agents.AirportAgent", airportArguments[i]);
+        }
+        
+        Integer routeArguments[][] = {{0,1,2,1,50}};
+        for(int i=0; i<NUMBER_OF_ROUTE_AGENTS; i++){
+            createAgent("rAgent"+i, "Agents.RouteAgent", routeArguments[i]);
         }
     }
     

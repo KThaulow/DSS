@@ -20,11 +20,13 @@ public class AirportAgent extends Agent {
     private static final String locationID = "airportLocation";
 
     int airportID;
-    double coordinateX;
-    double coordinateY;
+    int coordinateX;
+    int coordinateY;
     Hashtable<AID, String> aircrafts;
     
     protected void setup() {  
+        System.out.println("Airport-agent " + getAID().getName() + " is ready");
+        
         // Get the identifier of the cross and add behaviours
         Object[] args = getArguments();
         if ( args!=null && args.length>0 ) {
@@ -47,7 +49,7 @@ public class AirportAgent extends Agent {
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent);
+        sd.setName(nameOfAgent+airportID);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);

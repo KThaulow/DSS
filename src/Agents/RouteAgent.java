@@ -11,6 +11,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class RouteAgent extends Agent {
 
@@ -29,31 +31,30 @@ public class RouteAgent extends Agent {
     private AID arrivalAirport;
     private AID aircraft;
     private int soldTickets;
-    private int departureAirportID, arrivalAirportID;
+    private int departureAirportID, arrivalAirportID, aircraftID;
 
-
-    
+    @Override
     protected void setup() {
         System.out.println("Route-agent " + getAID().getName() + " is ready");
-        
+
         // Get the ID of the route as a startup argument
         Object[] args = getArguments();
         if (args != null && args.length > 0) {
             routeID = (Integer) args[0];
             departureAirportID = (Integer) args[1];
             arrivalAirportID = (Integer) args[2];
-            aircraft = (AID) args[3];
+            aircraftID = (Integer) args[3];
             soldTickets = (Integer) args[4];
-            
-            System.out.println("Route has ID " + routeID);
-            System.out.println("Route has departure airport " + departureAirportID);
-            System.out.println("Route has arrival airport " + arrivalAirportID);
-            System.out.println("Route has aircraft " + aircraft.getName());
-            System.out.println("Route has " + soldTickets + " sold tickets");
+
+            System.out.println("Route "+getAID().getLocalName()+" has ID " + routeID);
+            System.out.println("Route "+getAID().getLocalName()+ " has departure airport " + departureAirportID);
+            System.out.println("Route "+getAID().getLocalName()+" has arrival airport " + arrivalAirportID);
+            System.out.println("Route "+getAID().getLocalName()+" has aircraft " + aircraftID);
+            System.out.println("Route "+getAID().getLocalName()+" has " + soldTickets + " sold tickets");
 
             registerToDF();
 
-            addBehaviour(new RequestAirports(departureAirportID, arrivalAirportID));
+            addBehaviour(new RequestAirports());
             addBehaviour(new RequestReschedule());
         } else {
             System.out.println("No arguments specified specified");
@@ -86,34 +87,39 @@ public class RouteAgent extends Agent {
 
         System.out.println("Route agent " + getAID().getName() + " terminating");
     }
-    
-    private class RequestAirports extends OneShotBehaviour{
 
-        int departureAirport, arrivalAirport;
-        
-        private RequestAirports(int departureAirport, int arrivalAirport){
-            this.departureAirport = departureAirport;
-            this.arrivalAirport = arrivalAirport;
-        }
-        
+    /**
+     * One shot behaviour for getting associated airports
+     */
+    private class RequestAirports extends OneShotBehaviour {
+
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(locationID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            // Template for getting all aircraft agent
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setName("airportAgent" + departureAirportID); // Get departure airport AID
+            template.addServices(sd);
 
-            ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                departureAirport = results[0].getName();
+                System.out.println("Route "+myAgent.getLocalName() + " has departure airport agent " + departureAirport.getLocalName());
+            } catch (FIPAException ex) {
+                ex.printStackTrace();
+            }
 
-                ACLMessage reply = msg.createReply();
+            template = new DFAgentDescription();
+            sd = new ServiceDescription();
+            sd.setName("airportAgent" + arrivalAirportID); // Get arrival airport AID
+            template.addServices(sd);
 
-                String response = coordinateX + "," + coordinateY;
-
-                reply.setConversationId(locationID);
-                reply.setPerformative(ACLMessage.INFORM);
-                reply.setContent(response);
-
-                myAgent.send(reply);
-            } else {
-                block();
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                arrivalAirport = results[0].getName();
+                System.out.println("Route "+myAgent.getLocalName() + " has arrival airport agent " + arrivalAirport.getLocalName());
+            } catch (FIPAException ex) {
+                ex.printStackTrace();
             }
         }
     }

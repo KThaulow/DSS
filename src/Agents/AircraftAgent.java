@@ -24,8 +24,10 @@ public class AircraftAgent extends Agent {
     boolean aircraftAvailable; // Is the aircraft ready to fly
 
     protected void setup() {
+        System.out.println("Aircraft-agent " + getAID().getName() + " is ready");
+        
         registerToDF();
-        System.out.println("Hello, this is an aircraft agent!");
+        
 
         addBehaviour(new RescheduleRequestsServerBehaviour()); // Serve the reschedule request
         
