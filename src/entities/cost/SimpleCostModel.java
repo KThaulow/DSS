@@ -39,7 +39,8 @@ public class SimpleCostModel implements ICostModel
     }
     
     /**
-     * Calculates the cost of using this aircraft, based on ...
+     * Calculates the cost of using this aircraft, based on the number of passengers,
+     * empty seats, distance to the departure airport, estimated time of flight and fuel consumption.
      * @return The cost of using this aircraft.
      */
     @Override
@@ -51,7 +52,7 @@ public class SimpleCostModel implements ICostModel
         double fuelConsumption = fuelBurnRate * distToDepAirport;
         
         double weightedNumOfPassengers = numOfPassengers * NUM_OF_PASSENGERS_FACTOR;
-        double weightedNumOfEmptySeats = numOfEmptySeats * NUM_OF_PASSENGERS_FACTOR;
+        double weightedNumOfEmptySeats = numOfEmptySeats * NUM_OF_EMPTY_SEATS_FACTOR;
         double weightedDistToDepAirport = distToDepAirport * DIST_TO_DEPARTURE_AIRPORT_FACTOR;
         double weightedTotalEET = totalEET * TOTAL_EET_FACTOR;
         double weightedFuelConsumption = fuelConsumption * FUEL_CONSUMPTION_FACTOR;
