@@ -17,8 +17,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import Utils.Settings; 
-import static Utils.Settings.bestAircraftID;
+import static Utils.Settings.*;
 import jade.core.behaviours.Behaviour;
 /**
  *
@@ -31,8 +30,6 @@ public class GUIAgent extends Agent {
         REQUEST_AIRPORT_COORDINATES, GET_COORDINATES_FROM_AIRPORTS, DONE;
     }
     
-    private static final String typeOfAgent = "GUI";
-    private static final String nameOfAgent = "GUIAgent";
     GUIInterface guiInterface; // The gui interface
     
     protected void setup() {
@@ -84,7 +81,7 @@ public class GUIAgent extends Agent {
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType(Settings.typeOfAirportAgent); // Get all airports
+                    sd.setType(typeOfAirportAgent); // Get all airports
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
@@ -100,10 +97,10 @@ public class GUIAgent extends Agent {
                             System.out.println("Send message to all airports");
                             cfp.addReceiver(airports[i]);
                         }
-                        cfp.setConversationId(Settings.locationID);
+                        cfp.setConversationId(airportLocationID);
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(Settings.locationID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                         step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
                         System.out.println("CFP for all the airports coordinates");
                     } catch (FIPAException fe) {
