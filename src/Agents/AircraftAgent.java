@@ -155,6 +155,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         protected void onTick() {
+            
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(aircraftInfoID);
             info.setContent(coordinateX + "," + coordinateY + "," + arrivalAirportX + "," + arrivalAirportY + "," + speed);
