@@ -18,8 +18,9 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import Utils.Settings; 
-import static Utils.Settings.bestAircraftID;
+import static Utils.Settings.*;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
 /**
  *
  * @author Fuglsang
@@ -100,10 +101,10 @@ public class GUIAgent extends Agent {
                             System.out.println("Send message to all airports");
                             cfp.addReceiver(airports[i]);
                         }
-                        cfp.setConversationId(Settings.locationID);
+                        cfp.setConversationId(airportLocationID);
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(Settings.locationID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                         step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
                         System.out.println("CFP for all the airports coordinates");
                     } catch (FIPAException fe) {
@@ -144,9 +145,31 @@ public class GUIAgent extends Agent {
         public boolean done() {
             return (step == AirportsCoordinatesSteps.DONE); 
         }
-
-        
     } 
     
+    private class GetInformFromAircraftBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftInfoID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            
+            ACLMessage reply = myAgent.receive(mt);
+            if (reply != null) { 
+                    if (reply != null) {                        
+                        // Reply received
+                        if (reply.getPerformative() == ACLMessage.INFORM) {
+                            // this is an offer                            
+                            System.out.println("Coordinates received from " + reply.getSender().getName());
+                            System.out.println("The coordinates are " + reply.getContent()); 
+                            
+                        }
+                        
+                    } else {
+                        System.out.println("No aircraft info");
+                        block();
+                    }
+        }
+        
+    }
     
 }
