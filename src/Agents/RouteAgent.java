@@ -13,6 +13,7 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import static Utils.Settings.*;
+import jade.core.behaviours.CyclicBehaviour;
 
 public class RouteAgent extends Agent {
 
@@ -60,6 +61,9 @@ public class RouteAgent extends Agent {
             addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft
 
             addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
+            
+            addBehaviour(new ArrivalAirportRequestServerBehaviour()); // Serve arrival airport location request
+            
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -169,9 +173,9 @@ public class RouteAgent extends Agent {
                     ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
                     order.addReceiver(departureAirport);
                     order.addReceiver(arrivalAirport);
-                    order.setConversationId(airportLocationID);
+                    order.setConversationId(airportLocationConID);
                     myAgent.send(order);
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
                     step = AirportLocation.GET_LOCATION;
                     break;
 
@@ -195,7 +199,7 @@ public class RouteAgent extends Agent {
                                 System.out.println("Coordinates for arrival airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
                                 airportCoordinatesReceived++;
                             }
-                            if(airportCoordinatesReceived >= 2){
+                            if (airportCoordinatesReceived >= 2) {
                                 step = AirportLocation.DONE;
                             }
                         }
@@ -254,11 +258,11 @@ public class RouteAgent extends Agent {
                             cfp.addReceiver(aircrafts[i]);
                         }
                         cfp.setContent(departureAirport.toString()); // Send the departure airport
-                        cfp.setConversationId(bestAircraftID);
+                        cfp.setConversationId(bestAircraftConID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
                         step = BestAircraft.GET_PROPOSAL_FROM_AIRCRAFTS;
 
                         System.out.println("CFP for best fitted aircraft send to all aircrafts");
@@ -301,11 +305,11 @@ public class RouteAgent extends Agent {
                 case ORDER_AIRCRAFT: // Send the reschedule order to the plane that provided the best offer 
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestPlane);
-                    order.setConversationId(bestAircraftID);
-                    order.setReplyWith(bestAircraftID + System.currentTimeMillis());
+                    order.setConversationId(bestAircraftConID);
+                    order.setReplyWith(bestAircraftConID + System.currentTimeMillis());
                     myAgent.send(order);
                     // Prepare the template to get the order reply
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
                     step = BestAircraft.GET_RECEIPT;
                     System.out.println("Send reschedule order to plane " + bestPlane.getName());
                     break;
@@ -334,6 +338,29 @@ public class RouteAgent extends Agent {
         public boolean done() {
             return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.IDLE);
         }
+    }
+
+    /**
+     * Serves request for arrival airport location
+     */
+    private class ArrivalAirportRequestServerBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(arrivalAirportConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+            ACLMessage reply = myAgent.receive(mt);
+            if (reply != null) {
+
+                ACLMessage order = new ACLMessage(ACLMessage.INFORM);
+                order.addReceiver(reply.getSender());
+                order.setContent(arrivalAirportX + "," + arrivalAirportY);
+                myAgent.send(order);
+            } else {
+                block();
+            }
+        }
+
     }
 
 }

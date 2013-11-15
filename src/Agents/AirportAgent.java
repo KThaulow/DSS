@@ -75,16 +75,16 @@ public class AirportAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
 
                 ACLMessage reply = msg.createReply();
-
+                
                 String response = coordinateX + "," + coordinateY;
 
-                reply.setConversationId(airportLocationID);
+                reply.setConversationId(airportLocationConID);
                 reply.setPerformative(ACLMessage.INFORM);
                 reply.setContent(response);
 

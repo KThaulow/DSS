@@ -2,7 +2,7 @@
 package Utils;
 
 /**
- * Settings for agents, messages etc.
+ * Settings for agents, messages, behaviours etc.
  */
 public class Settings {
     public static final String typeOfAircraftAgent = "aircraft";
@@ -18,11 +18,12 @@ public class Settings {
     public static final String typeOfGUIAgent = "GUI";
     public static final String nameOfGUIAgent = "GUIAgent";
     
-    public static final String airportLocationID = "airportLocation";
-    public static final String bestAircraftID = "bestAircraft";
-    public static final String aircraftInfoID = "aircraftInfo";
+    public static final String airportLocationConID = "airportLocation";
+    public static final String bestAircraftConID = "bestAircraft";
+    public static final String aircraftInfoConID = "aircraftInfo";
+    public static final String arrivalAirportConID = "arrivalAirport";
     
     public static final int NUMBER_OF_AIRCRAFT_AGENTS = 3;
     public static final int NUMBER_OF_AIRPORT_AGENTS = 3;
-    public static final int NUMBER_OF_ROUTE_AGENTS = 1;
+    public static final int NUMBER_OF_ROUTE_AGENTS = 1;    
 }
