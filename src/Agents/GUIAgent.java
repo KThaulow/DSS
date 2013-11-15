@@ -2,6 +2,7 @@ package Agents;
 
 import GUI.GUIInterface;
 import jade.core.Agent;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -47,16 +48,17 @@ public class GUIAgent extends Agent {
         System.out.println("Airport agent " + getAID().getName() + " terminating");
     }
     
-    private class RequestGui extends TickerBehaviour {
-
-        public RequestGui(Agent a, long period) {
-            super(a, period);
-        }
+    private class RequestAirports extends OneShotBehaviour {
 
         @Override
-        protected void onTick() {
-            System.out.println("Update Gui");            
+        public void action() {
+//            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(locationID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+            
         }
+
         
     } 
+    
+    
 }

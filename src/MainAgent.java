@@ -45,6 +45,8 @@ public class MainAgent extends Agent
         for(int i=0; i<NUMBER_OF_ROUTE_AGENTS; i++){
             createAgent("rAgent"+i, "Agents.RouteAgent", routeArguments[i]);
         }
+        
+        createAgent("GUIAgent", "Agents.GUIAgent", null);
     }
     
     /**
