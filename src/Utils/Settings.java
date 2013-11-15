@@ -15,7 +15,7 @@ public class Settings {
     
     public static final String typeOfAirportAgent = "airport";
     public static final String nameOfAirportAgent = "airportAgent";
-    public static final String locationID = "airportLocation";
+    public static final String airportLocationID = "airportLocation";
     
     public static final String typeOfGUIAgent = "GUI";
     public static final String nameOfGUIAgent = "GUIAgent";
