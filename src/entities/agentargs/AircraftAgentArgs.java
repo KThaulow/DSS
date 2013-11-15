@@ -12,7 +12,7 @@ package entities.agentargs;
  */
 public class AircraftAgentArgs implements IAgentArgs
 {
-    public int aircraftID, capacity, speed;
+    private int aircraftID, capacity, speed;
 
     /**
      * Constructs an empty instance of aircraft agent arguments.
@@ -37,8 +37,32 @@ public class AircraftAgentArgs implements IAgentArgs
      * Constructs an instance of AircraftAgentArgs using the given args.
      * @param args An array containing the arguments as objects.
      * 0) aircraftID, 1) capacity, 2) speed.
+     * @return An instance of AircraftAgentArgs representing arguments for the aircraft agent.
      */
-    public AircraftAgentArgs(Object[] args)
+    public static AircraftAgentArgs createAgentArgs(Object[] args)
+    {
+        if(args == null)
+            return null;
+        
+        if(args.length == 3)
+        {
+            return new AircraftAgentArgs(args);
+        }
+        else if(args.length > 0)
+        {
+            AircraftAgentArgs acAgentArgs = new AircraftAgentArgs();
+            acAgentArgs.aircraftID = (int)args[0];
+            
+            if(args.length >= 2)
+                acAgentArgs.capacity = (int)args[1];
+            
+            return acAgentArgs;
+        }
+        
+        return null;
+    }
+    
+    private AircraftAgentArgs(Object[] args)
     {
         aircraftID = (int)args[0];
         capacity = (int)args[1];
@@ -55,4 +79,11 @@ public class AircraftAgentArgs implements IAgentArgs
     {
         return new Object[] { aircraftID, capacity, speed };
     }
+    
+    public int getAircraftID() { return aircraftID; }
+    public int getCapacity() { return capacity; }
+    public int getSpeed() { return speed; }
+    public void setAircraftID(int acID) { aircraftID = acID; }
+    public void setCapacity(int capacity) { this.capacity = capacity; }
+    public void setSpeed(int speed) { this.speed = speed; }
 }

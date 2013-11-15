@@ -13,6 +13,7 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import static Utils.Settings.*;
+import entities.agentargs.*;
 import jade.core.behaviours.CyclicBehaviour;
 
 public class RouteAgent extends Agent {
@@ -40,13 +41,14 @@ public class RouteAgent extends Agent {
         System.out.println("Route-agent " + getAID().getName() + " is ready");
 
         // Get the ID of the route as a startup argument
-        Object[] args = getArguments();
-        if (args != null && args.length > 0) {
-            routeID = (Integer) args[0];
-            departureAirportID = (Integer) args[1];
-            arrivalAirportID = (Integer) args[2];
-            aircraftID = (Integer) args[3];
-            soldTickets = (Integer) args[4];
+        RouteAgentArgs args = RouteAgentArgs.createAgentArgs(getArguments());
+        
+        if (args != null) {
+            routeID = args.getRouteID();
+            departureAirportID = args.getDepartureAirportID();
+            arrivalAirportID = args.getDestinationAirportID();
+            aircraftID = args.getAircraftID();
+            soldTickets = args.getNumOfPassengers();
 
             System.out.println("Route " + getAID().getLocalName() + " has ID " + routeID);
             System.out.println("Route " + getAID().getLocalName() + " has departure airport " + departureAirportID);

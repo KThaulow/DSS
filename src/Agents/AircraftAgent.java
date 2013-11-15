@@ -9,22 +9,21 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import entities.agentargs.*;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
 
 public class AircraftAgent extends Agent {
-
-    int aircraftID;
-    int coordinateX;
-    int coordinateY;
-    int capacity;
-    int speed;
-    int arrivalAirportX, arrivalAirportY;
-    boolean aircraftAvailable; // Is the aircraft in use by another route
-    boolean aircraftFunctional; // Is the aircraft functional
+    private int aircraftID;
+    private int coordinateX;
+    private int coordinateY;
+    private int capacity;
+    private int speed;
+    private int arrivalAirportX, arrivalAirportY;
+    private boolean aircraftAvailable; // Is the aircraft in use by another route
+    private boolean aircraftFunctional; // Is the aircraft functional
 
     private enum ArrivalAirport {
-
         REQUEST_ARRIVAL_AIRPORT, GET_ARRIVAL_AIRPORT, DONE;
     }
 
@@ -33,28 +32,22 @@ public class AircraftAgent extends Agent {
         System.out.println("Aircraft-agent " + getAID().getName() + " is ready");
 
         // Get the ID of the route as a startup argument
-        Object[] args = getArguments();
-        if (args != null && args.length > 0) {
-            aircraftID = (Integer) args[0];
-            capacity = (Integer) args[1];
-            speed = (Integer) args[2];
+        AircraftAgentArgs acAgentArgs = AircraftAgentArgs.createAgentArgs(getArguments());
+        
+        if (acAgentArgs != null) {
+            aircraftID = acAgentArgs.getAircraftID();
+            capacity = acAgentArgs.getCapacity();
+            speed = acAgentArgs.getSpeed();
 
             System.out.println("Aircraft " + getAID().getLocalName() + " has ID " + aircraftID);
             System.out.println("Aircraft " + getAID().getLocalName() + " has capacity " + capacity);
             System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
 
             registerToDF();
-
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request
-
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order
-            
             addBehaviour(new ArrivalAirportRequestBehaviour()); // Request arrival airport location
-
             addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
-            
-            
-
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
