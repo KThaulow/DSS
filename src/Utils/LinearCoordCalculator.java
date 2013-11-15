@@ -46,6 +46,24 @@ public enum LinearCoordCalculator
         return null;
     }
     
+    /**
+     * Calculates and returns the distance between two coordinates.
+     * @param depCoord The departure coordinates.
+     * @param destCoord The destination coordinates.
+     * @return The distance between the two given coordinates.
+     */
+    public double calculateDistance(Coord2D depCoord, Coord2D destCoord)
+    {
+        double yDiff = destCoord.Y - depCoord.Y;
+        double xDiff = destCoord.X - depCoord.X;
+        
+        double slope = yDiff / xDiff;
+        double xDiffSquared = Math.pow(xDiff, 2);
+        double yDiffSquared = Math.pow(yDiff, 2);
+        
+        return Math.sqrt(xDiffSquared + yDiffSquared); // Hypothenuse
+    }
+    
     private Coord2D calculateCoordinates(Coord2D depCoord, Coord2D destCoord, double travelledDistance)
     {
         double yDiff = destCoord.Y - depCoord.Y;
