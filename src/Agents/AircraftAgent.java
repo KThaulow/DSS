@@ -9,16 +9,16 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import jade.core.behaviours.TickerBehaviour;
 
 public class AircraftAgent extends Agent {
-    
- 
-    
+
     int aircraftID;
     int coordinateX;
     int coordinateY;
     int capacity;
     int speed;
+    int arrivalAirportX, arrivalAirportY;
     boolean aircraftAvailable; // Is the aircraft in use by another route
     boolean aircraftFunctional; // Is the aircraft functional
 
@@ -32,23 +32,27 @@ public class AircraftAgent extends Agent {
             aircraftID = (Integer) args[0];
             capacity = (Integer) args[1];
             speed = (Integer) args[2];
-            
+
             System.out.println("Aircraft " + getAID().getLocalName() + " has ID " + aircraftID);
             System.out.println("Aircraft " + getAID().getLocalName() + " has capacity " + capacity);
             System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
-            
+
             registerToDF();
-            
+
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request
 
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order
+            
+            addBehaviour(new InformAircraftDataBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
+            
+            
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
         }
-        
+
     }
-    
+
     private void registerToDF() {
         // Register the plane service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
@@ -63,7 +67,7 @@ public class AircraftAgent extends Agent {
             fe.printStackTrace();
         }
     }
-    
+
     @Override
     protected void takeDown() {
         // Deregister from the yellow pages
@@ -72,7 +76,7 @@ public class AircraftAgent extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        
+
         System.out.println("Plane agent " + getAID().getName() + " terminating");
     }
 
@@ -80,17 +84,17 @@ public class AircraftAgent extends Agent {
      * Serves the reschedule request from the RouteAgent
      */
     private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
-        
+
         @Override
         public void action() {
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchPerformative(ACLMessage.CFP));
-            
+
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 // Message received. Process it
                 String departureAirport = msg.getContent();
                 ACLMessage reply = msg.createReply();
-                
+
                 String response = "0";
 
                 /**
@@ -98,7 +102,7 @@ public class AircraftAgent extends Agent {
                  */
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContent(response);
-                
+
                 myAgent.send(reply);
             } else {
                 block();
@@ -110,16 +114,16 @@ public class AircraftAgent extends Agent {
      * Serves the reschedule order from the RouteAgent
      */
     private class BestAircraftOrderServerBehaviour extends CyclicBehaviour {
-        
+
         @Override
         public void action() {
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
-            
+
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 // Message received. Process it
                 ACLMessage reply = msg.createReply();
-                
+
                 if (aircraftFunctional) {
                     reply.setPerformative(ACLMessage.INFORM);
                     System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender());
@@ -127,11 +131,29 @@ public class AircraftAgent extends Agent {
                     reply.setPerformative(ACLMessage.CANCEL);
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional");
                 }
-                
+
                 myAgent.send(reply);
             } else {
                 block();
             }
+        }
+    }
+
+    /**
+     * Informs about location, destination and speed
+     */
+    private class InformAircraftDataBehaviour extends TickerBehaviour {
+
+        public InformAircraftDataBehaviour(Agent a, long period) {
+            super(a, period);
+        }
+
+        @Override
+        protected void onTick() {
+            ACLMessage info = new ACLMessage(ACLMessage.INFORM);
+            info.setConversationId(aircraftInfoID);
+            info.setContent(coordinateX+","+coordinateY+","+arrivalAirportX+","+arrivalAirportY+","+speed);
+            myAgent.send(info);
         }
     }
 }
