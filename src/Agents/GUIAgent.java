@@ -99,10 +99,10 @@ public class GUIAgent extends Agent {
                             System.out.println("Send message to all airports");
                             cfp.addReceiver(airports[i]);
                         }
-                        cfp.setConversationId(airportLocationID);
+                        cfp.setConversationId(airportLocationConID);
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                         step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
                         System.out.println("CFP for all the airports coordinates");
                     } catch (FIPAException fe) {

@@ -48,8 +48,12 @@ public class AircraftAgent extends Agent {
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request
 
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order
+            
+            addBehaviour(new ArrivalAirportRequestBehaviour()); // Request arrival airport location
 
-            addBehaviour(new InformAircraftDataBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
+            addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
+            
+            
 
         } else {
             System.out.println("No arguments specified specified");
@@ -92,7 +96,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchPerformative(ACLMessage.CFP));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.CFP));
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
@@ -122,7 +126,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
@@ -147,9 +151,9 @@ public class AircraftAgent extends Agent {
     /**
      * Informs about location, destination and speed
      */
-    private class InformAircraftDataBehaviour extends TickerBehaviour {
+    private class AircraftDataInformBehaviour extends TickerBehaviour {
 
-        public InformAircraftDataBehaviour(Agent a, long period) {
+        public AircraftDataInformBehaviour(Agent a, long period) {
             super(a, period);
         }
 
@@ -157,13 +161,16 @@ public class AircraftAgent extends Agent {
         protected void onTick() {
             
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
-            info.setConversationId(aircraftInfoID);
+            info.setConversationId(aircraftInfoConID);
             info.setContent(coordinateX + "," + coordinateY + "," + arrivalAirportX + "," + arrivalAirportY + "," + speed);
             myAgent.send(info);
         }
     }
 
-    private class RequestArrivalAirportBehaviour extends Behaviour {
+    /**
+     * Request arrival airport location
+     */
+    private class ArrivalAirportRequestBehaviour extends Behaviour {
 
         private MessageTemplate mt; // The template to receive replies
         private ArrivalAirport step = ArrivalAirport.REQUEST_ARRIVAL_AIRPORT;
@@ -174,10 +181,10 @@ public class AircraftAgent extends Agent {
                 case REQUEST_ARRIVAL_AIRPORT:
 
                     ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
-                    order.setConversationId(airportLocationID);
+                    order.setConversationId(airportLocationConID);
                     order.setContent(myAgent.getName());
                     myAgent.send(order);
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(arrivalAirportID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(arrivalAirportConID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
                     step = ArrivalAirport.GET_ARRIVAL_AIRPORT;
                     break;
 
