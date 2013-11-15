@@ -9,6 +9,7 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
 
 public class AircraftAgent extends Agent {
@@ -21,6 +22,11 @@ public class AircraftAgent extends Agent {
     int arrivalAirportX, arrivalAirportY;
     boolean aircraftAvailable; // Is the aircraft in use by another route
     boolean aircraftFunctional; // Is the aircraft functional
+
+    private enum ArrivalAirport {
+
+        REQUEST_ARRIVAL_AIRPORT, GET_ARRIVAL_AIRPORT, DONE;
+    }
 
     @Override
     protected void setup() {
@@ -42,10 +48,9 @@ public class AircraftAgent extends Agent {
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request
 
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order
-            
+
             addBehaviour(new InformAircraftDataBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
-            
-            
+
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -152,8 +157,58 @@ public class AircraftAgent extends Agent {
         protected void onTick() {
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(aircraftInfoID);
-            info.setContent(coordinateX+","+coordinateY+","+arrivalAirportX+","+arrivalAirportY+","+speed);
+            info.setContent(coordinateX + "," + coordinateY + "," + arrivalAirportX + "," + arrivalAirportY + "," + speed);
             myAgent.send(info);
+        }
+    }
+
+    private class RequestArrivalAirportBehaviour extends Behaviour {
+
+        private MessageTemplate mt; // The template to receive replies
+        private ArrivalAirport step = ArrivalAirport.REQUEST_ARRIVAL_AIRPORT;
+
+        @Override
+        public void action() {
+            switch (step) {
+                case REQUEST_ARRIVAL_AIRPORT:
+
+                    ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
+                    order.setConversationId(airportLocationID);
+                    order.setContent(myAgent.getName());
+                    myAgent.send(order);
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(arrivalAirportID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    step = ArrivalAirport.GET_ARRIVAL_AIRPORT;
+                    break;
+
+                case GET_ARRIVAL_AIRPORT:
+                    ACLMessage reply = myAgent.receive(mt);
+                    if (reply != null) {
+                        // Reschedule order reply received
+                        if (reply.getPerformative() == ACLMessage.INFORM) {
+                            // Purchase succesful. We can terminate.
+                            String location = reply.getContent();
+
+                            int seperator = location.indexOf(',');
+
+                            arrivalAirportX = Integer.parseInt(location.substring(0, seperator));
+                            arrivalAirportY = Integer.parseInt(location.substring(seperator + 1));
+                            System.out.println("Coordinates for arrival airport got for aircraft " + myAgent.getLocalName());
+
+                            step = ArrivalAirport.DONE;
+                        }
+
+                    } else {
+                        block();
+                        System.out.println("No airport location reply received");
+                    }
+                    break;
+            }
+
+        }
+
+        @Override
+        public boolean done() {
+            return step == ArrivalAirport.DONE;
         }
     }
 }
