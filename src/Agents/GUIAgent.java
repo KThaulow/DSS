@@ -17,7 +17,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import Utils.Settings; 
 import static Utils.Settings.*;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
@@ -32,8 +31,6 @@ public class GUIAgent extends Agent {
         REQUEST_AIRPORT_COORDINATES, GET_COORDINATES_FROM_AIRPORTS, DONE;
     }
     
-    private static final String typeOfAgent = "GUI";
-    private static final String nameOfAgent = "GUIAgent";
     GUIInterface guiInterface; // The gui interface
     
     protected void setup() {
@@ -43,6 +40,7 @@ public class GUIAgent extends Agent {
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
         addBehaviour(new RequestAirports());
+        addBehaviour(new GetInformFromAircraftBehaviour());
     }
     
     private void registerToDF() {
@@ -50,8 +48,8 @@ public class GUIAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent);
+        sd.setType(typeOfGUIAgent);
+        sd.setName(nameOfGUIAgent);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -85,7 +83,7 @@ public class GUIAgent extends Agent {
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType(Settings.typeOfAirportAgent); // Get all airports
+                    sd.setType(typeOfAirportAgent); // Get all airports
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
@@ -151,25 +149,22 @@ public class GUIAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftInfoID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftInfoID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            System.out.println("Get the info");
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {                        
+                // Reply received
+                if (msg.getPerformative() == ACLMessage.INFORM) {
+                    // this is an offer                            
+                    System.out.println("Aircraft name " + msg.getSender().getName());
+                    System.out.println("Aircraft info " + msg.getContent()); 
+                }
+            } else {
+                System.out.println("No aircraft info");
+                block();
+            }
             
-            ACLMessage reply = myAgent.receive(mt);
-            if (reply != null) { 
-                    if (reply != null) {                        
-                        // Reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // this is an offer                            
-                            System.out.println("Coordinates received from " + reply.getSender().getName());
-                            System.out.println("The coordinates are " + reply.getContent()); 
-                            
-                        }
-                        
-                    } else {
-                        System.out.println("No aircraft info");
-                        block();
-                    }
-        }
-        
+            }
     }
     
 }
