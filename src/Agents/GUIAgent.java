@@ -17,11 +17,20 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import Utils.Settings; 
+import static Utils.Settings.bestAircraftID;
+import jade.core.behaviours.Behaviour;
 /**
  *
  * @author Fuglsang
  */
 public class GUIAgent extends Agent {
+    
+    private enum AirportsCoordinatesSteps {
+
+        REQUEST_AIRPORT_COORDINATES, GET_COORDINATES_FROM_AIRPORTS, DONE;
+    }
+    
     private static final String typeOfAgent = "GUI";
     private static final String nameOfAgent = "GUIAgent";
     GUIInterface guiInterface; // The gui interface
@@ -32,6 +41,7 @@ public class GUIAgent extends Agent {
         System.out.println("Setup gui agent");
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
+        addBehaviour(new RequestAirports());
     }
     
     private void registerToDF() {
@@ -60,41 +70,79 @@ public class GUIAgent extends Agent {
         System.out.println("Airport agent " + getAID().getName() + " terminating");
     }
     
-    private class RequestAirports extends OneShotBehaviour {        
-        AID[] airports;
+    private class RequestAirports extends Behaviour {        
+        private MessageTemplate mt; // The template to receive replies
+        private int repliesCnt = 0; // The counter of replies from airport agents        
+        private AirportsCoordinatesSteps step = AirportsCoordinatesSteps.REQUEST_AIRPORT_COORDINATES;
 
         @Override
-        public void action() {            
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId("Test"), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-            
-            // Template for getting all aircraft agents
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setType("airport"); // Get all airports
-            template.addServices(sd);
-            try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                airports = new AID[results.length];
-                for (int i = 0; i < results.length; ++i) {
-                    airports[i] = results[i].getName();
-                }
+        public void action() {  
+            int numberOfAirports = 0;
+            AID[] airports;
+            switch(step) {
+                case REQUEST_AIRPORT_COORDINATES:                                 
+                    // Template for getting all aircraft agents
+                    DFAgentDescription template = new DFAgentDescription();
+                    ServiceDescription sd = new ServiceDescription();
+                    sd.setType(Settings.typeOfAirportAgent); // Get all airports
+                    template.addServices(sd);
+                    try {
+                        DFAgentDescription[] results = DFService.search(myAgent, template);
+                        numberOfAirports = results.length; 
+                        airports = new AID[results.length];
+                        for (int i = 0; i < results.length; ++i) {
+                            airports[i] = results[i].getName();
+                        }
 
-                // Sent message to airport
-                ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
-                for (int i = 0; i < airports.length; ++i) {
-                    cfp.addReceiver(airports[i]);
-                }                
-                cfp.setConversationId(bestAircraftID);
-                cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
-                myAgent.send(cfp);
-                // Prepare the template to get proposals
-                mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
-                step = RouteAgent.Reschedule.GET_PROPOSAL_FROM_AIRCRAFTS;
-
-                System.out.println("CFP for best fitted aircraft send to all aircrafts");
-            } catch (FIPAException fe) {
-                fe.printStackTrace();
+                        // Sent message to airport
+                        ACLMessage cfp = new ACLMessage(ACLMessage.REQUEST);                        
+                        for (int i = 0; i < airports.length; ++i) {
+                            System.out.println("Send message to all airports");
+                            cfp.addReceiver(airports[i]);
+                        }
+                        cfp.setConversationId(Settings.locationID);
+                        myAgent.send(cfp);
+                        // Prepare the template to get proposals
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(Settings.locationID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                        step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
+                        System.out.println("CFP for all the airports coordinates");
+                    } catch (FIPAException fe) {
+                        fe.printStackTrace();
+                    }
+                    break; 
+                    
+                case GET_COORDINATES_FROM_AIRPORTS: 
+                    System.out.println("GET_COORDINATES_FROM_AIRPORTS");
+                    ACLMessage reply = myAgent.receive(mt);
+                    if (reply != null) {                        
+                        // Reply received
+                        if (reply.getPerformative() == ACLMessage.INFORM) {
+                            // this is an offer                            
+                            System.out.println("Coordinates received from " + reply.getSender().getName());
+                            System.out.println("The coordinates are " + reply.getContent()); 
+                            String[] coordinates = reply.getContent().split(",");
+                            System.out.println("coordinates " + coordinates[0] + " " + coordinates[1]);
+                            guiInterface.drawAirport(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[0]), reply.getSender().getName());
+                            repliesCnt++;
+                        }
+                        
+                        if (repliesCnt == numberOfAirports) {
+                            // We received all replies  
+                            step = AirportsCoordinatesSteps.DONE; 
+                        } else {
+                            step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS; 
+                        }
+                    } else {
+                        System.out.println("We are done");
+                        block();
+                    }
+                    break;
             }
+        }
+
+        @Override
+        public boolean done() {
+            return (step == AirportsCoordinatesSteps.DONE); 
         }
 
         

@@ -14,6 +14,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*; 
+import Utils.Settings;
 
 /**
  *
@@ -22,24 +23,30 @@ import javax.swing.*;
 public class GUIInterface extends JPanel {
     private JFrame frame = new JFrame();
     private JSplitPane  splitPaneV;
+    private List<GUIComponentAirport> fillAirports;
+    private List<GUIComponentAircraft> fillAircrafts; 
+    private Grid grid; 
+         
     
-    public GUIInterface() {        
-        Grid grid = new Grid(810, 560);
-        Settings settings = new Settings(290, 560); 
+    public GUIInterface() {   
+        fillAirports = new ArrayList<>(Settings.NUMBER_OF_AIRPORT_AGENTS);
+        fillAircrafts = new ArrayList<>(Settings.NUMBER_OF_AIRCRAFT_AGENTS); 
+        grid = new Grid(810, 560, fillAirports, fillAircrafts);
+        SettingsPanel settingsPanel = new SettingsPanel(290, 560); 
         
-        grid.fillAirport(new GUIComponentAirport(new Point(78, 1), "A"));
-        grid.fillAirport(new GUIComponentAirport(new Point(63, 27), "B"));
-        grid.fillAirport(new GUIComponentAirport(new Point(29, 48), "C"));
-        grid.fillAirport(new GUIComponentAirport(new Point(2, 5), "D"));
-        grid.fillAirport(new GUIComponentAirport(new Point(15, 15), "E"));
-
-        grid.fillAircraft(new GUIComponentAircraft(new Point(3, 5), 150, 980));
-        grid.fillAircraft(new GUIComponentAircraft(new Point(3, 5), 300, 1050));
-        grid.fillAircraft(new GUIComponentAircraft(new Point(10, 20), 50, 700));
-        grid.fillAircraft(new GUIComponentAircraft(new Point(40, 24), 150, 900));
-        grid.fillAircraft(new GUIComponentAircraft(new Point(64, 17), 200, 900));
+//        grid.fillAirport(new GUIComponentAirport(new Point(78, 1), "A"));
+//        grid.fillAirport(new GUIComponentAirport(new Point(63, 27), "B"));
+//        grid.fillAirport(new GUIComponentAirport(new Point(29, 48), "C"));
+//        grid.fillAirport(new GUIComponentAirport(new Point(2, 5), "D"));
+//        grid.fillAirport(new GUIComponentAirport(new Point(15, 15), "E"));
+//
+//        grid.fillAircraft(new GUIComponentAircraft(new Point(3, 5), 150, 980));
+//        grid.fillAircraft(new GUIComponentAircraft(new Point(3, 5), 300, 1050));
+//        grid.fillAircraft(new GUIComponentAircraft(new Point(10, 20), 50, 700));
+//        grid.fillAircraft(new GUIComponentAircraft(new Point(40, 24), 150, 900));
+//        grid.fillAircraft(new GUIComponentAircraft(new Point(64, 17), 200, 900));
         
-        splitPaneV = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, grid, settings);        
+        splitPaneV = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, grid, settingsPanel);        
         splitPaneV.setDividerLocation(815);
         
         frame.setSize(1100, 560);
@@ -49,9 +56,20 @@ public class GUIInterface extends JPanel {
         frame.setVisible(true); 
     }
     
-    private static class Settings extends JPanel {
+    public void drawAirport(int x, int y, String name) {
+        GUIComponentAirport airport = new GUIComponentAirport(new Point(x, y), name); 
+        fillAirports.add(airport);
+        grid.repaint();
+    }
+
+    public void fillAircraft(GUIComponentAircraft aircraft) {
+        fillAircrafts.add(aircraft); 
+        grid.repaint();
+    }
+    
+    private static class SettingsPanel extends JPanel {
         
-        public Settings(int width, int height) {
+        public SettingsPanel(int width, int height) {
             setSize(width, height);
             setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             
@@ -74,16 +92,15 @@ public class GUIInterface extends JPanel {
         }
     }
     
-    
-        
-    private static class Grid extends JPanel {
-         private List<GUIComponentAirport> fillAirports;
-         private List<GUIComponentAircraft> fillAircrafts; 
+    private static class Grid extends JPanel { 
+        private List<GUIComponentAirport> fillAirports;
+        private List<GUIComponentAircraft> fillAircrafts;
          
-         public Grid(int width, int height) {
+         public Grid(int width, int height, List<GUIComponentAirport> airports, List<GUIComponentAircraft> aircrafts) {
             setSize(width, height); 
-            fillAirports = new ArrayList<>(25);
-            fillAircrafts = new ArrayList<>(25); 
+            fillAircrafts = aircrafts; 
+            fillAirports = airports; 
+            repaint(); 
         }
 
         protected void paintComponent(Graphics g) {
@@ -122,20 +139,7 @@ public class GUIInterface extends JPanel {
             }
             
         }
-        
-        public void fillAirport(GUIComponentAirport airport) {
-            fillAirports.add(airport); 
-            repaint();
-        }
-
-        public void fillAircraft(GUIComponentAircraft aircraft) {
-            fillAircrafts.add(aircraft); 
-            repaint();
-        }
-
     }
-
- 
 
  }
 

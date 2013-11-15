@@ -175,7 +175,7 @@ public class RouteAgent extends Agent {
                     sd.setType("aircraft"); // Get all aircrafts
                     template.addServices(sd);
                     try {
-                        DFAgentDescription[] results = DFService.search(myAgent, template);
+                        DFAgentDescription[] results = DFService.search(myAgent, template);                        
                         aircrafts = new AID[results.length];
                         for (int i = 0; i < results.length; ++i) {
                             aircrafts[i] = results[i].getName();
