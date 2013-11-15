@@ -7,6 +7,7 @@
 package Agents;
 
 import GUI.GUIInterface;
+import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -59,13 +60,41 @@ public class GUIAgent extends Agent {
         System.out.println("Airport agent " + getAID().getName() + " terminating");
     }
     
-    private class RequestAirports extends OneShotBehaviour {
+    private class RequestAirports extends OneShotBehaviour {        
+        AID[] airports;
 
         @Override
-        public void action() {
-//            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(locationID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
+        public void action() {            
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId("Test"), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
             
+            // Template for getting all aircraft agents
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType("airport"); // Get all airports
+            template.addServices(sd);
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                airports = new AID[results.length];
+                for (int i = 0; i < results.length; ++i) {
+                    airports[i] = results[i].getName();
+                }
+
+                // Sent message to airport
+                ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+                for (int i = 0; i < airports.length; ++i) {
+                    cfp.addReceiver(airports[i]);
+                }                
+                cfp.setConversationId(bestAircraftID);
+                cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
+                myAgent.send(cfp);
+                // Prepare the template to get proposals
+                mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                step = RouteAgent.Reschedule.GET_PROPOSAL_FROM_AIRCRAFTS;
+
+                System.out.println("CFP for best fitted aircraft send to all aircrafts");
+            } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
         }
 
         
