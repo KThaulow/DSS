@@ -1,4 +1,6 @@
 
+import Utils.LinearCoordCalculator;
+import entities.Coord2D;
 import jade.core.Agent;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;

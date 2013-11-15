@@ -27,18 +27,23 @@ public enum LinearCoordCalculator
      * @param depCoord The coordinates of the departure airport.
      * @param destCoord The coordinates of the destination airport.
      * @param travelledDistance The distance travelled thus far.
-     * @return the current coordinates of the aircraft.
+     * @return The current coordinates of the aircraft. Returns null if either given coordinates are invalid.
      */
     public Coord2D getCoordinates(Coord2D depCoord, Coord2D destCoord, double travelledDistance)
     {
-        if(depCoord.equals(destCoord))
-            return depCoord;
-        else if(isVertical(depCoord, destCoord))
-            return calculateVerticalCoord(depCoord, destCoord, travelledDistance);
-        else if(isHorizontal(depCoord, destCoord))
-            return calculateHorizontalCoord(depCoord, destCoord, travelledDistance);
+        if(depCoord.isValid() && destCoord.isValid())
+        {
+            if(depCoord.equals(destCoord))
+                return depCoord;
+            else if(isVertical(depCoord, destCoord))
+                return calculateVerticalCoord(depCoord, destCoord, travelledDistance);
+            else if(isHorizontal(depCoord, destCoord))
+                return calculateHorizontalCoord(depCoord, destCoord, travelledDistance);
+
+            return calculateCoordinates(depCoord, destCoord, travelledDistance);
+        }
         
-        return calculateCoordinates(depCoord, destCoord, travelledDistance);
+        return null;
     }
     
     private Coord2D calculateCoordinates(Coord2D depCoord, Coord2D destCoord, double travelledDistance)
