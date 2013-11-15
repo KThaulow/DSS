@@ -4,7 +4,6 @@ package Agents;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
@@ -12,12 +11,9 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.Hashtable;
+import static Utils.Settings.*;
 
 public class AirportAgent extends Agent {
-
-    private static final String typeOfAgent = "airport";
-    private static final String nameOfAgent = "airportAgent";
-    private static final String locationID = "airportLocation";
 
     int airportID;
     int coordinateX;
@@ -49,8 +45,8 @@ public class AirportAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent+airportID);
+        sd.setType(typeOfAirportAgent);
+        sd.setName(nameOfAirportAgent+airportID);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);

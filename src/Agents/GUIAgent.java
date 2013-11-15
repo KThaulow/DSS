@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package Agents;
 
 import GUI.GUIInterface;
@@ -14,15 +8,10 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import jade.lang.acl.ACLMessage;
-import jade.lang.acl.MessageTemplate;
-/**
- *
- * @author Fuglsang
- */
+import static Utils.Settings.*;
+
 public class GUIAgent extends Agent {
-    private static final String typeOfAgent = "GUI";
-    private static final String nameOfAgent = "GUIAgent";
+
     GUIInterface guiInterface; // The gui interface
     
     protected void setup() {
@@ -38,8 +27,8 @@ public class GUIAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent);
+        sd.setType(typeOfGUIAgent);
+        sd.setName(nameOfGUIAgent);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
