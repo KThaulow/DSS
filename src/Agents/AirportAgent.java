@@ -81,7 +81,7 @@ public class AirportAgent extends Agent {
             if (msg != null) {
 
                 ACLMessage reply = msg.createReply();
-
+                
                 String response = coordinateX + "," + coordinateY;
 
                 reply.setConversationId(airportLocationID);

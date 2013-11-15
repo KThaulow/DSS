@@ -25,5 +25,5 @@ public class Settings {
     
     public static final int NUMBER_OF_AIRCRAFT_AGENTS = 3;
     public static final int NUMBER_OF_AIRPORT_AGENTS = 3;
-    public static final int NUMBER_OF_ROUTE_AGENTS = 1;
+    public static final int NUMBER_OF_ROUTE_AGENTS = 1;    
 }
