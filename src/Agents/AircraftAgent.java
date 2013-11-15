@@ -8,12 +8,11 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import static Utils.Settings.*;
 
 public class AircraftAgent extends Agent {
     
-    private static final String typeOfAgent = "aircraft";
-    private static final String nameOfAgent = "aircraftAgent";
-    private static final String bestAircraftID = "bestAircraft";
+ 
     
     int aircraftID;
     int coordinateX;
@@ -40,9 +39,9 @@ public class AircraftAgent extends Agent {
             
             registerToDF();
             
-            addBehaviour(new RescheduleRequestsServerBehaviour()); // Serve the reschedule request
+            addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request
 
-            addBehaviour(new RescheduleOrderServerBehaviour()); // Serve the reschedule order
+            addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -55,8 +54,8 @@ public class AircraftAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent + aircraftID);
+        sd.setType(typeOfAircraftAgent);
+        sd.setName(nameOfAircraftAgent + aircraftID);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -80,7 +79,7 @@ public class AircraftAgent extends Agent {
     /**
      * Serves the reschedule request from the RouteAgent
      */
-    private class RescheduleRequestsServerBehaviour extends CyclicBehaviour {
+    private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
         
         @Override
         public void action() {
@@ -110,7 +109,7 @@ public class AircraftAgent extends Agent {
     /**
      * Serves the reschedule order from the RouteAgent
      */
-    private class RescheduleOrderServerBehaviour extends CyclicBehaviour {
+    private class BestAircraftOrderServerBehaviour extends CyclicBehaviour {
         
         @Override
         public void action() {

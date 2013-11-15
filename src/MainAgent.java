@@ -2,13 +2,11 @@
 import jade.core.Agent;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
-
+import static Utils.Settings.*;
 
 public class MainAgent extends Agent
 {
-    private static final int NUMBER_OF_AIRCRAFT_AGENTS = 3;
-    private static final int NUMBER_OF_AIRPORT_AGENTS = 3;
-    private static final int NUMBER_OF_ROUTE_AGENTS = 1;
+    
     
     @Override
     protected void setup() 

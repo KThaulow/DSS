@@ -12,13 +12,11 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 import java.util.List;
+import static Utils.Settings.*;
 
 public class RouteAgent extends Agent {
 
-    private static final String typeOfAgent = "route";
-    private static final String nameOfAgent = "routeAgent";
-    private static final String bestAircraftID = "bestAircraft";
-    private static final String agentToFind = "airport";
+    
 
     private enum Reschedule {
 
@@ -69,8 +67,8 @@ public class RouteAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAgent);
-        sd.setName(nameOfAgent);
+        sd.setType(typeOfRouteAgent);
+        sd.setName(nameOfRouteAgent);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -101,7 +99,7 @@ public class RouteAgent extends Agent {
             // Template for getting all aircraft agent
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setName("airportAgent" + departureAirportID); // Get departure airport AID
+            sd.setName(nameOfAirportAgent + departureAirportID); // Get departure airport AID
             template.addServices(sd);
 
             try {
@@ -114,7 +112,7 @@ public class RouteAgent extends Agent {
 
             template = new DFAgentDescription();
             sd = new ServiceDescription();
-            sd.setName("airportAgent" + arrivalAirportID); // Get arrival airport AID
+            sd.setName(nameOfAirportAgent + arrivalAirportID); // Get arrival airport AID
             template.addServices(sd);
 
             try {
@@ -136,7 +134,7 @@ public class RouteAgent extends Agent {
         public void action() {
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setName("aircraftAgent" + aircraftID); // Get departure airport AID
+            sd.setName(nameOfAircraftAgent + aircraftID); // Get departure airport AID
             template.addServices(sd);
 
             try {
