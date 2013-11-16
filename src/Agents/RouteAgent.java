@@ -23,7 +23,7 @@ public class RouteAgent extends Agent {
 
     private enum BestAircraft {
 
-        REQUEST_AIRCRAFT, GET_PROPOSAL_FROM_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, START_FLIGHT;
+        REQUEST_AIRCRAFT, GET_PROPOSAL_FROM_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, IDLE;
     }
 
     private enum AirportLocation {
@@ -46,7 +46,7 @@ public class RouteAgent extends Agent {
 
         // Get the ID of the route as a startup argument
         RouteAgentArgs args = RouteAgentArgs.createAgentArgs(getArguments());
-        
+
         if (args != null) {
             routeID = args.getRouteID();
             departureAirportID = args.getDepartureAirportID();
@@ -63,13 +63,12 @@ public class RouteAgent extends Agent {
             addBehaviour(new RequestAssignedAirports()); // Request associated airports
 
             //addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft (No default associated aircraft right now)
-            
             addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
 
             addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
-            
-            addBehaviour(new ArrivalAirportRequestServerBehaviour()); // Serve arrival airport location request
-            
+
+            addBehaviour(new AirportLocationRequestServerBehaviour()); // Serve arrival airport location request
+
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -141,7 +140,7 @@ public class RouteAgent extends Agent {
 
     /**
      * One shot behaviour for getting associated aircraft
-     * 
+     *
      * (Not used right now because the route doesn't have a default aircraft)
      */
     @Deprecated
@@ -185,7 +184,7 @@ public class RouteAgent extends Agent {
                     order.addReceiver(arrivalAirport);
                     order.setConversationId(airportLocationConID);
                     myAgent.send(order);
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                     step = AirportLocation.GET_LOCATION;
                     break;
 
@@ -233,8 +232,8 @@ public class RouteAgent extends Agent {
     }
 
     /**
-     * This is the complex behaviour used to request aircraft
-     * agents to be assigned to fly this route
+     * This is the complex behaviour used to request aircraft agents to be
+     * assigned to fly this route
      */
     private class RequestBestAircraft extends Behaviour {
 
@@ -335,7 +334,8 @@ public class RouteAgent extends Agent {
                             // Purchase succesful. We can terminate.
                             aircraft = bestPlane;
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
-                            step = BestAircraft.START_FLIGHT;
+                            step = BestAircraft.IDLE;
+
                         } else if (reply.getPerformative() == ACLMessage.CANCEL) {
                             unavailableAircrafts.add(bestPlane);
                         }
@@ -350,47 +350,28 @@ public class RouteAgent extends Agent {
 
         @Override
         public boolean done() {
-            if(step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null){
-                System.out.println("No aircraft was found for route "+myAgent.getLocalName());
-            } else if(step == BestAircraft.START_FLIGHT)
-            {
-                //addBehaviour(new StartFlightBehaviour(myAgent, routeUpdateTimerMs)); // Start the flight
-            }
-            return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.START_FLIGHT);
+            if (step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) {
+                System.out.println("No aircraft was found for route " + myAgent.getLocalName());
+            } 
+            return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.IDLE);
         }
-    }
-    
-    /**
-     * Start the flight
-     */
-    private class StartFlightBehaviour extends TickerBehaviour{
-
-        public StartFlightBehaviour(Agent a, long period) {
-            super(a, period);
-        }
-
-        @Override
-        protected void onTick() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-        
     }
 
     /**
-     * Serves request for arrival airport location
+     * Serves request for arrival and departure airport location
      */
-    private class ArrivalAirportRequestServerBehaviour extends CyclicBehaviour {
+    private class AirportLocationRequestServerBehaviour extends CyclicBehaviour {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(arrivalAirportConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
 
             ACLMessage reply = myAgent.receive(mt);
-            if (reply != null) {
+            if (reply != null && reply.getContent().contentEquals(aircraft.getName())) {
 
                 ACLMessage order = new ACLMessage(ACLMessage.INFORM);
                 order.addReceiver(reply.getSender());
-                order.setContent(arrivalAirportLocation.X + "," + arrivalAirportLocation.Y);
+                order.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+arrivalAirportLocation.X + "," + arrivalAirportLocation.Y);
                 myAgent.send(order);
             } else {
                 block();

@@ -1,5 +1,6 @@
 package Agents;
 
+import Utils.LinearCoordCalculator;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -9,22 +10,24 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import entities.Coord2D;
 import entities.agentargs.*;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
 
 public class AircraftAgent extends Agent {
+
     private int aircraftID;
-    private int coordinateX;
-    private int coordinateY;
     private int capacity;
     private int speed;
-    private int arrivalAirportX, arrivalAirportY;
+    private double travelledDistance;
+    private Coord2D departureAirportLocation, arrivalAirportLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route
     private boolean aircraftFunctional; // Is the aircraft functional
 
     private enum ArrivalAirport {
-        REQUEST_ARRIVAL_AIRPORT, GET_ARRIVAL_AIRPORT, DONE;
+
+        REQUEST_AIRPORT_LOCATION, GET_AIRPORT_LOCATION, DONE;
     }
 
     @Override
@@ -33,7 +36,7 @@ public class AircraftAgent extends Agent {
 
         // Get the ID of the route as a startup argument
         AircraftAgentArgs acAgentArgs = AircraftAgentArgs.createAgentArgs(getArguments());
-        
+
         if (acAgentArgs != null) {
             aircraftID = acAgentArgs.getAircraftID();
             capacity = acAgentArgs.getCapacity();
@@ -46,8 +49,8 @@ public class AircraftAgent extends Agent {
             registerToDF();
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order
-            addBehaviour(new ArrivalAirportRequestBehaviour()); // Request arrival airport location
-            addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
+            addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location
+            //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -128,7 +131,10 @@ public class AircraftAgent extends Agent {
 
                 if (aircraftFunctional) {
                     reply.setPerformative(ACLMessage.INFORM);
-                    System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender());
+                    System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
+                    travelledDistance = 0; // Reset traveled distance
+
+                    addBehaviour(new AircraftStartBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional");
@@ -142,64 +148,67 @@ public class AircraftAgent extends Agent {
     }
 
     /**
-     * Informs about location, destination and speed
+     * Update aircraft location and inform about location, destination and speed
      */
-    private class AircraftDataInformBehaviour extends TickerBehaviour {
+    private class AircraftStartBehaviour extends TickerBehaviour {
 
-        public AircraftDataInformBehaviour(Agent a, long period) {
+        public AircraftStartBehaviour(Agent a, long period) {
             super(a, period);
         }
 
         @Override
         protected void onTick() {
+            travelledDistance += speed / (aircraftStartTimerMs * MS_TO_HOUR);
+            Coord2D currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
+
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
-            info.setConversationId(aircraftInfoConID);
-            info.setContent(coordinateX + "," + coordinateY + "," + arrivalAirportX + "," + arrivalAirportY + "," + speed);
+            info.setConversationId(aircraftStartConID);
+            info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
             myAgent.send(info);
         }
     }
 
     /**
-     * Request arrival airport location
+     * Request departure and arrival airport location
      */
-    private class ArrivalAirportRequestBehaviour extends Behaviour {
+    private class AirportLocationRequestBehaviour extends Behaviour {
 
         private MessageTemplate mt; // The template to receive replies
-        private ArrivalAirport step = ArrivalAirport.REQUEST_ARRIVAL_AIRPORT;
+        private ArrivalAirport step = ArrivalAirport.REQUEST_AIRPORT_LOCATION;
 
         @Override
         public void action() {
             switch (step) {
-                case REQUEST_ARRIVAL_AIRPORT:
+                case REQUEST_AIRPORT_LOCATION:
 
                     ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
-                    order.setConversationId(airportLocationConID);
+                    order.setConversationId(airportLocationAircraftConID);
                     order.setContent(myAgent.getName());
                     myAgent.send(order);
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(arrivalAirportConID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
-                    step = ArrivalAirport.GET_ARRIVAL_AIRPORT;
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                    step = ArrivalAirport.GET_AIRPORT_LOCATION;
                     break;
 
-                case GET_ARRIVAL_AIRPORT:
+                case GET_AIRPORT_LOCATION:
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
-                        // Reschedule order reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // Purchase succesful. We can terminate.
-                            String location = reply.getContent();
+                        // Location received
+                        String location = reply.getContent();
 
-                            int seperator = location.indexOf(',');
+                        int seperator = location.indexOf(',');
+                        departureAirportLocation.X = Integer.parseInt(location.substring(0, seperator));
+                        departureAirportLocation.Y = Integer.parseInt(location.substring(seperator + 1));
+                        seperator = location.indexOf(',', seperator);
+                        arrivalAirportLocation.X = Integer.parseInt(location.substring(0, seperator));
+                        seperator = location.indexOf(',', seperator);
+                        arrivalAirportLocation.Y = Integer.parseInt(location.substring(seperator + 1));
+                        System.out.println("Coordinates for departure and arrival airport got for aircraft " + myAgent.getLocalName());
 
-                            arrivalAirportX = Integer.parseInt(location.substring(0, seperator));
-                            arrivalAirportY = Integer.parseInt(location.substring(seperator + 1));
-                            System.out.println("Coordinates for arrival airport got for aircraft " + myAgent.getLocalName());
-
-                            step = ArrivalAirport.DONE;
-                        }
+                        step = ArrivalAirport.DONE;
 
                     } else {
                         block();
-                        System.out.println("No airport location reply received");
+                        System.out.println("No airport location reply received for aircraft " + myAgent.getLocalName());
                     }
                     break;
             }
