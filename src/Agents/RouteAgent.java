@@ -1,5 +1,6 @@
 package Agents;
 
+import Utils.LinearCoordCalculator;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -13,6 +14,7 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import static Utils.Settings.*;
+import entities.Coord2D;
 import entities.agentargs.*;
 import jade.core.behaviours.CyclicBehaviour;
 
@@ -33,8 +35,9 @@ public class RouteAgent extends Agent {
     private AID arrivalAirport;
     private AID aircraft;
     private int soldTickets;
-    private int departureAirportID, arrivalAirportID, aircraftID;
-    private int departureAirportX, departureAirportY, arrivalAirportX, arrivalAirportY;
+    private int departureAirportID, arrivalAirportID;
+    private Coord2D departureAirportLocation, arrivalAirportLocation;
+    private int routeDistance;
 
     @Override
     protected void setup() {
@@ -47,20 +50,20 @@ public class RouteAgent extends Agent {
             routeID = args.getRouteID();
             departureAirportID = args.getDepartureAirportID();
             arrivalAirportID = args.getDestinationAirportID();
-            aircraftID = args.getAircraftID();
             soldTickets = args.getNumOfPassengers();
 
             System.out.println("Route " + getAID().getLocalName() + " has ID " + routeID);
             System.out.println("Route " + getAID().getLocalName() + " has departure airport " + departureAirportID);
             System.out.println("Route " + getAID().getLocalName() + " has arrival airport " + arrivalAirportID);
-            System.out.println("Route " + getAID().getLocalName() + " has aircraft " + aircraftID);
             System.out.println("Route " + getAID().getLocalName() + " has " + soldTickets + " sold tickets");
 
             registerToDF();
 
             addBehaviour(new RequestAssignedAirports()); // Request associated airports
 
-            addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft
+            //addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft (No default associated aircraft right now)
+            
+            addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
 
             addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
             
@@ -137,14 +140,17 @@ public class RouteAgent extends Agent {
 
     /**
      * One shot behaviour for getting associated aircraft
+     * 
+     * (Not used right now because the route doesn't have a default aircraft)
      */
+    @Deprecated
     private class RequestAssignedAircraft extends OneShotBehaviour {
 
         @Override
         public void action() {
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setName(nameOfAircraftAgent + aircraftID); // Get departure airport AID
+            sd.setName(nameOfAircraftAgent + "aircraftID"); // Get departure airport AID
             template.addServices(sd);
 
             try {
@@ -166,6 +172,7 @@ public class RouteAgent extends Agent {
         private AirportLocation step = AirportLocation.REQUEST_AIRPORT_LOCATION;
         private MessageTemplate mt; // The template to receive replies
         private int airportCoordinatesReceived = 0;
+        private int airportX, airportY;
 
         @Override
         public void action() {
@@ -191,17 +198,20 @@ public class RouteAgent extends Agent {
                             int seperator = location.indexOf(',');
 
                             if (reply.getSender().equals(departureAirport)) {
-                                departureAirportX = Integer.parseInt(location.substring(0, seperator));
-                                departureAirportY = Integer.parseInt(location.substring(seperator + 1));
+                                airportX = Integer.parseInt(location.substring(0, seperator));
+                                airportY = Integer.parseInt(location.substring(seperator + 1));
+                                departureAirportLocation = new Coord2D(airportX, airportY);
                                 System.out.println("Coordinates for departure airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
                                 airportCoordinatesReceived++;
                             } else if (reply.getSender().equals(departureAirport)) {
-                                departureAirportX = Integer.parseInt(location.substring(0, seperator));
-                                departureAirportY = Integer.parseInt(location.substring(seperator + 1));
+                                airportX = Integer.parseInt(location.substring(0, seperator));
+                                airportY = Integer.parseInt(location.substring(seperator + 1));
+                                arrivalAirportLocation = new Coord2D(airportX, airportY);
                                 System.out.println("Coordinates for arrival airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
                                 airportCoordinatesReceived++;
                             }
                             if (airportCoordinatesReceived >= 2) {
+                                routeDistance = (int) LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportLocation, arrivalAirportLocation);
                                 step = AirportLocation.DONE;
                             }
                         }
@@ -222,7 +232,7 @@ public class RouteAgent extends Agent {
     }
 
     /**
-     * This is the complex behaviour used by route agents to request plane
+     * This is the complex behaviour used to request aircraft
      * agents to be assigned to fly this route
      */
     private class RequestBestAircraft extends Behaviour {
@@ -322,6 +332,7 @@ public class RouteAgent extends Agent {
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.INFORM) {
                             // Purchase succesful. We can terminate.
+                            aircraft = bestPlane;
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;
                         } else if (reply.getPerformative() == ACLMessage.CANCEL) {
@@ -356,7 +367,7 @@ public class RouteAgent extends Agent {
 
                 ACLMessage order = new ACLMessage(ACLMessage.INFORM);
                 order.addReceiver(reply.getSender());
-                order.setContent(arrivalAirportX + "," + arrivalAirportY);
+                order.setContent(arrivalAirportLocation.X + "," + arrivalAirportLocation.Y);
                 myAgent.send(order);
             } else {
                 block();

@@ -12,7 +12,7 @@ package entities.agentargs;
  */
 public class RouteAgentArgs implements IAgentArgs
 {
-    private int routeID, departureAirportID, destinationAirportID, aircraftID, numOfPassengers;
+    private int routeID, departureAirportID, destinationAirportID, numOfPassengers;
     
     /**
      * Constructs an empty instance of the RouteAgentArgs.
@@ -25,15 +25,13 @@ public class RouteAgentArgs implements IAgentArgs
      * @param routeID The identifier of the route.
      * @param depAirportID The identifier of the departure airport.
      * @param destAirportID The identifier of the destination airport.
-     * @param acID The identifier of the aircraft.
      * @param numOfPassengers Number of expected passengers (number of sold tickets).
      */
-    public RouteAgentArgs(int routeID, int depAirportID, int destAirportID, int acID, int numOfPassengers)
+    public RouteAgentArgs(int routeID, int depAirportID, int destAirportID, int numOfPassengers)
     {
         this.routeID = routeID;
         this.departureAirportID = depAirportID;
         this.destinationAirportID = destAirportID;
-        this.aircraftID = acID;
         this.numOfPassengers = numOfPassengers;
     }
     
@@ -48,7 +46,7 @@ public class RouteAgentArgs implements IAgentArgs
         if(args == null)
             return null;
         
-        if(args.length == 5)
+        if(args.length == 4)
         {
             return new RouteAgentArgs(args);
         }
@@ -61,8 +59,6 @@ public class RouteAgentArgs implements IAgentArgs
                 routeAgentArgs.departureAirportID = (int)args[1];
             if(args.length >= 3)
                 routeAgentArgs.destinationAirportID = (int)args[2];
-            if(args.length >= 4)
-                routeAgentArgs.aircraftID = (int)args[3];
             
             return routeAgentArgs;
         }
@@ -75,8 +71,7 @@ public class RouteAgentArgs implements IAgentArgs
         routeID = (int)args[0];
         departureAirportID = (int)args[1];
         destinationAirportID = (int)args[2];
-        aircraftID = (int)args[3];
-        numOfPassengers = (int)args[4];
+        numOfPassengers = (int)args[3];
     }
     
     /**
@@ -87,17 +82,15 @@ public class RouteAgentArgs implements IAgentArgs
     @Override
     public Object[] asObjectArray() 
     {
-        return new Object[] { routeID, departureAirportID, destinationAirportID, aircraftID, numOfPassengers };
+        return new Object[] { routeID, departureAirportID, destinationAirportID, numOfPassengers };
     }
     
     public int getRouteID() { return routeID; }
     public int getDepartureAirportID() { return departureAirportID; }
     public int getDestinationAirportID() { return destinationAirportID; }
-    public int getAircraftID() { return aircraftID; }
     public int getNumOfPassengers() { return numOfPassengers; }
     public void setRouteID(int routeID) { this.routeID = routeID; }
     public void setDepartureAirportID(int depAirportID) { departureAirportID = depAirportID; }
     public void setDestinationAirportID(int destAirportID) { destinationAirportID = destAirportID; }
-    public void setAircraftID(int acID) { aircraftID = acID; }
     public void setNumOfPassengers(int numOfPassengers) { this.numOfPassengers = numOfPassengers; }
 }

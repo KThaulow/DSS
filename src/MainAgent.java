@@ -72,7 +72,7 @@ public class MainAgent extends Agent
     private ArrayList<IAgentArgs> createRouteAgentArgs()
     {
         ArrayList<IAgentArgs> routeAgentArgs = new ArrayList<>();
-        routeAgentArgs.add(new RouteAgentArgs(0, 1, 2, 2, 50));
+        routeAgentArgs.add(new RouteAgentArgs(0, 1, 2, 50));
         
         return routeAgentArgs;
     }
