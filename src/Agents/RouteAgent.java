@@ -17,12 +17,13 @@ import static Utils.Settings.*;
 import entities.Coord2D;
 import entities.agentargs.*;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
 
 public class RouteAgent extends Agent {
 
     private enum BestAircraft {
 
-        REQUEST_AIRCRAFT, GET_PROPOSAL_FROM_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, IDLE;
+        REQUEST_AIRCRAFT, GET_PROPOSAL_FROM_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, START_FLIGHT;
     }
 
     private enum AirportLocation {
@@ -334,7 +335,7 @@ public class RouteAgent extends Agent {
                             // Purchase succesful. We can terminate.
                             aircraft = bestPlane;
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
-                            step = BestAircraft.IDLE;
+                            step = BestAircraft.START_FLIGHT;
                         } else if (reply.getPerformative() == ACLMessage.CANCEL) {
                             unavailableAircrafts.add(bestPlane);
                         }
@@ -349,8 +350,30 @@ public class RouteAgent extends Agent {
 
         @Override
         public boolean done() {
-            return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.IDLE);
+            if(step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null){
+                System.out.println("No aircraft was found for route "+myAgent.getLocalName());
+            } else if(step == BestAircraft.START_FLIGHT)
+            {
+                //addBehaviour(new StartFlightBehaviour(myAgent, routeUpdateTimerMs)); // Start the flight
+            }
+            return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.START_FLIGHT);
         }
+    }
+    
+    /**
+     * Start the flight
+     */
+    private class StartFlightBehaviour extends TickerBehaviour{
+
+        public StartFlightBehaviour(Agent a, long period) {
+            super(a, period);
+        }
+
+        @Override
+        protected void onTick() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+        
     }
 
     /**

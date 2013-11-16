@@ -11,6 +11,7 @@ public class Settings {
     
     public static final String typeOfRouteAgent = "route";
     public static final String nameOfRouteAgent = "routeAgent";
+    public static final int routeUpdateTimerMs = 1000;
     
     public static final String typeOfAirportAgent = "airport";
     public static final String nameOfAirportAgent = "airportAgent";
