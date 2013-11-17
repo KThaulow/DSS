@@ -40,7 +40,7 @@ public class GUIAgent extends Agent {
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
         addBehaviour(new RequestAirports());
-        addBehaviour(new GetInformFromAircraftBehaviour());
+        addBehaviour(new GetInfoFromAircraftBehaviour());
     }
     
     private void registerToDF() {
@@ -66,7 +66,7 @@ public class GUIAgent extends Agent {
             fe.printStackTrace();
         }
 
-        System.out.println("Airport agent " + getAID().getName() + " terminating");
+        System.out.println("GUIAgent agent " + getAID().getName() + " terminating");
     }
     
     private class RequestAirports extends Behaviour {        
@@ -145,20 +145,18 @@ public class GUIAgent extends Agent {
         }
     } 
     
-    private class GetInformFromAircraftBehaviour extends CyclicBehaviour {
+    private class GetInfoFromAircraftBehaviour extends CyclicBehaviour {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftInfoID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftInfoConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             System.out.println("Get the info");
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {                        
                 // Reply received
-                if (msg.getPerformative() == ACLMessage.INFORM) {
-                    // this is an offer                            
-                    System.out.println("Aircraft name " + msg.getSender().getName());
-                    System.out.println("Aircraft info " + msg.getContent()); 
-                }
+                // this is an offer                            
+                System.out.println("Aircraft name " + msg.getSender().getName());
+                System.out.println("Aircraft info " + msg.getContent()); 
             } else {
                 System.out.println("No aircraft info");
                 block();
