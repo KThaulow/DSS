@@ -20,6 +20,8 @@ import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.tools.testagent.ReceiveCyclicBehaviour;
+import jade.tools.testagent.TestAgent;
 /**
  *
  * @author Fuglsang
@@ -149,7 +151,7 @@ public class GUIAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftInfoConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftStartConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             System.out.println("Get the info");
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {                        
