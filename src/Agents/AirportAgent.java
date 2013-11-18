@@ -12,6 +12,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.Hashtable;
 import static Utils.Settings.*;
+import entities.agentargs.*;
 
 public class AirportAgent extends Agent {
 
@@ -25,11 +26,12 @@ public class AirportAgent extends Agent {
         System.out.println("Airport-agent " + getAID().getName() + " is ready");
         
         // Get the identifier of the cross and add behaviours
-        Object[] args = getArguments();
-        if ( args!=null && args.length>0 ) {
-            airportID = (Integer) args[0];
-            coordinateX = (Integer) args[1];
-            coordinateY = (Integer) args[2];
+        AirportAgentArgs args = AirportAgentArgs.createAgentArgs(getArguments());
+        
+        if (args != null) {
+            airportID = args.getAirportID();
+            coordinateX = args.getCoordinateX();
+            coordinateY = args.getCoordinateY();
              
             registerToDF(); 
             
