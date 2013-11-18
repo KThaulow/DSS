@@ -52,9 +52,9 @@ public class MainAgent extends Agent
     private ArrayList<IAgentArgs> createAircraftAgentsArgs()
     {
         ArrayList<IAgentArgs> acAgentArgs = new ArrayList<>();
-        acAgentArgs.add(new AircraftAgentArgs(0, 100, 1000));
-        acAgentArgs.add(new AircraftAgentArgs(1, 100, 1000));
-        acAgentArgs.add(new AircraftAgentArgs(2, 100, 1000));
+        acAgentArgs.add(new AircraftAgentArgs(0, 100, 1000, 500));
+        acAgentArgs.add(new AircraftAgentArgs(1, 100, 1000, 500));
+        acAgentArgs.add(new AircraftAgentArgs(2, 100, 1000, 500));
         
         return acAgentArgs;
     }
