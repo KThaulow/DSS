@@ -35,6 +35,7 @@ public class GUIAgent extends Agent {
     
     GUIInterface guiInterface; // The gui interface
     
+    @Override
     protected void setup() {
         guiInterface = new GUIInterface();
         registerToDF();
@@ -42,6 +43,7 @@ public class GUIAgent extends Agent {
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
         addBehaviour(new RequestAirports());
+        addBehaviour(new RequestInfoListenerBehaviour());
         addBehaviour(new GetInfoFromAircraftBehaviour());
     }
     
@@ -55,6 +57,7 @@ public class GUIAgent extends Agent {
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
+            System.out.println("GUI register to DF");
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
@@ -146,6 +149,30 @@ public class GUIAgent extends Agent {
             return (step == AirportsCoordinatesSteps.DONE); 
         }
     } 
+    
+    private class RequestInfoListenerBehaviour extends OneShotBehaviour {
+        
+        @Override
+        public void action() {
+            AID[] infoListeners;
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType(typeOfGUIAgent); // Get departure airport AID
+            template.addServices(sd);            
+            
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                System.out.println("results.length " + results.length);
+                infoListeners = new AID[results.length]; 
+                for (int i = 0; i < results.length; i++) {
+                    infoListeners[i] = results[i].getName();
+                }
+                System.out.println("GUI added as listener of aircraft info");
+            } catch (FIPAException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
     
     private class GetInfoFromAircraftBehaviour extends CyclicBehaviour {
 

@@ -52,8 +52,9 @@ public class AircraftAgent extends Agent {
             registerToDF();
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request (Cyclic)
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order (Cyclic)
-            addBehaviour(new RequestInfoListenerBehaviour()); // Request and subscribe listeners for aircraft info (Oneshot)
+            //addBehaviour(new RequestInfoListenerBehaviour()); // Request and subscribe listeners for aircraft info (Oneshot)
             addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
+            addBehaviour(new AircraftStartBehaviour(this, 1000));
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
             System.out.println("No arguments specified specified");
@@ -163,39 +164,19 @@ public class AircraftAgent extends Agent {
         @Override
         protected void onTick() {
             
-            travelledDistance += speed / (aircraftStartTimerMs * MS_TO_HOUR);
-            Coord2D currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
+            travelledDistance += speed / (aircraftStartTimerMs * MS_TO_HOUR);            
+//            Coord2D currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
             
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(aircraftStartConID);
-            info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
-            
-            for (int i = 0; i < infoListeners.length; i++) {
-                info.addReceiver(infoListeners[i]);
+//            info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
+            info.setContent(10 + "," + 10 + "," + 50 + "," + 70 + "," + speed);
+            for (AID infoListener : infoListeners) {
+                System.out.println("reciver");
+                info.addReceiver(infoListener);
             }
             
             myAgent.send(info);
-        }
-    }
-    
-    private class RequestInfoListenerBehaviour extends OneShotBehaviour {
-        
-        @Override
-        public void action() {
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setName(nameOfGUIAgent); // Get departure airport AID
-            template.addServices(sd);
-            
-            try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                for (int i = 0; i < results.length; i++) {
-                    infoListeners[i] = results[i].getName();
-                }
-                System.out.println("GUI added as listener of aircraft info");
-            } catch (FIPAException ex) {
-                ex.printStackTrace();
-            }
         }
     }
 
