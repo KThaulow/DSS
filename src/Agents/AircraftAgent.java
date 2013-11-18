@@ -10,13 +10,11 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
-import com.sun.org.apache.xerces.internal.impl.dtd.models.SimpleContentModel;
 import entities.Coord2D;
 import entities.agentargs.*;
 import entities.cost.SimpleCostModel;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import java.util.Arrays;
 import java.util.List;
@@ -31,7 +29,7 @@ public class AircraftAgent extends Agent {
     private boolean aircraftAvailable; // Is the aircraft in use by another route
     private boolean aircraftFunctional; // Is the aircraft functional
     private double fuelBurnRate;
-    private AID[] infoListeners;
+    private List<AID> infoListeners;
 
     private enum ArrivalAirport {
 
@@ -54,11 +52,12 @@ public class AircraftAgent extends Agent {
             System.out.println("Aircraft " + getAID().getLocalName() + " has ID " + aircraftID);
             System.out.println("Aircraft " + getAID().getLocalName() + " has capacity " + capacity);
             System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
+            System.out.println("Aircraft " + getAID().getLocalName() + " has fuel burn rate " + fuelBurnRate);
 
             registerToDF();
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request (Cyclic)
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order (Cyclic)
-            addBehaviour(new RequestInfoListenerBehaviour()); // Request and subscribe listeners for aircraft info (Oneshot)
+            addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
             addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
@@ -191,25 +190,20 @@ public class AircraftAgent extends Agent {
     /**
      * Request listener(s) for aircraft info
      */
-    private class RequestInfoListenerBehaviour extends OneShotBehaviour {
+    private class InfoListenerRequestServerBehaviour extends CyclicBehaviour {
 
         @Override
         public void action() {
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setName(nameOfGUIAgent); // Get GUI agent AID
-            template.addServices(sd);
-
-            try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                for (int i = 0; i < results.length; i++) {
-                    infoListeners[i] = results[i].getName();
-                }
-                System.out.println("GUI added as listener of aircraft info");
-            } catch (FIPAException ex) {
-                ex.printStackTrace();
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftSubscriptionConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            ACLMessage reply = myAgent.receive(mt);
+            if (reply != null) {
+                infoListeners.add(reply.getSender());
+            } else {
+                block();
+                System.out.println("No info listeners for aircraft " + myAgent.getLocalName());
             }
         }
+
     }
 
     /**

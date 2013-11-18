@@ -22,6 +22,7 @@ public class Settings {
     public static final String bestAircraftConID = "bestAircraft";
     public static final String aircraftStartConID = "aircraftInfo";
     public static final String airportLocationAircraftConID = "arrivalAirport";
+    public static final String aircraftSubscriptionConID = "aircraftSubscription";
     
     public static final int NUMBER_OF_AIRCRAFT_AGENTS = 3;
     public static final int NUMBER_OF_AIRPORT_AGENTS = 3;
