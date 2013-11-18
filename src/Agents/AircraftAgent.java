@@ -25,7 +25,7 @@ public class AircraftAgent extends Agent {
 
     private int aircraftID;
     private int capacity;
-    private int speed;
+    private double speed;
     private double travelledDistance;
     private Coord2D departureAirportLocation, arrivalAirportLocation, currentLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route

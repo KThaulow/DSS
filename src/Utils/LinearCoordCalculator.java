@@ -61,7 +61,7 @@ public enum LinearCoordCalculator
         double xDiffSquared = Math.pow(xDiff, 2);
         double yDiffSquared = Math.pow(yDiff, 2);
         
-        return Math.sqrt(xDiffSquared + yDiffSquared); // Hypothenuse
+        return Math.sqrt(xDiffSquared + yDiffSquared);
     }
     
     private Coord2D calculateCoordinates(Coord2D depCoord, Coord2D destCoord, double travelledDistance)
