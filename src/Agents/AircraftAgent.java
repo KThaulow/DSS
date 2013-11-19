@@ -63,6 +63,7 @@ public class AircraftAgent extends Agent {
 
             //addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
             
+            System.out.println("Aircraft info listener added");
             addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
             
             
@@ -209,10 +210,9 @@ public class AircraftAgent extends Agent {
             ACLMessage reply = myAgent.receive(mt);
             if (reply != null) {
                 infoListeners.add(reply.getSender());
-                System.out.println("Listener added "+reply.getSender());
+                System.out.println("Listener added "+reply.getSender()+" for aircraft agent "+myAgent.getLocalName());
             } else {
                 block();
-                System.out.println("No info listeners for aircraft " + myAgent.getLocalName());
             }
         }
 
