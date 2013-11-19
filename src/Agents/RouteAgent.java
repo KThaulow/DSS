@@ -64,7 +64,7 @@ public class RouteAgent extends Agent {
             //addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft (No default associated aircraft right now)
             addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
 
-            addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
+        
 
             addBehaviour(new AirportLocationRequestServerBehaviour()); // Serve arrival airport location request
 
@@ -225,6 +225,9 @@ public class RouteAgent extends Agent {
 
         @Override
         public boolean done() {
+            if(step == AirportLocation.DONE){
+                addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
+            }
             return step == AirportLocation.DONE;
         }
 
@@ -268,7 +271,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+soldTickets); // Send the departure airport and sold tickets
+                        cfp.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+arrivalAirportLocation.X+","+arrivalAirportLocation.Y+","+soldTickets); // Send the departure airport and sold tickets
                         cfp.setConversationId(bestAircraftConID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);

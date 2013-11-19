@@ -57,8 +57,11 @@ public class AircraftAgent extends Agent {
             registerToDF();
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request (Cyclic)
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order (Cyclic)
+
+            //addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
+            
             addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
-            addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
+            
             addBehaviour(new AircraftStartBehaviour(this, 1000));
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
@@ -110,12 +113,15 @@ public class AircraftAgent extends Agent {
                 String content = msg.getContent();
                 List<String> items = Arrays.asList(content.split(","));
                 int departureX = Integer.parseInt(items.get(0));
-                int departureY = Integer.parseInt(items.get(0));
-                int soldTickets = Integer.parseInt(items.get(0));
-                Coord2D departureAirpor = new Coord2D(departureX, departureY);
+                int departureY = Integer.parseInt(items.get(1));
+                int arrivalX = Integer.parseInt(items.get(2));
+                int arrivalY = Integer.parseInt(items.get(3));
+                int soldTickets = Integer.parseInt(items.get(4));
+                departureAirportLocation = new Coord2D(departureX, departureY);
+                arrivalAirportLocation = new Coord2D(arrivalX, arrivalY);
                 ACLMessage reply = msg.createReply();
 
-                SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirpor, travelledDistance, fuelBurnRate);
+                SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirportLocation, speed, fuelBurnRate);
 
                 String response = cost + "";
 
@@ -219,6 +225,18 @@ public class AircraftAgent extends Agent {
         public void action() {
             switch (step) {
                 case REQUEST_AIRPORT_LOCATION:
+                    DFAgentDescription template = new DFAgentDescription();
+                    ServiceDescription sd = new ServiceDescription();
+                    sd.setName(nameOfAirportAgent + "aircraftID"); // Get departure airport AID
+                    template.addServices(sd);
+
+                    try {
+                        DFAgentDescription[] results = DFService.search(myAgent, template);
+                        //aircraft = results[0].getName();
+                        //System.out.println("Route " + myAgent.getLocalName() + " has aircraft agent " + aircraft.getLocalName());
+                    } catch (FIPAException ex) {
+                        ex.printStackTrace();
+                    }
 
                     ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
                     order.setConversationId(airportLocationAircraftConID);
@@ -240,6 +258,7 @@ public class AircraftAgent extends Agent {
                         arrivalAirportLocation.Y = Integer.parseInt(items.get(3));
 
                         System.out.println("Coordinates for departure and arrival airport got for aircraft " + myAgent.getLocalName());
+                        System.out.println("Aircraft coordinates: " + departureAirportLocation.toString() + " " + arrivalAirportLocation.toString());
 
                         step = ArrivalAirport.DONE;
 
