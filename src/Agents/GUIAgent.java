@@ -40,6 +40,7 @@ public class GUIAgent extends Agent {
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
         addBehaviour(new RequestAirports());
+        System.out.println("Request info listener added");
         addBehaviour(new RequestInfoListenerBehaviour());
         addBehaviour(new GetInfoFromAircraftBehaviour());
     }
@@ -182,7 +183,7 @@ public class GUIAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftSubscriptionConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftStartConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             System.out.println("Get the info");
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {                        
