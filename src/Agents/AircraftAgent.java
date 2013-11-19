@@ -22,7 +22,7 @@ import java.util.List;
 
 public class AircraftAgent extends Agent {
 
-    private int aircraftID;
+    private int aircraftID, airportID;
     private int capacity;
     private double speed;
     private double travelledDistance;
@@ -49,11 +49,13 @@ public class AircraftAgent extends Agent {
             capacity = acAgentArgs.getCapacity();
             speed = acAgentArgs.getSpeed();
             fuelBurnRate = acAgentArgs.getFuelBurnRate();
+            airportID = acAgentArgs.getAirportID();
 
             System.out.println("Aircraft " + getAID().getLocalName() + " has ID " + aircraftID);
             System.out.println("Aircraft " + getAID().getLocalName() + " has capacity " + capacity);
             System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
             System.out.println("Aircraft " + getAID().getLocalName() + " has fuel burn rate " + fuelBurnRate);
+            System.out.println("Aircraft " + getAID().getLocalName() + " has starting airport ID " + airportID);
             
             infoListeners = new ArrayList<>();
 

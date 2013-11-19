@@ -12,7 +12,7 @@ package entities.agentargs;
  */
 public class AircraftAgentArgs implements IAgentArgs
 {
-    private int aircraftID, capacity;
+    private int aircraftID, capacity, airportID;
     private double speed, fuelBurnRate;
 
     /**
@@ -27,13 +27,15 @@ public class AircraftAgentArgs implements IAgentArgs
      * @param capacity The capacity of the aircraft.
      * @param speed The speed of the aircraft.
      * @param fuelBurnRate The rate of fuel consumption.
+     * @param airportID The ID of the starting airport.
      */
-    public AircraftAgentArgs(int aircraftID, int capacity, double speed, double fuelBurnRate)
+    public AircraftAgentArgs(int aircraftID, int capacity, double speed, double fuelBurnRate, int airportID)
     {
         this.aircraftID = aircraftID;
         this.capacity = capacity;
         this.speed = speed;
         this.fuelBurnRate = fuelBurnRate;
+        this.airportID = airportID;
     }
     
     /**
@@ -47,7 +49,7 @@ public class AircraftAgentArgs implements IAgentArgs
         if(args == null)
             return null;
         
-        if(args.length == 4)
+        if(args.length == 5)
         {
             return new AircraftAgentArgs(args);
         }
@@ -60,6 +62,8 @@ public class AircraftAgentArgs implements IAgentArgs
                 acAgentArgs.capacity = (int)args[1];
             if(args.length >= 3)
                 acAgentArgs.speed = (double)args[2];
+            if(args.length >= 4)
+                acAgentArgs.fuelBurnRate = (double)args[3];
             
             return acAgentArgs;
         }
@@ -73,11 +77,12 @@ public class AircraftAgentArgs implements IAgentArgs
         capacity = (int)args[1];
         speed = (double)args[2];
         fuelBurnRate = (double)args[3];
+        airportID = (int)args[4];
     }
     
     /**
      * Inserts the arguments into an array of objects.
-     * 0) aircraftID, 1) capacity, 2) speed, 3) fuelBurnRate.
+     * 0) aircraftID, 1) capacity, 2) speed, 3) fuelBurnRate, 4) airportID.
      * @return An object array representation of the aircraft agent's arguments.
      */
     @Override
@@ -90,8 +95,10 @@ public class AircraftAgentArgs implements IAgentArgs
     public int getCapacity() { return capacity; }
     public double getSpeed() { return speed; }
     public double getFuelBurnRate() { return fuelBurnRate; }
+    public int getAirportID() { return airportID; }
     public void setAircraftID(int acID) { aircraftID = acID; }
     public void setCapacity(int capacity) { this.capacity = capacity; }
     public void setSpeed(double speed) { this.speed = speed; }
     public void setFuelBurnRate(double fuelBurnRate) { this.fuelBurnRate = fuelBurnRate; }
+    public void setAirportID(int airportID) { this.airportID = airportID; }
 }
