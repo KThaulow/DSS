@@ -114,7 +114,7 @@ public class AircraftAgent extends Agent {
                 Coord2D departureAirpor = new Coord2D(departureX, departureY);
                 ACLMessage reply = msg.createReply();
 
-                SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirpor, travelledDistance, fuelBurnRate);
+                //SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirpor, travelledDistance, fuelBurnRate);
 
                 String response = cost + "";
 

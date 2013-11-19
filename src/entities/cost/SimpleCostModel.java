@@ -19,6 +19,7 @@ public class SimpleCostModel implements ICostModel
     private int aircraftCapacity;
     private Coord2D currentAircraftPosition;
     private Coord2D departureAirportPosition;
+    private Coord2D destinationAirportPosition;
     private double aircraftSpeed;
     private double fuelBurnRate;
     
@@ -28,7 +29,7 @@ public class SimpleCostModel implements ICostModel
     private final double TOTAL_EET_FACTOR = 12;
     private final double FUEL_CONSUMPTION_FACTOR = 9.8;
     
-    public SimpleCostModel(int numOfPassengers, int acCapacity, Coord2D currentAcPos, Coord2D depPos, double acSpeed, double fuelBurnRate)
+    public SimpleCostModel(int numOfPassengers, int acCapacity, Coord2D currentAcPos, Coord2D depPos, Coord2D destPos, double acSpeed, double fuelBurnRate)
     {
         this.numOfPassengers = numOfPassengers;
         this.aircraftCapacity = acCapacity;
@@ -36,6 +37,7 @@ public class SimpleCostModel implements ICostModel
         this.fuelBurnRate = fuelBurnRate;
         this.departureAirportPosition = depPos;
         this.currentAircraftPosition = currentAcPos;
+        this.destinationAirportPosition = destPos;
     }
     
     /**
@@ -48,8 +50,9 @@ public class SimpleCostModel implements ICostModel
     {
         int numOfEmptySeats = aircraftCapacity - numOfPassengers;
         double distToDepAirport = LinearCoordCalculator.INSTANCE.calculateDistance(currentAircraftPosition, departureAirportPosition);
+        double distToDestAirport = LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportPosition, destinationAirportPosition);
         double totalEET = distToDepAirport/aircraftSpeed;
-        double fuelConsumption = fuelBurnRate * distToDepAirport;
+        double fuelConsumption = fuelBurnRate * (distToDepAirport + distToDestAirport);
         
         double weightedNumOfPassengers = numOfPassengers * NUM_OF_PASSENGERS_FACTOR;
         double weightedNumOfEmptySeats = numOfEmptySeats * NUM_OF_EMPTY_SEATS_FACTOR;
