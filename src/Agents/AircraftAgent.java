@@ -185,7 +185,7 @@ public class AircraftAgent extends Agent {
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(aircraftStartConID);
             info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
-
+            
             for (AID infoListener : infoListeners) {
                 info.addReceiver(infoListener);
             }
