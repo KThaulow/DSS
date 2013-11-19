@@ -19,6 +19,9 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
 import jade.core.behaviours.Behaviour;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.tools.testagent.ReceiveCyclicBehaviour;
+import jade.tools.testagent.TestAgent;
 /**
  *
  * @author Fuglsang
@@ -32,6 +35,7 @@ public class GUIAgent extends Agent {
     
     GUIInterface guiInterface; // The gui interface
     
+    @Override
     protected void setup() {
         guiInterface = new GUIInterface();
         registerToDF();
@@ -39,6 +43,8 @@ public class GUIAgent extends Agent {
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
         addBehaviour(new RequestAirports());
+        addBehaviour(new RequestInfoListenerBehaviour());
+        addBehaviour(new GetInfoFromAircraftBehaviour());
     }
     
     private void registerToDF() {
@@ -51,6 +57,7 @@ public class GUIAgent extends Agent {
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
+            System.out.println("GUI register to DF");
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
@@ -64,7 +71,7 @@ public class GUIAgent extends Agent {
             fe.printStackTrace();
         }
 
-        System.out.println("Airport agent " + getAID().getName() + " terminating");
+        System.out.println("GUIAgent agent " + getAID().getName() + " terminating");
     }
     
     private class RequestAirports extends Behaviour {        
@@ -141,9 +148,57 @@ public class GUIAgent extends Agent {
         public boolean done() {
             return (step == AirportsCoordinatesSteps.DONE); 
         }
-
-        
     } 
     
+    private class RequestInfoListenerBehaviour extends OneShotBehaviour {
+        
+        @Override
+        public void action() {
+            AID[] aircrafts; 
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType(typeOfAirportAgent); // Get all airports
+            template.addServices(sd);
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);                 
+                aircrafts = new AID[results.length];
+                for (int i = 0; i < results.length; ++i) {
+                    aircrafts[i] = results[i].getName();
+                }
+
+                // Sent message to airport
+                ACLMessage cfp = new ACLMessage(ACLMessage.REQUEST);                        
+                for (int i = 0; i < aircrafts.length; ++i) {
+                    System.out.println("Send message to all aircrafts");
+                    cfp.addReceiver(aircrafts[i]);
+                }
+                cfp.setConversationId(aircraftSubscriptionConID);
+                myAgent.send(cfp);
+
+                } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
+        }
+    }
+    
+    private class GetInfoFromAircraftBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftStartConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            System.out.println("Get the info");
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {                        
+                // Reply received
+                // this is an offer                            
+                System.out.println("Aircraft name " + msg.getSender().getName());
+                System.out.println("Aircraft info " + msg.getContent()); 
+            } else {
+                System.out.println("No aircraft info");
+                block();
+            }
+            
+            }
+    }
     
 }
