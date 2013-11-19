@@ -118,7 +118,7 @@ public class AircraftAgent extends Agent {
                 // Message received. Process it
                 String content = msg.getContent();
                 List<String> items = Arrays.asList(content.split(","));
-                int departureX = Integer.parseInt(items.get(0));
+                int departureX = Integer.parseInt(items.get(0));                
                 int departureY = Integer.parseInt(items.get(1));
                 int arrivalX = Integer.parseInt(items.get(2));
                 int arrivalY = Integer.parseInt(items.get(3));
