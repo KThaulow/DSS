@@ -16,6 +16,7 @@ import entities.cost.SimpleCostModel;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -53,6 +54,8 @@ public class AircraftAgent extends Agent {
             System.out.println("Aircraft " + getAID().getLocalName() + " has capacity " + capacity);
             System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
             System.out.println("Aircraft " + getAID().getLocalName() + " has fuel burn rate " + fuelBurnRate);
+            
+            infoListeners = new ArrayList<>();
 
             registerToDF();
             addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request (Cyclic)

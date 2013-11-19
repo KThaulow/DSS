@@ -157,7 +157,7 @@ public class GUIAgent extends Agent {
             AID[] aircrafts; 
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setType(typeOfAirportAgent); // Get all airports
+            sd.setType(typeOfAircraftAgent); // Get all airports
             template.addServices(sd);
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);                 
