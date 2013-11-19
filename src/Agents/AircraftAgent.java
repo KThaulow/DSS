@@ -65,6 +65,7 @@ public class AircraftAgent extends Agent {
 
             //addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
             
+            System.out.println("Aircraft info listener added");
             addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
             
             
@@ -211,77 +212,11 @@ public class AircraftAgent extends Agent {
             ACLMessage reply = myAgent.receive(mt);
             if (reply != null) {
                 infoListeners.add(reply.getSender());
-                System.out.println("Listener added "+reply.getSender());
+                System.out.println("Listener added "+reply.getSender()+" for aircraft agent "+myAgent.getLocalName());
             } else {
                 block();
-                System.out.println("No info listeners for aircraft " + myAgent.getLocalName());
             }
         }
 
-    }
-
-    /**
-     * Request departure and arrival airport location
-     */
-    @Deprecated
-    private class AirportLocationRequestBehaviour extends Behaviour {
-
-        private MessageTemplate mt; // The template to receive replies
-        private ArrivalAirport step = ArrivalAirport.REQUEST_AIRPORT_LOCATION;
-
-        @Override
-        public void action() {
-            switch (step) {
-                case REQUEST_AIRPORT_LOCATION:
-                    DFAgentDescription template = new DFAgentDescription();
-                    ServiceDescription sd = new ServiceDescription();
-                    sd.setName(nameOfAirportAgent + "aircraftID"); // Get departure airport AID
-                    template.addServices(sd);
-
-                    try {
-                        DFAgentDescription[] results = DFService.search(myAgent, template);
-                        //aircraft = results[0].getName();
-                        //System.out.println("Route " + myAgent.getLocalName() + " has aircraft agent " + aircraft.getLocalName());
-                    } catch (FIPAException ex) {
-                        ex.printStackTrace();
-                    }
-
-                    ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
-                    order.setConversationId(airportLocationAircraftConID);
-                    order.setContent(myAgent.getName());
-                    myAgent.send(order);
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-                    step = ArrivalAirport.GET_AIRPORT_LOCATION;
-                    break;
-
-                case GET_AIRPORT_LOCATION:
-                    ACLMessage reply = myAgent.receive(mt);
-                    if (reply != null) {
-                        // Location received
-                        String location = reply.getContent();
-                        List<String> items = Arrays.asList(location.split(","));
-                        departureAirportLocation.X = Integer.parseInt(items.get(0));
-                        departureAirportLocation.Y = Integer.parseInt(items.get(1));
-                        arrivalAirportLocation.X = Integer.parseInt(items.get(2));
-                        arrivalAirportLocation.Y = Integer.parseInt(items.get(3));
-
-                        System.out.println("Coordinates for departure and arrival airport got for aircraft " + myAgent.getLocalName());
-                        System.out.println("Aircraft coordinates: " + departureAirportLocation.toString() + " " + arrivalAirportLocation.toString());
-
-                        step = ArrivalAirport.DONE;
-
-                    } else {
-                        block();
-                        System.out.println("No airport location reply received for aircraft " + myAgent.getLocalName());
-                    }
-                    break;
-            }
-
-        }
-
-        @Override
-        public boolean done() {
-            return step == ArrivalAirport.DONE;
-        }
     }
 }
