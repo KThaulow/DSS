@@ -36,7 +36,8 @@ public class MainAgent extends Agent
         ArrayList<IAgentArgs> aircraftAgentArgs = createAircraftAgentsArgs();
         ArrayList<IAgentArgs> airportAgentArgs = createAirportAgentsArgs();
         ArrayList<IAgentArgs> routeAgentArgs = createRouteAgentArgs();
-
+        createAgent("GUIAgent", "Agents.GUIAgent", null);
+        
         for(int i = 0; i < aircraftAgentArgs.size(); i++)
             createAgent("acAgent"+i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         
@@ -46,7 +47,6 @@ public class MainAgent extends Agent
         for(int i = 0; i < routeAgentArgs.size(); i++)
             createAgent("rAgent"+i, "Agents.RouteAgent", routeAgentArgs.get(i));
         
-        createAgent("GUIAgent", "Agents.GUIAgent", null);
     }
     
     private ArrayList<IAgentArgs> createAircraftAgentsArgs()

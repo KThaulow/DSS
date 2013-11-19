@@ -59,6 +59,7 @@ public class AircraftAgent extends Agent {
             addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order (Cyclic)
             addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
             addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
+            addBehaviour(new AircraftStartBehaviour(this, 1000));
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
             System.out.println("No arguments specified specified");
