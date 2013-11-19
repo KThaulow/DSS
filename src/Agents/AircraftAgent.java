@@ -60,7 +60,7 @@ public class AircraftAgent extends Agent {
             infoListeners = new ArrayList<>();
 
             registerToDF();
-            addBehaviour(new CurrentAirportLocationRequestBehaviour()); // Request current airport location (Behaviour)
+            addBehaviour(new RequestStartAirportLocationBehaviour()); // Request current airport location (Behaviour)
 
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
@@ -98,9 +98,9 @@ public class AircraftAgent extends Agent {
     }
 
     /**
-     * Request departure and arrival airport location
+     * Request the location of the airport the aircraft was initialised to start in
      */
-    private class CurrentAirportLocationRequestBehaviour extends Behaviour {
+    private class RequestStartAirportLocationBehaviour extends Behaviour {
 
         private MessageTemplate mt; // The template to receive replies
         private ArrivalAirport step = ArrivalAirport.REQUEST_AIRPORT_LOCATION;
@@ -124,7 +124,7 @@ public class AircraftAgent extends Agent {
                     }
 
                     ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
-                    order.setConversationId(airportLocationAircraftConID);
+                    order.setConversationId(airportLocationConID);
                     order.setContent(myAgent.getName());
                     myAgent.send(order);
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
@@ -221,7 +221,7 @@ public class AircraftAgent extends Agent {
                     System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
                     travelledDistance = 0; // Reset traveled distance
 
-                    addBehaviour(new AircraftStartBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
+                    addBehaviour(new AircraftStartInformBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional");
@@ -237,9 +237,9 @@ public class AircraftAgent extends Agent {
     /**
      * Update aircraft location and inform about location, destination and speed
      */
-    private class AircraftStartBehaviour extends TickerBehaviour {
+    private class AircraftStartInformBehaviour extends TickerBehaviour {
 
-        public AircraftStartBehaviour(Agent a, long period) {
+        public AircraftStartInformBehaviour(Agent a, long period) {
             super(a, period);
         }
 
