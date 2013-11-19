@@ -15,7 +15,6 @@ import entities.agentargs.*;
 import entities.cost.SimpleCostModel;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
-import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import java.util.Arrays;
 import java.util.List;
@@ -172,21 +171,16 @@ public class AircraftAgent extends Agent {
         }
 
         @Override
-        protected void onTick() {            
-            
-            travelledDistance += speed / (aircraftStartTimerMs * MS_TO_HOUR);            
-//            Coord2D currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
-            
+        protected void onTick() {
 
             travelledDistance += speed / (aircraftStartTimerMs * MS_TO_HOUR);
             currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
+
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(aircraftStartConID);
-//            info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
-            info.setContent(10 + "," + 10 + "," + 50 + "," + 70 + "," + speed);
+            info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
+
             for (AID infoListener : infoListeners) {
-                System.out.println("reciver");
-                info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
                 info.addReceiver(infoListener);
             }
 
