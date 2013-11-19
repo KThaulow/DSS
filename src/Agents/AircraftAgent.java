@@ -121,12 +121,12 @@ public class AircraftAgent extends Agent {
                 arrivalAirportLocation = new Coord2D(arrivalX, arrivalY);
                 ACLMessage reply = msg.createReply();
 
-                SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirportLocation, speed, fuelBurnRate);
+                //SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirpor, travelledDistance, fuelBurnRate);
 
-                String response = cost + "";
+                //String response = cost + "";
 
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(response);
+                //reply.setContent(response);
 
                 myAgent.send(reply);
             } else {
