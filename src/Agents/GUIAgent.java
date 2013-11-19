@@ -154,22 +154,29 @@ public class GUIAgent extends Agent {
         
         @Override
         public void action() {
-            AID[] infoListeners;
+            AID[] aircrafts; 
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setType(typeOfGUIAgent); // Get departure airport AID
-            template.addServices(sd);            
-            
+            sd.setType(typeOfAirportAgent); // Get all airports
+            template.addServices(sd);
             try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                System.out.println("results.length " + results.length);
-                infoListeners = new AID[results.length]; 
-                for (int i = 0; i < results.length; i++) {
-                    infoListeners[i] = results[i].getName();
+                DFAgentDescription[] results = DFService.search(myAgent, template);                 
+                aircrafts = new AID[results.length];
+                for (int i = 0; i < results.length; ++i) {
+                    aircrafts[i] = results[i].getName();
                 }
-                System.out.println("GUI added as listener of aircraft info");
-            } catch (FIPAException ex) {
-                ex.printStackTrace();
+
+                // Sent message to airport
+                ACLMessage cfp = new ACLMessage(ACLMessage.REQUEST);                        
+                for (int i = 0; i < aircrafts.length; ++i) {
+                    System.out.println("Send message to all aircrafts");
+                    cfp.addReceiver(aircrafts[i]);
+                }
+                cfp.setConversationId(aircraftSubscriptionConID);
+                myAgent.send(cfp);
+
+                } catch (FIPAException fe) {
+                fe.printStackTrace();
             }
         }
     }

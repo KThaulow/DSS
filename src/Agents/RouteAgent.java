@@ -17,7 +17,6 @@ import static Utils.Settings.*;
 import entities.Coord2D;
 import entities.agentargs.*;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.TickerBehaviour;
 
 public class RouteAgent extends Agent {
 
@@ -269,7 +268,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent(departureAirport.toString()); // Send the departure airport
+                        cfp.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+soldTickets); // Send the departure airport and sold tickets
                         cfp.setConversationId(bestAircraftConID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
