@@ -62,7 +62,7 @@ public class AircraftAgent extends Agent {
             
             addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
             
-            addBehaviour(new AircraftStartBehaviour(this, 1000));
+            
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
             System.out.println("No arguments specified specified");
@@ -121,12 +121,12 @@ public class AircraftAgent extends Agent {
                 arrivalAirportLocation = new Coord2D(arrivalX, arrivalY);
                 ACLMessage reply = msg.createReply();
 
-                //SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirpor, travelledDistance, fuelBurnRate);
+                SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirportLocation, arrivalAirportLocation, travelledDistance, fuelBurnRate);
 
-                //String response = cost + "";
+                String response = cost + "";
 
                 reply.setPerformative(ACLMessage.PROPOSE);
-                //reply.setContent(response);
+                reply.setContent(response);
 
                 myAgent.send(reply);
             } else {
@@ -187,6 +187,7 @@ public class AircraftAgent extends Agent {
             info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
 
             for (AID infoListener : infoListeners) {
+                System.out.println("INFO sent to "+infoListener.getLocalName()+" with current location "+currentLocation.toString()+" and arrival "+arrivalAirportLocation.toString());
                 info.addReceiver(infoListener);
             }
 
@@ -205,6 +206,7 @@ public class AircraftAgent extends Agent {
             ACLMessage reply = myAgent.receive(mt);
             if (reply != null) {
                 infoListeners.add(reply.getSender());
+                System.out.println("Listener added "+reply.getSender());
             } else {
                 block();
                 System.out.println("No info listeners for aircraft " + myAgent.getLocalName());
@@ -216,6 +218,7 @@ public class AircraftAgent extends Agent {
     /**
      * Request departure and arrival airport location
      */
+    @Deprecated
     private class AirportLocationRequestBehaviour extends Behaviour {
 
         private MessageTemplate mt; // The template to receive replies
