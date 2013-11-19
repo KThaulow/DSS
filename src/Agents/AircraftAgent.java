@@ -12,7 +12,7 @@ import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
 import entities.Coord2D;
 import entities.agentargs.*;
-import entities.cost.SimpleCostModel;
+import entities.cost.*;
 import jade.core.AID;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -56,19 +56,12 @@ public class AircraftAgent extends Agent {
             System.out.println("Aircraft " + getAID().getLocalName() + " has speed " + speed);
             System.out.println("Aircraft " + getAID().getLocalName() + " has fuel burn rate " + fuelBurnRate);
             System.out.println("Aircraft " + getAID().getLocalName() + " has starting airport ID " + airportID);
-            
+
             infoListeners = new ArrayList<>();
 
             registerToDF();
-            addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request (Cyclic)
-            addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order (Cyclic)
+            addBehaviour(new CurrentAirportLocationRequestBehaviour()); // Request current airport location (Behaviour)
 
-            //addBehaviour(new AirportLocationRequestBehaviour()); // Request arrival airport location (Behaviour)
-            
-            System.out.println("Aircraft info listener added");
-            addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
-            
-            
             //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
         } else {
             System.out.println("No arguments specified specified");
@@ -105,6 +98,72 @@ public class AircraftAgent extends Agent {
     }
 
     /**
+     * Request departure and arrival airport location
+     */
+    private class CurrentAirportLocationRequestBehaviour extends Behaviour {
+
+        private MessageTemplate mt; // The template to receive replies
+        private ArrivalAirport step = ArrivalAirport.REQUEST_AIRPORT_LOCATION;
+        private AID currentAirport;
+
+        @Override
+        public void action() {
+            switch (step) {
+                case REQUEST_AIRPORT_LOCATION:
+                    DFAgentDescription template = new DFAgentDescription();
+                    ServiceDescription sd = new ServiceDescription();
+                    sd.setName(nameOfAirportAgent + airportID); // Get departure airport AID
+                    template.addServices(sd);
+
+                    try {
+                        DFAgentDescription[] results = DFService.search(myAgent, template);
+                        currentAirport = results[0].getName();
+                        System.out.println("Aircraft " + myAgent.getLocalName() + " has current airport agent " + currentAirport.getLocalName());
+                    } catch (FIPAException ex) {
+                        ex.printStackTrace();
+                    }
+
+                    ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
+                    order.setConversationId(airportLocationAircraftConID);
+                    order.setContent(myAgent.getName());
+                    myAgent.send(order);
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                    step = ArrivalAirport.GET_AIRPORT_LOCATION;
+                    break;
+
+                case GET_AIRPORT_LOCATION:
+                    ACLMessage reply = myAgent.receive(mt);
+                    if (reply != null) {
+                        // Location received
+                        String location = reply.getContent();
+                        List<String> items = Arrays.asList(location.split(","));
+                        currentLocation.X = Integer.parseInt(items.get(0));
+                        currentLocation.Y = Integer.parseInt(items.get(1));
+
+                        System.out.println("Coordinates for current airport " + currentAirport.toString() + " got for aircraft " + myAgent.getLocalName());
+
+                        step = ArrivalAirport.DONE;
+
+                    } else {
+                        block();
+                    }
+                    break;
+            }
+
+        }
+
+        @Override
+        public boolean done() {
+            if (step == ArrivalAirport.DONE) {
+                addBehaviour(new BestAircraftRequestsServerBehaviour()); // Serve the reschedule request (Cyclic)
+                addBehaviour(new BestAircraftOrderServerBehaviour()); // Serve the reschedule order (Cyclic)
+                addBehaviour(new InfoListenerRequestServerBehaviour()); // Serves requests for subscriptions for aircraft info (Cyclic)
+            }
+            return step == ArrivalAirport.DONE;
+        }
+    }
+
+    /**
      * Serves the reschedule request from the RouteAgent
      */
     private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
@@ -115,21 +174,23 @@ public class AircraftAgent extends Agent {
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
+                System.out.println("Best aircraft request served");
+                
                 // Message received. Process it
                 String content = msg.getContent();
                 List<String> items = Arrays.asList(content.split(","));
-                int departureX = Integer.parseInt(items.get(0));
-                int departureY = Integer.parseInt(items.get(1));
-                int arrivalX = Integer.parseInt(items.get(2));
-                int arrivalY = Integer.parseInt(items.get(3));
+                double departureX = Double.parseDouble(items.get(0));
+                double departureY = Double.parseDouble(items.get(1));
+                double arrivalX = Double.parseDouble(items.get(2));
+                double arrivalY = Double.parseDouble(items.get(3));
                 int soldTickets = Integer.parseInt(items.get(4));
                 departureAirportLocation = new Coord2D(departureX, departureY);
                 arrivalAirportLocation = new Coord2D(arrivalX, arrivalY);
                 ACLMessage reply = msg.createReply();
 
-                SimpleCostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirportLocation, arrivalAirportLocation, travelledDistance, fuelBurnRate);
+                ICostModel cost = new SimpleCostModel(soldTickets, capacity, currentLocation, departureAirportLocation, arrivalAirportLocation, travelledDistance, fuelBurnRate);
 
-                String response = cost + "";
+                String response = cost.calculateCost() + "";
 
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContent(response);
@@ -154,7 +215,7 @@ public class AircraftAgent extends Agent {
             if (msg != null) {
                 // Message received. Process it
                 ACLMessage reply = msg.createReply();
-
+                
                 if (aircraftFunctional) {
                     reply.setPerformative(ACLMessage.INFORM);
                     System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
@@ -193,7 +254,7 @@ public class AircraftAgent extends Agent {
             info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + speed);
 
             for (AID infoListener : infoListeners) {
-                System.out.println("INFO sent to "+infoListener.getLocalName()+" with current location "+currentLocation.toString()+" and arrival "+arrivalAirportLocation.toString());
+                System.out.println("INFO sent to " + infoListener.getLocalName() + " with current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
                 info.addReceiver(infoListener);
             }
 
@@ -212,7 +273,7 @@ public class AircraftAgent extends Agent {
             ACLMessage reply = myAgent.receive(mt);
             if (reply != null) {
                 infoListeners.add(reply.getSender());
-                System.out.println("Listener added "+reply.getSender()+" for aircraft agent "+myAgent.getLocalName());
+                System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
             } else {
                 block();
             }

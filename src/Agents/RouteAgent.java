@@ -60,12 +60,7 @@ public class RouteAgent extends Agent {
             registerToDF();
 
             addBehaviour(new RequestAssignedAirports()); // Request associated airports
-
-            //addBehaviour(new RequestAssignedAircraft()); // Request associated aircraft (No default associated aircraft right now)
             addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
-
-        
-
             addBehaviour(new AirportLocationRequestServerBehaviour()); // Serve arrival airport location request
 
         } else {
@@ -138,32 +133,6 @@ public class RouteAgent extends Agent {
     }
 
     /**
-     * One shot behaviour for getting associated aircraft
-     *
-     * (Not used right now because the route doesn't have a default aircraft)
-     */
-    @Deprecated
-    private class RequestAssignedAircraft extends OneShotBehaviour {
-
-        @Override
-        public void action() {
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setName(nameOfAircraftAgent + "aircraftID"); // Get departure airport AID
-            template.addServices(sd);
-
-            try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                aircraft = results[0].getName();
-                System.out.println("Route " + myAgent.getLocalName() + " has aircraft agent " + aircraft.getLocalName());
-            } catch (FIPAException ex) {
-                ex.printStackTrace();
-            }
-        }
-
-    }
-
-    /**
      * Behaviour for getting associated airports coordinates
      */
     private class RequestAirportLocationBehaviour extends Behaviour {
@@ -185,24 +154,28 @@ public class RouteAgent extends Agent {
                     myAgent.send(order);
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                     step = AirportLocation.GET_LOCATION;
+                    
                     break;
 
                 case GET_LOCATION:
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
+                        
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.INFORM) {
                             // Purchase succesful. We can terminate.
                             String location = reply.getContent();
                             int seperator = location.indexOf(',');
+                            
+                            System.out.println("Request airport location by route "+myAgent.getLocalName()+" Sender: "+reply.getSender().getLocalName());
 
-                            if (reply.getSender().equals(departureAirport)) {
+                            if (reply.getSender().getName().equals(departureAirport.getName())) {
                                 airportX = Integer.parseInt(location.substring(0, seperator));
                                 airportY = Integer.parseInt(location.substring(seperator + 1));
                                 departureAirportLocation = new Coord2D(airportX, airportY);
                                 System.out.println("Coordinates for departure airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
                                 airportCoordinatesReceived++;
-                            } else if (reply.getSender().equals(departureAirport)) {
+                            } else if (reply.getSender().getName().equals(arrivalAirport.getName())) {
                                 airportX = Integer.parseInt(location.substring(0, seperator));
                                 airportY = Integer.parseInt(location.substring(seperator + 1));
                                 arrivalAirportLocation = new Coord2D(airportX, airportY);
@@ -217,7 +190,6 @@ public class RouteAgent extends Agent {
 
                     } else {
                         block();
-                        System.out.println("No airport location reply received");
                     }
                     break;
             }
@@ -240,7 +212,7 @@ public class RouteAgent extends Agent {
     private class RequestBestAircraft extends Behaviour {
 
         private AID bestPlane; // The agent who provides the best offer
-        private int lowestCost; // The lowest cost
+        private double lowestCost; // The lowest cost
         private int repliesCnt = 0; // The counter of replies from plane agents
         private MessageTemplate mt; // The template to receive replies
         private BestAircraft step = BestAircraft.REQUEST_AIRCRAFT;
@@ -296,7 +268,7 @@ public class RouteAgent extends Agent {
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
-                            int cost = Integer.parseInt(reply.getContent());
+                            double cost = Double.parseDouble(reply.getContent());
                             if (bestPlane == null || cost < lowestCost) {
                                 // This is the best offer at present
                                 lowestCost = cost;
@@ -311,7 +283,6 @@ public class RouteAgent extends Agent {
                         }
 
                     } else {
-                        System.out.println("No proposals received");
                         block();
                     }
                     break;
@@ -344,7 +315,6 @@ public class RouteAgent extends Agent {
 
                     } else {
                         block();
-                        System.out.println("No reschedule order reply received");
                     }
                     break;
             }
