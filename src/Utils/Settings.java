@@ -18,6 +18,9 @@ public class Settings {
     public static final String typeOfGUIAgent = "GUI";
     public static final String nameOfGUIAgent = "GUIAgent";
     
+    public static final String typeOfStatisticsAgent = "Statistics";
+    public static final String nameOfStatisticsAgent = "StatisticsAgent";
+    
     public static final String airportLocationConID = "airportLocation";
     public static final String bestAircraftConID = "bestAircraft";
     public static final String aircraftStartConID = "aircraftInfo";
