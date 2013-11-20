@@ -59,9 +59,8 @@ public class RouteAgent extends Agent {
 
             registerToDF();
 
-            addBehaviour(new RequestAssignedAirports()); // Request associated airports
+            addBehaviour(new RequestAssignedAirportsBehaviour()); // Request associated airports
             addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
-            addBehaviour(new AirportLocationRequestServerBehaviour()); // Serve arrival airport location request
 
         } else {
             System.out.println("No arguments specified specified");
@@ -99,7 +98,7 @@ public class RouteAgent extends Agent {
     /**
      * One shot behaviour for getting associated airports
      */
-    private class RequestAssignedAirports extends OneShotBehaviour {
+    private class RequestAssignedAirportsBehaviour extends OneShotBehaviour {
 
         @Override
         public void action() {
@@ -304,7 +303,6 @@ public class RouteAgent extends Agent {
                     if (reply != null) {
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // Purchase succesful. We can terminate.
                             aircraft = bestPlane;
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;
@@ -328,27 +326,4 @@ public class RouteAgent extends Agent {
             return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.IDLE);
         }
     }
-
-    /**
-     * Serves request for arrival and departure airport location
-     */
-    private class AirportLocationRequestServerBehaviour extends CyclicBehaviour {
-
-        @Override
-        public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
-            ACLMessage reply = myAgent.receive(mt);
-            if (reply != null && reply.getContent().contentEquals(aircraft.getName())) {
-
-                ACLMessage order = new ACLMessage(ACLMessage.INFORM);
-                order.addReceiver(reply.getSender());
-                order.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+arrivalAirportLocation.X + "," + arrivalAirportLocation.Y);
-                myAgent.send(order);
-            } else {
-                block();
-            }
-        }
-    }
-
 }
