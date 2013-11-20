@@ -12,13 +12,14 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.util.Hashtable;
 import static Utils.Settings.*;
+import entities.Airport;
 import entities.agentargs.*;
 
 public class AirportAgent extends Agent {
 
-    int airportID;
-    int coordinateX;
-    int coordinateY;
+  
+    private Airport airport;
+    
     Hashtable<AID, String> aircrafts;
     
     @Override
@@ -29,13 +30,8 @@ public class AirportAgent extends Agent {
         AirportAgentArgs args = AirportAgentArgs.createAgentArgs(getArguments());
         
         if (args != null) {
-            airportID = args.getAirportID();
-            coordinateX = args.getCoordinateX();
-            coordinateY = args.getCoordinateY();
-             
+            airport = args.getAirport();
             registerToDF(); 
-            
-            addBehaviour(new LocationRequestsServerBehaviour());
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -48,7 +44,7 @@ public class AirportAgent extends Agent {
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
         sd.setType(typeOfAirportAgent);
-        sd.setName(nameOfAirportAgent+airportID);
+        sd.setName(nameOfAirportAgent+airport.toString());
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -68,32 +64,5 @@ public class AirportAgent extends Agent {
 
         System.out.println("Airport agent " + getAID().getName() + " terminating");
     }
-     
     
-    /**
-     * Serves the location request
-     */
-    private class LocationRequestsServerBehaviour extends CyclicBehaviour {
-
-        @Override
-        public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
-            ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
-
-                ACLMessage reply = msg.createReply();
-                
-                String response = coordinateX + "," + coordinateY;
-
-                reply.setConversationId(airportLocationConID);
-                reply.setPerformative(ACLMessage.INFORM);
-                reply.setContent(response);
-
-                myAgent.send(reply);
-            } else {
-                block();
-            }
-        }
-    }
 }

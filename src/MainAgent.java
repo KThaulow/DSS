@@ -1,9 +1,13 @@
 
+import entities.Airport;
 import jade.core.Agent;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import entities.agentargs.*;
 import java.util.ArrayList;
+import java.util.Date;
+import mediator.AircraftManager;
+import mediator.AirportManager;
 
 public class MainAgent extends Agent
 {
@@ -33,15 +37,15 @@ public class MainAgent extends Agent
      */
     private void setupAllAgents()
     {   
-        ArrayList<IAgentArgs> aircraftAgentArgs = createAircraftAgentsArgs();
         ArrayList<IAgentArgs> airportAgentArgs = createAirportAgentsArgs();
+        ArrayList<IAgentArgs> aircraftAgentArgs = createAircraftAgentsArgs();
         ArrayList<IAgentArgs> routeAgentArgs = createRouteAgentArgs();
-        
-        for(int i = 0; i < aircraftAgentArgs.size(); i++)
-            createAgent("acAgent"+i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         
         for(int i = 0; i < airportAgentArgs.size(); i++)
             createAgent("apAgent"+i, "Agents.AirportAgent", airportAgentArgs.get(i));
+        
+        for(int i = 0; i < aircraftAgentArgs.size(); i++)
+            createAgent("acAgent"+i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         
         for(int i = 0; i < routeAgentArgs.size(); i++)
             createAgent("rAgent"+i, "Agents.RouteAgent", routeAgentArgs.get(i));
@@ -52,9 +56,9 @@ public class MainAgent extends Agent
     private ArrayList<IAgentArgs> createAircraftAgentsArgs()
     {
         ArrayList<IAgentArgs> acAgentArgs = new ArrayList<>();
-        acAgentArgs.add(new AircraftAgentArgs(0, 100, 1000, 500, 1));
-        acAgentArgs.add(new AircraftAgentArgs(1, 100, 1000, 500, 2));
-        acAgentArgs.add(new AircraftAgentArgs(2, 100, 1000, 500, 3));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirprot("EKCH")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly"), AirportManager.getInstance().getAirprot("ENGM")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly"), AirportManager.getInstance().getAirprot("EDDF")));
         
         return acAgentArgs;
     }
@@ -62,18 +66,25 @@ public class MainAgent extends Agent
     private ArrayList<IAgentArgs> createAirportAgentsArgs()
     {
         ArrayList<IAgentArgs> airportAgentArgs = new ArrayList<>();
-        airportAgentArgs.add(new AirportAgentArgs(0, 2, 3));
-        airportAgentArgs.add(new AirportAgentArgs(1, 5, 6));
-        airportAgentArgs.add(new AirportAgentArgs(2, 8, 10));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirprot("EKCH")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirprot("ENGM")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirprot("EDDF")));
         
         return airportAgentArgs;
     }
     
     private ArrayList<IAgentArgs> createRouteAgentArgs()
     {
-        ArrayList<IAgentArgs> routeAgentArgs = new ArrayList<>();
-        routeAgentArgs.add(new RouteAgentArgs(0, 1, 2, 50));
         
+        long now = new Date().getTime();
+        ArrayList<IAgentArgs> routeAgentArgs = new ArrayList<>();
+        
+        Airport depAirport = AirportManager.getInstance().getAirprot("EKCH");
+        Airport arrAirport = AirportManager.getInstance().getAirprot("EKCH");
+        Date earliestArrival = new Date(now + 3600 * 1000);
+        Date latest = new Date(now + 3600 * 4 * 1000);
+        routeAgentArgs.add(new RouteAgentArgs(0, 150, depAirport, arrAirport, earliestArrival, latest));
+       
         return routeAgentArgs;
     }
     
