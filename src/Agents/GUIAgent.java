@@ -17,6 +17,7 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import gui.GUIMapInterface;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 /**
@@ -31,15 +32,17 @@ public class GUIAgent extends Agent {
     }
     
     GUIInterface guiInterface; // The gui interface
+    GUIMapInterface guiMapInterface; 
     
     @Override
     protected void setup() {
-        guiInterface = new GUIInterface();
+//        guiInterface = new GUIInterface();
+        guiMapInterface = new GUIMapInterface(); 
         registerToDF();
         System.out.println("Setup gui agent");
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
-        addBehaviour(new RequestAirports());
+//        addBehaviour(new RequestAirports());        
         System.out.println("Request info listener added");
         addBehaviour(new RequestInfoListenerBehaviour());
         addBehaviour(new GetInfoFromAircraftBehaviour());
@@ -114,7 +117,7 @@ public class GUIAgent extends Agent {
                     break; 
                     
                 case GET_COORDINATES_FROM_AIRPORTS: 
-                    System.out.println("GET_COORDINATES_FROM_AIRPORTS");
+                    System.out.println("GET_COORDINATES_FROM_AIRPORTS");                    
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {                        
                         // Reply received
@@ -124,7 +127,7 @@ public class GUIAgent extends Agent {
                             System.out.println("The coordinates are " + reply.getContent()); 
                             String[] coordinates = reply.getContent().split(",");
                             System.out.println("coordinates " + coordinates[0] + " " + coordinates[1]);
-                            guiInterface.drawAirport(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[0]), reply.getSender().getName());
+//                            guiInterface.drawAirport(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[0]), reply.getSender().getName());
                             repliesCnt++;
                         }
                         

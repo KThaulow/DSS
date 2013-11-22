@@ -55,6 +55,7 @@ public class AircraftAgent extends Agent {
             addBehaviour(new BestAircraftRequestsServerBehaviour()); 
             addBehaviour(new BestAircraftOrderServerBehaviour()); 
             addBehaviour(new InfoListenerRequestServerBehaviour()); 
+            
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -147,7 +148,7 @@ public class AircraftAgent extends Agent {
                     System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
                     travelledDistance = 0; // Reset traveled distance
 
-                    addBehaviour(new AircraftStartInformBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
+                    
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional");
@@ -183,6 +184,7 @@ public class AircraftAgent extends Agent {
                 System.out.println("INFO sent to " + infoListener.getLocalName() + " with current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
                 info.addReceiver(infoListener);
             }
+            System.out.println("AircraftStartInformBehaviour send aircraft coordinates");
 
             myAgent.send(info);
         }
@@ -200,6 +202,7 @@ public class AircraftAgent extends Agent {
             if (reply != null) {
                 infoListeners.add(reply.getSender());
                 System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
+                addBehaviour(new AircraftStartInformBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
             } else {
                 block();
             }
