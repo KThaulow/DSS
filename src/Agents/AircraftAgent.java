@@ -20,10 +20,11 @@ import jade.core.behaviours.TickerBehaviour;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import mediator.AirportManager;
 
 public class AircraftAgent extends Agent {
 
-    private Airport currentAirport;     
+    private Airport currentAirport, departureAirport, arrivalAirport;    
     private double travelledDistance;
     private Coord2D departureAirportLocation, arrivalAirportLocation, currentLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route
@@ -108,13 +109,12 @@ public class AircraftAgent extends Agent {
                 // Message received. Process it
                 String content = msg.getContent();
                 List<String> items = Arrays.asList(content.split(","));
-                double departureX = Double.parseDouble(items.get(0));
-                double departureY = Double.parseDouble(items.get(1));
-                double arrivalX = Double.parseDouble(items.get(2));
-                double arrivalY = Double.parseDouble(items.get(3));
-                int soldTickets = Integer.parseInt(items.get(4));
-                departureAirportLocation = new Coord2D(departureX, departureY);
-                arrivalAirportLocation = new Coord2D(arrivalX, arrivalY);
+                String departureICAO = items.get(0);
+                String arrivalICAO = items.get(1);
+                int soldTickets = Integer.parseInt(items.get(2));
+                departureAirport = AirportManager.getInstance().getAirprot(departureICAO);
+                arrivalAirport = AirportManager.getInstance().getAirprot(arrivalICAO);
+                
                 ACLMessage reply = msg.createReply();
 
                 ICostModel cost = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
@@ -175,9 +175,9 @@ public class AircraftAgent extends Agent {
         @Override
         protected void onTick() {
 
-            travelledDistance += aircraft.getSpeed() / (AIRCRAFT_START_TIMER_MS * MS_TO_HOUR);
+            travelledDistance += aircraft.getSpeed() / (MS_TO_HOUR / AIRCRAFT_START_TIMER_MS );
             currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
-
+            
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(AIRCRAFT_START_CON_ID);
             info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + aircraft.getSpeed());
@@ -186,7 +186,12 @@ public class AircraftAgent extends Agent {
                 System.out.println("INFO sent to " + infoListener.getLocalName() + " with current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
                 info.addReceiver(infoListener);
             }
-            System.out.println("AircraftStartInformBehaviour send aircraft coordinates");
+            
+            if(currentLocation.equals(arrivalAirportLocation)){
+                System.out.println("Aircraft "+myAgent.getLocalName()+ " with current location " + currentLocation.toString() + " has arrived at its airport");
+                currentAirport = arrivalAirport;
+                stop();
+            }
 
             myAgent.send(info);
         }
