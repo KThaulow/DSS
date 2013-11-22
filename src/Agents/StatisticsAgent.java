@@ -18,6 +18,12 @@ public class StatisticsAgent extends Agent{
         registerToDF();
 
     }
+    
+    // Free seats
+    // Off loaded passengers
+    // Overall cost
+    
+    // Comma seperated
 
     private void registerToDF() {
         // Register the plane service in the yellow pages
