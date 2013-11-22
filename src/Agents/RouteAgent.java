@@ -14,11 +14,15 @@ import jade.lang.acl.MessageTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import static Utils.Settings.*;
+import entities.Airport;
 import entities.Coord2D;
 import entities.agentargs.*;
 import jade.core.behaviours.CyclicBehaviour;
+import java.util.Date;
 
 public class RouteAgent extends Agent {
+    private Date earliestArrivalTime;
+    private Date latestArrivalTime;
 
     private enum BestAircraft {
 
@@ -31,12 +35,11 @@ public class RouteAgent extends Agent {
     }
 
     private int routeID;
-    private AID departureAirport;
-    private AID arrivalAirport;
+//    private AID departureAirportAgentId;
+//    private AID arrivalAirportAgentId;
     private AID aircraft;
     private int soldTickets;
-    private int departureAirportID, arrivalAirportID;
-    private Coord2D departureAirportLocation, arrivalAirportLocation;
+    private Airport departureAirport, arrivalAirport;
     private int routeDistance;
 
     @Override
@@ -48,20 +51,18 @@ public class RouteAgent extends Agent {
 
         if (args != null) {
             routeID = args.getRouteID();
-            departureAirportID = args.getDepartureAirportID();
-            arrivalAirportID = args.getDestinationAirportID();
+            departureAirport = args.getDepartureAirport();
+            arrivalAirport = args.getArrivalAirport();
             soldTickets = args.getNumOfPassengers();
-
-            System.out.println("Route " + getAID().getLocalName() + " has ID " + routeID);
-            System.out.println("Route " + getAID().getLocalName() + " has departure airport " + departureAirportID);
-            System.out.println("Route " + getAID().getLocalName() + " has arrival airport " + arrivalAirportID);
-            System.out.println("Route " + getAID().getLocalName() + " has " + soldTickets + " sold tickets");
-
+            earliestArrivalTime = args.getEarliestArrivalTime();
+            latestArrivalTime = args.getLatestArrivalTime();
+           
             registerToDF();
 
-            addBehaviour(new RequestAssignedAirports()); // Request associated airports
-            addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
-            addBehaviour(new AirportLocationRequestServerBehaviour()); // Serve arrival airport location request
+//            addBehaviour(new RequestAssignedAirportsBehaviour()); // Request associated airports
+//            addBehaviour(new RequestAirportLocationBehaviour()); // Request associated airports locations
+            
+            addBehaviour(new RequestBestAircraft());
 
         } else {
             System.out.println("No arguments specified specified");
@@ -95,115 +96,115 @@ public class RouteAgent extends Agent {
 
         System.out.println("Route agent " + getAID().getName() + " terminating");
     }
+//
+//    /**
+//     * One shot behaviour for getting associated airports
+//     */
+//    private class RequestAssignedAirportsBehaviour extends OneShotBehaviour {
+//
+//        @Override
+//        public void action() {
+//            // Template for getting all aircraft agent
+//            DFAgentDescription template = new DFAgentDescription();
+//            ServiceDescription sd = new ServiceDescription();
+//            sd.setName(nameOfAirportAgent + departureAirportID); // Get departure airport AID
+//            template.addServices(sd);
+//
+//            try {
+//                DFAgentDescription[] results = DFService.search(myAgent, template);
+//                departureAirportAgentId = results[0].getName();
+//                System.out.println("Route " + myAgent.getLocalName() + " has departure airport agent " + departureAirportAgentId.getLocalName());
+//            } catch (FIPAException ex) {
+//                ex.printStackTrace();
+//            }
+//
+//            template = new DFAgentDescription();
+//            sd = new ServiceDescription();
+//            sd.setName(nameOfAirportAgent + arrivalAirportID); // Get arrival airport AID
+//            template.addServices(sd);
+//
+//            try {
+//                DFAgentDescription[] results = DFService.search(myAgent, template);
+//                arrivalAirportAgentId = results[0].getName();
+//                System.out.println("Route " + myAgent.getLocalName() + " has arrival airport agent " + arrivalAirportAgentId.getLocalName());
+//            } catch (FIPAException ex) {
+//                ex.printStackTrace();
+//            }
+//        }
+//    }
 
-    /**
-     * One shot behaviour for getting associated airports
-     */
-    private class RequestAssignedAirports extends OneShotBehaviour {
-
-        @Override
-        public void action() {
-            // Template for getting all aircraft agent
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setName(nameOfAirportAgent + departureAirportID); // Get departure airport AID
-            template.addServices(sd);
-
-            try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                departureAirport = results[0].getName();
-                System.out.println("Route " + myAgent.getLocalName() + " has departure airport agent " + departureAirport.getLocalName());
-            } catch (FIPAException ex) {
-                ex.printStackTrace();
-            }
-
-            template = new DFAgentDescription();
-            sd = new ServiceDescription();
-            sd.setName(nameOfAirportAgent + arrivalAirportID); // Get arrival airport AID
-            template.addServices(sd);
-
-            try {
-                DFAgentDescription[] results = DFService.search(myAgent, template);
-                arrivalAirport = results[0].getName();
-                System.out.println("Route " + myAgent.getLocalName() + " has arrival airport agent " + arrivalAirport.getLocalName());
-            } catch (FIPAException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
-
-    /**
-     * Behaviour for getting associated airports coordinates
-     */
-    private class RequestAirportLocationBehaviour extends Behaviour {
-
-        private AirportLocation step = AirportLocation.REQUEST_AIRPORT_LOCATION;
-        private MessageTemplate mt; // The template to receive replies
-        private int airportCoordinatesReceived = 0;
-        private int airportX, airportY;
-
-        @Override
-        public void action() {
-            switch (step) {
-                case REQUEST_AIRPORT_LOCATION:
-
-                    ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
-                    order.addReceiver(departureAirport);
-                    order.addReceiver(arrivalAirport);
-                    order.setConversationId(airportLocationConID);
-                    myAgent.send(order);
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-                    step = AirportLocation.GET_LOCATION;
-                    
-                    break;
-
-                case GET_LOCATION:
-                    ACLMessage reply = myAgent.receive(mt);
-                    if (reply != null) {
-                        
-                        // Reschedule order reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // Purchase succesful. We can terminate.
-                            String location = reply.getContent();
-                            int seperator = location.indexOf(',');
-                            
-                            System.out.println("Request airport location by route "+myAgent.getLocalName()+" Sender: "+reply.getSender().getLocalName());
-
-                            if (reply.getSender().getName().equals(departureAirport.getName())) {
-                                airportX = Integer.parseInt(location.substring(0, seperator));
-                                airportY = Integer.parseInt(location.substring(seperator + 1));
-                                departureAirportLocation = new Coord2D(airportX, airportY);
-                                System.out.println("Coordinates for departure airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
-                                airportCoordinatesReceived++;
-                            } else if (reply.getSender().getName().equals(arrivalAirport.getName())) {
-                                airportX = Integer.parseInt(location.substring(0, seperator));
-                                airportY = Integer.parseInt(location.substring(seperator + 1));
-                                arrivalAirportLocation = new Coord2D(airportX, airportY);
-                                System.out.println("Coordinates for arrival airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
-                                airportCoordinatesReceived++;
-                            }
-                            if (airportCoordinatesReceived >= 2) {
-                                routeDistance = (int) LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportLocation, arrivalAirportLocation);
-                                step = AirportLocation.DONE;
-                            }
-                        }
-
-                    } else {
-                        block();
-                    }
-                    break;
-            }
-        }
-
-        @Override
-        public boolean done() {
-            if(step == AirportLocation.DONE){
-                addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
-            }
-            return step == AirportLocation.DONE;
-        }
-
-    }
+//    /**
+//     * Behaviour for getting associated airports coordinates
+//     */
+//    private class RequestAirportLocationBehaviour extends Behaviour {
+//
+//        private AirportLocation step = AirportLocation.REQUEST_AIRPORT_LOCATION;
+//        private MessageTemplate mt; // The template to receive replies
+//        private int airportCoordinatesReceived = 0;
+//        private int airportX, airportY;
+//
+//        @Override
+//        public void action() {
+//            switch (step) {
+//                case REQUEST_AIRPORT_LOCATION:
+//
+//                    ACLMessage order = new ACLMessage(ACLMessage.REQUEST);
+//                    order.addReceiver(departureAirportAgentId);
+//                    order.addReceiver(arrivalAirportAgentId);
+//                    order.setConversationId(airportLocationConID);
+//                    myAgent.send(order);
+//                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+//                    step = AirportLocation.GET_LOCATION;
+//                    
+//                    break;
+//
+//                case GET_LOCATION:
+//                    ACLMessage reply = myAgent.receive(mt);
+//                    if (reply != null) {
+//                        
+//                        // Reschedule order reply received
+//                        if (reply.getPerformative() == ACLMessage.INFORM) {
+//                            // Purchase succesful. We can terminate.
+//                            String location = reply.getContent();
+//                            int seperator = location.indexOf(',');
+//                            
+//                            System.out.println("Request airport location by route "+myAgent.getLocalName()+" Sender: "+reply.getSender().getLocalName());
+//
+//                            if (reply.getSender().getName().equals(departureAirportAgentId.getName())) {
+//                                airportX = Integer.parseInt(location.substring(0, seperator));
+//                                airportY = Integer.parseInt(location.substring(seperator + 1));
+//                                departureAirportLocation = new Coord2D(airportX, airportY);
+//                                System.out.println("Coordinates for departure airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
+//                                airportCoordinatesReceived++;
+//                            } else if (reply.getSender().getName().equals(arrivalAirportAgentId.getName())) {
+//                                airportX = Integer.parseInt(location.substring(0, seperator));
+//                                airportY = Integer.parseInt(location.substring(seperator + 1));
+//                                arrivalAirportLocation = new Coord2D(airportX, airportY);
+//                                System.out.println("Coordinates for arrival airport " + reply.getSender().getLocalName() + " got for route " + myAgent.getLocalName());
+//                                airportCoordinatesReceived++;
+//                            }
+//                            if (airportCoordinatesReceived >= 2) {
+//                                routeDistance = (int) LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportLocation, arrivalAirportLocation);
+//                                step = AirportLocation.DONE;
+//                            }
+//                        }
+//
+//                    } else {
+//                        block();
+//                    }
+//                    break;
+//            }
+//        }
+//
+//        @Override
+//        public boolean done() {
+//            if(step == AirportLocation.DONE){
+//                addBehaviour(new RequestBestAircraft()); // Request reschedule of flight
+//            }
+//            return step == AirportLocation.DONE;
+//        }
+//
+//    }
 
     /**
      * This is the complex behaviour used to request aircraft agents to be
@@ -243,7 +244,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+arrivalAirportLocation.X+","+arrivalAirportLocation.Y+","+soldTickets); // Send the departure airport and sold tickets
+                        cfp.setContent(departureAirport.getLocation().X+","+departureAirport.getLocation().Y+","+arrivalAirport.getLocation().X+","+arrivalAirport.getLocation().Y+","+soldTickets); // Send the departure airport and sold tickets
                         cfp.setConversationId(bestAircraftConID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
@@ -304,7 +305,6 @@ public class RouteAgent extends Agent {
                     if (reply != null) {
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // Purchase succesful. We can terminate.
                             aircraft = bestPlane;
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;
@@ -328,27 +328,4 @@ public class RouteAgent extends Agent {
             return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.IDLE);
         }
     }
-
-    /**
-     * Serves request for arrival and departure airport location
-     */
-    private class AirportLocationRequestServerBehaviour extends CyclicBehaviour {
-
-        @Override
-        public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
-            ACLMessage reply = myAgent.receive(mt);
-            if (reply != null && reply.getContent().contentEquals(aircraft.getName())) {
-
-                ACLMessage order = new ACLMessage(ACLMessage.INFORM);
-                order.addReceiver(reply.getSender());
-                order.setContent(departureAirportLocation.X+","+departureAirportLocation.Y+","+arrivalAirportLocation.X + "," + arrivalAirportLocation.Y);
-                myAgent.send(order);
-            } else {
-                block();
-            }
-        }
-    }
-
 }

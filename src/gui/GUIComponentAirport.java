@@ -7,21 +7,22 @@
 package GUI;
 
 import java.awt.Point;
+import java.awt.geom.Point2D;
 
 /**
  *
  * @author Fuglsang
  */
 public class GUIComponentAirport {
-    private Point airportCoordinates;
+    private Point2D.Double airportCoordinates;
     private String airportName; 
     
-    public GUIComponentAirport(Point coordinates, String airportName) {
+    public GUIComponentAirport(Point2D.Double coordinates, String airportName) {
         airportCoordinates = coordinates; 
         this.airportName = airportName; 
     }
     
-    public Point airportCoordinates() {
+    public Point2D.Double airportCoordinates() {
         return airportCoordinates; 
     }
     
