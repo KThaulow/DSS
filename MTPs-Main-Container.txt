@@ -1,1 +1,1 @@
-http://10.126.21.178:7778/acc
+http://Kristian-Yoga:7778/acc

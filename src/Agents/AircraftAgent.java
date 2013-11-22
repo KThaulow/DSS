@@ -114,6 +114,8 @@ public class AircraftAgent extends Agent {
                 int soldTickets = Integer.parseInt(items.get(2));
                 departureAirport = AirportManager.getInstance().getAirprot(departureICAO);
                 arrivalAirport = AirportManager.getInstance().getAirprot(arrivalICAO);
+                departureAirportLocation = departureAirport.getLocation();
+                arrivalAirportLocation = arrivalAirport.getLocation();
                 
                 ACLMessage reply = msg.createReply();
 
@@ -183,12 +185,12 @@ public class AircraftAgent extends Agent {
             info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + aircraft.getSpeed());
 
             for (AID infoListener : infoListeners) {
-                System.out.println("INFO sent to " + infoListener.getLocalName() + " with current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
+                System.out.println("INFO for "+myAgent.getLocalName()+ " sent to " + infoListener.getLocalName() + " with current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
                 info.addReceiver(infoListener);
             }
             
             if(currentLocation.equals(arrivalAirportLocation)){
-                System.out.println("Aircraft "+myAgent.getLocalName()+ " with current location " + currentLocation.toString() + " has arrived at its airport");
+                System.out.println("Aircraft "+myAgent.getLocalName()+ " with current location " + currentLocation.toString() + " has arrived at "+arrivalAirport.getName()+" airport");
                 currentAirport = arrivalAirport;
                 stop();
             }
@@ -209,7 +211,6 @@ public class AircraftAgent extends Agent {
             if (reply != null) {
                 infoListeners.add(reply.getSender());
                 System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
-                addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
             } else {
                 block();
             }
