@@ -30,5 +30,5 @@ public class Settings {
     public static final int NUMBER_OF_AIRPORT_AGENTS = 3;
     public static final int NUMBER_OF_ROUTE_AGENTS = 1;    
     
-    public static final int MS_TO_HOUR = 3600000;
+    public static final long MS_TO_HOUR = 3600000;
 }
