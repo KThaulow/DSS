@@ -16,7 +16,6 @@ import entities.Coord2D;
 import entities.agentargs.*;
 import entities.cost.*;
 import jade.core.AID;
-import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.TickerBehaviour;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,7 +23,7 @@ import java.util.List;
 
 public class AircraftAgent extends Agent {
 
-    private Airport currentAirport;
+    private Airport currentAirport;     
     private double travelledDistance;
     private Coord2D departureAirportLocation, arrivalAirportLocation, currentLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route
@@ -53,7 +52,9 @@ public class AircraftAgent extends Agent {
 
             registerToDF();
 
-            //addBehaviour(new AircraftDataInformBehaviour(this, aircraftInfoTimerMs)); // Informs listeners about the aircrafts data (location, speed, destination)
+            addBehaviour(new BestAircraftRequestsServerBehaviour()); 
+            addBehaviour(new BestAircraftOrderServerBehaviour()); 
+            addBehaviour(new InfoListenerRequestServerBehaviour()); 
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
