@@ -36,6 +36,7 @@ public class AircraftAgentArgs implements IAgentArgs
     public AircraftAgentArgs(Aircraft aircraft, Airport airport)
     {
         this.airport = airport;
+        this.aircraft = aircraft;
     }
     
     /**

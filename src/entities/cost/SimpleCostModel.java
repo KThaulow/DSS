@@ -29,6 +29,16 @@ public class SimpleCostModel implements ICostModel
     private final double TOTAL_EET_FACTOR = 12;
     private final double FUEL_CONSUMPTION_FACTOR = 9.8;
     
+    /**
+     * Constructs a very simple proof-of-concept cost model.
+     * @param numOfPassengers The number of passengers (sold tickets)
+     * @param acCapacity The total number of seats in the aircraft.
+     * @param currentAcPos To current position of the aircraft.
+     * @param depPos The coordinates of the departure airport.
+     * @param destPos The coordinates of the destination airport.
+     * @param acSpeed The speed of the aircraft. 
+     * @param fuelBurnRate Fuel consumption per time unit.
+     */
     public SimpleCostModel(int numOfPassengers, int acCapacity, Coord2D currentAcPos, Coord2D depPos, Coord2D destPos, double acSpeed, double fuelBurnRate)
     {
         this.numOfPassengers = numOfPassengers;
@@ -49,8 +59,15 @@ public class SimpleCostModel implements ICostModel
     public double calculateCost()
     {
         int numOfEmptySeats = aircraftCapacity - numOfPassengers;
-        double distToDepAirport = LinearCoordCalculator.INSTANCE.calculateDistance(currentAircraftPosition, departureAirportPosition);
-        double distToDestAirport = LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportPosition, destinationAirportPosition);
+        double distToDepAirport = 0;
+        double distToDestAirport = 0;
+        
+        if(currentAircraftPosition != null && departureAirportPosition != null)
+            distToDepAirport = LinearCoordCalculator.INSTANCE.calculateDistance(currentAircraftPosition, departureAirportPosition);
+        
+        if(departureAirportPosition != null && destinationAirportPosition != null)
+            distToDestAirport = LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportPosition, destinationAirportPosition);
+        
         double totalEET = distToDepAirport/aircraftSpeed;
         double fuelConsumption = fuelBurnRate * (distToDepAirport + distToDestAirport);
         

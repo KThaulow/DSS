@@ -106,8 +106,11 @@ public class RouteAgentArgs implements IAgentArgs
     private RouteAgentArgs(Object[] args)
     {
         routeID = (int)args[0];
-
+        departureAirport = (Airport)args[1];
+        arrivalAirport = (Airport)args[2];
         numOfPassengers = (int)args[3];
+        earliestArrivalTime = (Date)args[4];
+        latestArrivalTime = (Date)args[5];
     }
     
     /**
