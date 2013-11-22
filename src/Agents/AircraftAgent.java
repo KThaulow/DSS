@@ -204,7 +204,7 @@ public class AircraftAgent extends Agent {
             if (reply != null) {
                 infoListeners.add(reply.getSender());
                 System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
-                addBehaviour(new AircraftStartInformBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
+                addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
             } else {
                 block();
             }

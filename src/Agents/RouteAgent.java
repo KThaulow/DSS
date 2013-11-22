@@ -129,7 +129,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < aircrafts.length; ++i) {
                             cfp.addReceiver(aircrafts[i]);
                         }
-                        cfp.setContent(departureAirport.getLocation().X+","+departureAirport.getLocation().Y+","+arrivalAirport.getLocation().X+","+arrivalAirport.getLocation().Y+","+soldTickets); // Send the departure airport and sold tickets
+                        cfp.setContent(departureAirport.getIcao() + "," + arrivalAirport.getIcao() + "," + soldTickets); // Send the departure airport and sold tickets
                         cfp.setConversationId(BEST_AIRCRAFT_CON_ID);
                         //cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
