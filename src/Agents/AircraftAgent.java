@@ -47,6 +47,8 @@ public class AircraftAgent extends Agent {
 
             aircraft = acAgentArgs.getAircraft();
             currentAirport = acAgentArgs.getAirport();
+            currentLocation = currentAirport.getLocation();
+            aircraftFunctional = true;
             
             infoListeners = new ArrayList<>();
 
@@ -114,7 +116,7 @@ public class AircraftAgent extends Agent {
                 arrivalAirportLocation = new Coord2D(arrivalX, arrivalY);
                 ACLMessage reply = msg.createReply();
 
-                ICostModel cost = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, travelledDistance, aircraft.getFuelBurnRate());
+                ICostModel cost = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
 
                 String response = cost.calculateCost() + "";
 

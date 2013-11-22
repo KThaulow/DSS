@@ -101,10 +101,10 @@ public class RouteAgent extends Agent {
         private MessageTemplate mt; // The template to receive replies
         private BestAircraft step = BestAircraft.REQUEST_AIRCRAFT;
         private List<AID> unavailableAircrafts = new ArrayList<>();
+        private int numberOfAircrafts = 0;
 
         @Override
         public void action() {
-            int planes = 0;
             AID[] aircrafts;
 
             switch (step) {
@@ -113,7 +113,7 @@ public class RouteAgent extends Agent {
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType("aircraft"); // Get all aircrafts
+                    sd.setType(TYPE_OF_AIRCRAFT_AGENT); // Get all aircrafts
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
@@ -121,6 +121,8 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < results.length; ++i) {
                             aircrafts[i] = results[i].getName();
                         }
+                        
+                        numberOfAircrafts = aircrafts.length;
 
                         // Sent message to airport
                         ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
@@ -129,10 +131,10 @@ public class RouteAgent extends Agent {
                         }
                         cfp.setContent(departureAirport.getLocation().X+","+departureAirport.getLocation().Y+","+arrivalAirport.getLocation().X+","+arrivalAirport.getLocation().Y+","+soldTickets); // Send the departure airport and sold tickets
                         cfp.setConversationId(BEST_AIRCRAFT_CON_ID);
-                        cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
+                        //cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
                         step = BestAircraft.GET_PROPOSAL_FROM_AIRCRAFTS;
 
                         System.out.println("CFP for best fitted aircraft send to all aircrafts");
@@ -161,7 +163,7 @@ public class RouteAgent extends Agent {
                             System.out.println("Proposals received from " + reply.getSender().getName() + " with cost " + cost);
                         }
                         repliesCnt++;
-                        if (repliesCnt >= planes) {
+                        if (repliesCnt >= numberOfAircrafts) {
                             // We received all replies
                             step = BestAircraft.ORDER_AIRCRAFT;
                         }
