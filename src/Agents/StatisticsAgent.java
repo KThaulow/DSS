@@ -18,14 +18,20 @@ public class StatisticsAgent extends Agent{
         registerToDF();
 
     }
+    
+    // Free seats
+    // Off loaded passengers
+    // Overall cost
+    
+    // Comma seperated
 
     private void registerToDF() {
         // Register the plane service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfStatisticsAgent);
-        sd.setName(nameOfStatisticsAgent);
+        sd.setType(TYPE_OF_STATISTICS_AGENT);
+        sd.setName(NAME_OF_STATISTICS_AGENT);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);

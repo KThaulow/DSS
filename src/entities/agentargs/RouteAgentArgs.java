@@ -8,7 +8,6 @@ package entities.agentargs;
 
 import entities.Airport;
 import java.util.Date;
-import javax.print.attribute.standard.NumberOfDocuments;
 
 /**
  * Represents a container of arguments for the RouteAgent.
@@ -20,11 +19,6 @@ public class RouteAgentArgs implements IAgentArgs
     private Airport departureAirport, arrivalAirport;
     private Date earliestArrivalTime, latestArrivalTime;
     
-    
-    /**
-     * Constructs an empty instance of the RouteAgentArgs.
-     * Please remember to initialize the public arguments of this instance.
-     */
     public RouteAgentArgs() {}
 
     public RouteAgentArgs(int routeID, int numOfPassengers, Airport departureAirport, Airport arrivalAirport, Date earliestArrivalTime, Date latestArrivalTime) {
@@ -36,12 +30,6 @@ public class RouteAgentArgs implements IAgentArgs
         this.latestArrivalTime = latestArrivalTime;
     }
     
-    /**
-     * Constructs an instance of RouteAgentArgs using the given args.
-     * @param args An array containing the arguments as objects.
-     * 0) routeID, 1) departureAirportID, 2) destinationAirportID, 3) aircraftID, 4) numOfPassengers.
-     * @return A RouteAgentArgs instance representing the arguments for the RouteAgent.
-     */
     public static RouteAgentArgs createAgentArgs(Object[] args)
     {
         
@@ -113,11 +101,6 @@ public class RouteAgentArgs implements IAgentArgs
         latestArrivalTime = (Date)args[5];
     }
     
-    /**
-     * Inserts the RouteAgent arguments into an array as objects.
-     * 0) routeID, 1) departureAirportID, 2) destinationAirportID, 3) aircraftID, 4) numOfPassengers.
-     * @return An array of objects representing the arguments of the RouteAgent.
-     */
     @Override
     public Object[] asObjectArray() 
     {

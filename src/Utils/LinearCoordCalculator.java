@@ -74,6 +74,10 @@ public enum LinearCoordCalculator
         double yDiffSquared = Math.pow(yDiff, 2);
         
         double routeDistance = Math.sqrt(xDiffSquared + yDiffSquared); // Hypothenuse
+        
+        if(travelledDistance >= routeDistance)
+            return destCoord;
+        
         double yCoord = (yDiff / routeDistance) * travelledDistance + depCoord.Y;
         double xCoord = (yCoord - depCoord.Y)/slope + depCoord.X;
         
