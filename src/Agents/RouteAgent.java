@@ -66,8 +66,8 @@ public class RouteAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfRouteAgent);
-        sd.setName(nameOfRouteAgent);
+        sd.setType(TYPE_OF_ROUTE_AGENT);
+        sd.setName(NAME_OF_ROUTE_AGENT);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -128,11 +128,11 @@ public class RouteAgent extends Agent {
                             cfp.addReceiver(aircrafts[i]);
                         }
                         cfp.setContent(departureAirport.getLocation().X+","+departureAirport.getLocation().Y+","+arrivalAirport.getLocation().X+","+arrivalAirport.getLocation().Y+","+soldTickets); // Send the departure airport and sold tickets
-                        cfp.setConversationId(bestAircraftConID);
+                        cfp.setConversationId(BEST_AIRCRAFT_CON_ID);
                         cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
                         step = BestAircraft.GET_PROPOSAL_FROM_AIRCRAFTS;
 
                         System.out.println("CFP for best fitted aircraft send to all aircrafts");
@@ -174,11 +174,11 @@ public class RouteAgent extends Agent {
                 case ORDER_AIRCRAFT: // Send the reschedule order to the plane that provided the best offer 
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestPlane);
-                    order.setConversationId(bestAircraftConID);
-                    order.setReplyWith(bestAircraftConID + System.currentTimeMillis());
+                    order.setConversationId(BEST_AIRCRAFT_CON_ID);
+                    order.setReplyWith(BEST_AIRCRAFT_CON_ID + System.currentTimeMillis());
                     myAgent.send(order);
                     // Prepare the template to get the order reply
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
                     step = BestAircraft.GET_RECEIPT;
                     System.out.println("Send reschedule order to plane " + bestPlane.getName());
                     break;

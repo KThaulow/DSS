@@ -67,8 +67,8 @@ public class AircraftAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAircraftAgent);
-        sd.setName(nameOfAircraftAgent + aircraft.getTailnumber());
+        sd.setType(TYPE_OF_AIRCRAFT_AGENT);
+        sd.setName(NAME_OF_AIRCRAFT_AGENT + aircraft.getTailnumber());
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -96,7 +96,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.CFP));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.CFP));
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
@@ -135,7 +135,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(bestAircraftConID), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL));
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
@@ -147,7 +147,7 @@ public class AircraftAgent extends Agent {
                     System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
                     travelledDistance = 0; // Reset traveled distance
 
-                    addBehaviour(new AircraftStartInformBehaviour(myAgent, aircraftStartTimerMs)); // Start flight
+                    addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional");
@@ -172,11 +172,11 @@ public class AircraftAgent extends Agent {
         @Override
         protected void onTick() {
 
-            travelledDistance += aircraft.getSpeed() / (aircraftStartTimerMs * MS_TO_HOUR);
+            travelledDistance += aircraft.getSpeed() / (AIRCRAFT_START_TIMER_MS * MS_TO_HOUR);
             currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
 
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
-            info.setConversationId(aircraftStartConID);
+            info.setConversationId(AIRCRAFT_START_CON_ID);
             info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + aircraft.getSpeed());
 
             for (AID infoListener : infoListeners) {
@@ -195,7 +195,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftSubscriptionConID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRCRAFT_SUBSCRIPTION_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
             ACLMessage reply = myAgent.receive(mt);
             if (reply != null) {
                 infoListeners.add(reply.getSender());
