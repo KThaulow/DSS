@@ -50,8 +50,8 @@ public class GUIAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfGUIAgent);
-        sd.setName(nameOfGUIAgent);
+        sd.setType(TYPE_OF_GUI_AGENT);
+        sd.setName(NAME_OF_GUI_AGENT);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -86,7 +86,7 @@ public class GUIAgent extends Agent {
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType(typeOfAirportAgent); // Get all airports
+                    sd.setType(TYPE_OF_AIRPORT_AGENT); // Get all airports
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
@@ -102,10 +102,10 @@ public class GUIAgent extends Agent {
                             System.out.println("Send message to all airports");
                             cfp.addReceiver(airports[i]);
                         }
-                        cfp.setConversationId(airportLocationConID);
+                        cfp.setConversationId(AIRPORT_LOCATION_CON_ID);
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRPORT_LOCATION_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                         step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
                         System.out.println("CFP for all the airports coordinates");
                     } catch (FIPAException fe) {
@@ -155,7 +155,7 @@ public class GUIAgent extends Agent {
             AID[] aircrafts; 
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setType(typeOfAircraftAgent); // Get all airports
+            sd.setType(TYPE_OF_AIRCRAFT_AGENT); // Get all airports
             template.addServices(sd);
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);                 
@@ -170,7 +170,7 @@ public class GUIAgent extends Agent {
                     System.out.println("Send message to all aircrafts");
                     cfp.addReceiver(aircrafts[i]);
                 }
-                cfp.setConversationId(aircraftSubscriptionConID);
+                cfp.setConversationId(AIRCRAFT_SUBSCRIPTION_CON_ID);
                 myAgent.send(cfp);
 
                 } catch (FIPAException fe) {
@@ -183,7 +183,7 @@ public class GUIAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftStartConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRCRAFT_START_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             System.out.println("Get the info");
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {                        

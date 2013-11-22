@@ -43,8 +43,8 @@ public class AirportAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfAirportAgent);
-        sd.setName(nameOfAirportAgent+airport.toString());
+        sd.setType(TYPE_OF_AIRPORT_AGENT);
+        sd.setName(NAME_OF_AIRPORT_AGENT+airport.toString());
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
