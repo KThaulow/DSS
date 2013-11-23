@@ -187,15 +187,12 @@ public class GUIAgent extends Agent {
         @Override
         public void action() {
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRCRAFT_START_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-            System.out.println("Get the info");
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {                        
                 // Reply received
                 // this is an offer                            
-                System.out.println("Aircraft name " + msg.getSender().getName());
-                System.out.println("Aircraft info " + msg.getContent()); 
+                System.out.println("GUI received aircraft name " + msg.getSender().getLocalName() + " and info: " + msg.getContent());
             } else {
-                System.out.println("No aircraft info");
                 block();
             }
             
