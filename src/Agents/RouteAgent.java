@@ -131,7 +131,6 @@ public class RouteAgent extends Agent {
                         }
                         cfp.setContent(departureAirport.getIcao() + "," + arrivalAirport.getIcao() + "," + soldTickets); // Send the departure airport and sold tickets
                         cfp.setConversationId(BEST_AIRCRAFT_CON_ID);
-                        //cfp.setReplyWith("cfp" + System.currentTimeMillis()); // Unique value
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
                         mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));

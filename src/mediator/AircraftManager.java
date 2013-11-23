@@ -19,7 +19,7 @@ public class AircraftManager {
     
     private AircraftManager() {
         aircrafts = new HashMap<>();
-        aircrafts.put("KaspersFly", new Aircraft("KaspersFly", 1, 150, 850, 1500));
+        aircrafts.put("KaspersFly", new Aircraft("KaspersFly", 1, 155, 850, 1500));
         aircrafts.put("PetersFly", new Aircraft("PetersFly", 2, 125, 750, 1200));
         aircrafts.put("KristiansFly", new Aircraft("KristiansFly", 3, 250, 800, 3000));
         aircrafts.put("HenriksFly", new Aircraft("HenriksFly", 4, 175, 830, 2000));

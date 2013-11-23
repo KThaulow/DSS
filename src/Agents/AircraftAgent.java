@@ -16,6 +16,7 @@ import entities.Coord2D;
 import entities.agentargs.*;
 import entities.cost.*;
 import jade.core.AID;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,14 +25,17 @@ import mediator.AirportManager;
 
 public class AircraftAgent extends Agent {
 
-    private Airport currentAirport, departureAirport, arrivalAirport;    
-    private double travelledDistance;
+    private Airport currentAirport, departureAirport, arrivalAirport;
+    private double travelledDistanceRoute, travelledDistanceLeg;
     private Coord2D departureAirportLocation, arrivalAirportLocation, currentLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route
     private boolean aircraftFunctional; // Is the aircraft functional
     private List<AID> infoListeners;
     private Aircraft aircraft;
-    
+    private int overbookedSeats;
+    private String cost;
+    private double routeTimeSeconds;
+
     private enum ArrivalAirport {
 
         REQUEST_AIRPORT_LOCATION, GET_AIRPORT_LOCATION, DONE;
@@ -50,15 +54,15 @@ public class AircraftAgent extends Agent {
             currentAirport = acAgentArgs.getAirport();
             currentLocation = currentAirport.getLocation();
             aircraftFunctional = true;
-            
+
             infoListeners = new ArrayList<>();
 
             registerToDF();
 
-            addBehaviour(new BestAircraftRequestsServerBehaviour()); 
-            addBehaviour(new BestAircraftOrderServerBehaviour()); 
-            addBehaviour(new InfoListenerRequestServerBehaviour()); 
-            
+            addBehaviour(new BestAircraftRequestsServerBehaviour());
+            addBehaviour(new BestAircraftOrderServerBehaviour());
+            addBehaviour(new InfoListenerRequestServerBehaviour());
+
         } else {
             System.out.println("No arguments specified specified");
             doDelete();
@@ -105,7 +109,7 @@ public class AircraftAgent extends Agent {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 System.out.println("Best aircraft request served");
-                
+
                 // Message received. Process it
                 String content = msg.getContent();
                 List<String> items = Arrays.asList(content.split(","));
@@ -116,15 +120,14 @@ public class AircraftAgent extends Agent {
                 arrivalAirport = AirportManager.getInstance().getAirprot(arrivalICAO);
                 departureAirportLocation = departureAirport.getLocation();
                 arrivalAirportLocation = arrivalAirport.getLocation();
-                
+
+                overbookedSeats = soldTickets - aircraft.getCapacity();
+
                 ACLMessage reply = msg.createReply();
-
-                ICostModel cost = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
-
-                String response = cost.calculateCost() + "";
-
+                ICostModel costModel = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                cost = costModel.calculateCost() + "";
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(response);
+                reply.setContent(cost);
 
                 myAgent.send(reply);
             } else {
@@ -146,11 +149,13 @@ public class AircraftAgent extends Agent {
             if (msg != null) {
                 // Message received. Process it
                 ACLMessage reply = msg.createReply();
-                
+
                 if (aircraftFunctional) {
                     reply.setPerformative(ACLMessage.INFORM);
                     System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
-                    travelledDistance = 0; // Reset traveled distance
+                    travelledDistanceRoute = 0; // Reset travelled distance for route
+                    travelledDistanceLeg = 0; // Reset travelled distance for leg
+                    routeTimeSeconds = 0; // Reset route minutes
 
                     addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
@@ -170,28 +175,57 @@ public class AircraftAgent extends Agent {
      */
     private class AircraftStartInformBehaviour extends TickerBehaviour {
 
+        private Coord2D otherLocation;
+        private double distanceSinceLastUpdate;
+        private boolean IsArrivedAtDeparture = false;
+
         public AircraftStartInformBehaviour(Agent a, long period) {
             super(a, period);
         }
 
         @Override
         protected void onTick() {
+            distanceSinceLastUpdate = aircraft.getSpeed() / (MS_TO_HOUR / AIRCRAFT_START_TIMER_MS);
+            travelledDistanceLeg += distanceSinceLastUpdate;
+            travelledDistanceRoute = distanceSinceLastUpdate;
+            routeTimeSeconds += AIRCRAFT_START_TIMER_MS / MS_TO_SECONDS;
 
-            travelledDistance += aircraft.getSpeed() / (MS_TO_HOUR / AIRCRAFT_START_TIMER_MS );
-            currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistance);
-            
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(AIRCRAFT_START_CON_ID);
-            info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + aircraft.getSpeed());
+
+            // Aircraft is not at the departure airport
+            if (currentAirport.equals(departureAirport) == false) {
+                if (otherLocation == null) {
+                    otherLocation = currentLocation;
+                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not at the departure airport " + departureAirport.getName() + " but at location " + otherLocation.toString());
+                }
+                currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(otherLocation, departureAirportLocation, travelledDistanceLeg);
+
+                if (currentLocation.equals(departureAirportLocation)) { // Aircraft has arrived at the departure airport
+                    currentAirport = departureAirport;
+                    travelledDistanceLeg = 0;
+                    System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + departureAirport.getName() + " airport");
+                }
+                info.setContent(currentLocation.X + "," + currentLocation.Y + "," + departureAirportLocation.X + "," + departureAirportLocation.Y + "," + aircraft.getSpeed());
+                System.out.println("Aircraft " + myAgent.getLocalName() + " has current location " + currentLocation.toString() + " and departure " + departureAirportLocation.toString());
+            }
+            // Aircraft is at the departure airport
+            if (currentAirport.equals(departureAirport)) {
+                currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistanceLeg);
+                info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + aircraft.getSpeed());
+                System.out.println("Aircraft " + myAgent.getLocalName() + " has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
+            }
 
             for (AID infoListener : infoListeners) {
-                System.out.println("INFO for "+myAgent.getLocalName()+ " sent to " + infoListener.getLocalName() + " with current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
                 info.addReceiver(infoListener);
             }
-            
-            if(currentLocation.equals(arrivalAirportLocation)){
-                System.out.println("Aircraft "+myAgent.getLocalName()+ " with current location " + currentLocation.toString() + " has arrived at "+arrivalAirport.getName()+" airport");
+
+            if (currentLocation.equals(arrivalAirportLocation)) {
+                System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
                 currentAirport = arrivalAirport;
+
+                addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
+
                 stop();
             }
 
@@ -215,6 +249,34 @@ public class AircraftAgent extends Agent {
                 block();
             }
         }
+    }
 
+    /**
+     * Informs the statistics agent with aircraft info
+     */
+    private class InformStatisticsBehaviour extends OneShotBehaviour {
+
+        private AID statisticsAgent;
+
+        @Override
+        public void action() {
+            System.out.println("Inform statistics agent");
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            sd.setType(TYPE_OF_STATISTICS_AGENT); // Get all aircrafts
+            template.addServices(sd);
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                statisticsAgent = results[0].getName();
+                System.out.println("Info sent to " + statisticsAgent.getLocalName());
+                ACLMessage info = new ACLMessage(ACLMessage.INFORM);
+                info.addReceiver(statisticsAgent);
+                info.setContent(overbookedSeats + "," + routeTimeSeconds + "," + cost);
+                info.setConversationId(STATISTICS_CON_ID);
+                myAgent.send(info);
+            } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
+        }
     }
 }

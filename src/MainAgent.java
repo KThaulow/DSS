@@ -51,6 +51,8 @@ public class MainAgent extends Agent
             createAgent("rAgent"+i, "Agents.RouteAgent", routeAgentArgs.get(i));
         
         createAgent("GUIAgent", "Agents.GUIAgent", null);
+        
+        createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
     }
     
     private ArrayList<IAgentArgs> createAircraftAgentsArgs()
