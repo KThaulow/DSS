@@ -27,21 +27,25 @@ public enum SphericalPositionCalculator
         if(distToDest <= travelledDist)
             return destPos;
         
-        double bearing = getBearing(depPos, destPos);
-        
-        double lat2 = Math.asin(Math.sin(depPos.getLatitude()) * Math.cos(travelledDist / EARTH_RADIUS) 
-                + Math.cos(depPos.getLatitude()) * Math.sin(travelledDist / EARTH_RADIUS) * Math.cos(bearing));
-        
-        double lon2 = depPos.getLongitude() + Math.atan2(Math.sin(bearing) * Math.sin(travelledDist / EARTH_RADIUS) 
-                * Math.cos(depPos.getLatitude()), Math.cos(travelledDist / EARTH_RADIUS) - Math.sin(depPos.getLatitude()) * Math.sin(lat2));
+        double dist = travelledDist/EARTH_RADIUS;
+        double brng = toRad(getBearing(depPos, destPos));
+        double lat1 = toRad(depPos.getLatitude());
+        double lon1 = toRad(depPos.getLongitude());
 
-        return new SphericalPosition(lat2, lon2);
+        double lat2 = Math.asin(Math.sin(lat1) * Math.cos(dist) + Math.cos(lat1) * Math.sin(dist) * Math.cos(brng));
+        
+        double lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(dist) * Math.cos(lat1), 
+                                     Math.cos(dist) - Math.sin(lat1) * Math.sin(lat2));
+        
+        lon2 = (lon2 + 3*Math.PI) % (2*Math.PI) - Math.PI;
+
+        return new SphericalPosition(toDeg(lat2), toDeg(lon2));
     }
     
     public double calculateDistance(SphericalPosition depPos, SphericalPosition destPos)
     {
-        double dLat = toRad(destPos.getLatitude() - depPos.getLatitude());
-        double dLon = toRad(destPos.getLongitude() - depPos.getLongitude());
+        double dLat = toRad(destPos.getLatitude()) - toRad(depPos.getLatitude());
+        double dLon = toRad(destPos.getLongitude()) - toRad(depPos.getLongitude());
         double lat1 = toRad(depPos.getLatitude());
         double lat2 = toRad(destPos.getLatitude());
         
@@ -53,16 +57,15 @@ public enum SphericalPositionCalculator
     
     private double getBearing(SphericalPosition depPos, SphericalPosition destPos)
     {
-        double dLat = toRad(destPos.getLatitude() - depPos.getLatitude());
+        double lat1 = toRad(depPos.getLatitude());
+        double lat2 = toRad(destPos.getLatitude());
         double dLon = toRad(destPos.getLongitude() - depPos.getLongitude());
         
-        double y = Math.sin(dLon) * Math.cos(destPos.getLatitude());
-        double x = Math.cos(depPos.getLatitude()) * Math.sin(destPos.getLatitude()) 
-                    - Math.sin(depPos.getLatitude()) * Math.cos(destPos.getLatitude()) * Math.cos(dLon);
-        
-        double brng = toDeg(Math.atan2(y, x));
-        
-        return brng;
+        double y = Math.sin(dLon) * Math.cos(lat2);
+        double x = Math.cos(lat1)*Math.sin(lat2) - Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
+        double brng = Math.atan2(y, x);
+
+        return (toDeg(brng) + 360) % 360;
     }
     
     private double toDeg(double val)
