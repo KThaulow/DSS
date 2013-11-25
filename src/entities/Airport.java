@@ -12,12 +12,12 @@ package entities;
  */
 public class Airport {
     
-    private Coord2D location;
+    private SphericalPosition location;
     private String name;
     private String icao;
     private int id;
 
-    public Airport(Coord2D location, String name, String icao, int id) {
+    public Airport(SphericalPosition location, String name, String icao, int id) {
         this.location = location;
         this.name = name;
         this.icao = icao;
@@ -27,7 +27,7 @@ public class Airport {
     /**
      * @return the location
      */
-    public Coord2D getLocation() {
+    public SphericalPosition getLocation() {
         return location;
     }
 
@@ -39,7 +39,7 @@ public class Airport {
     /**
      * @param location the location to set
      */
-    public void setLocation(Coord2D location) {
+    public void setLocation(SphericalPosition location) {
         this.location = location;
     }
 

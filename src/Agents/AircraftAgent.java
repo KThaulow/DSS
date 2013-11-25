@@ -10,9 +10,10 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import Utils.SphericalPositionCalculator;
 import entities.Aircraft;
 import entities.Airport;
-import entities.Coord2D;
+import entities.SphericalPosition;
 import entities.agentargs.*;
 import entities.cost.*;
 import jade.core.AID;
@@ -27,7 +28,7 @@ public class AircraftAgent extends Agent {
 
     private Airport currentAirport, departureAirport, arrivalAirport;
     private double travelledDistanceRoute, travelledDistanceLeg;
-    private Coord2D departureAirportLocation, arrivalAirportLocation, currentLocation;
+    private SphericalPosition departureAirportLocation, arrivalAirportLocation, currentLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route
     private boolean aircraftFunctional; // Is the aircraft functional
     private List<AID> infoListeners;
@@ -175,7 +176,7 @@ public class AircraftAgent extends Agent {
      */
     private class AircraftStartInformBehaviour extends TickerBehaviour {
 
-        private Coord2D otherLocation;
+        private SphericalPosition otherLocation;
         private double distanceSinceLastUpdate;
         private boolean IsArrivedAtDeparture = false;
 
@@ -199,20 +200,20 @@ public class AircraftAgent extends Agent {
                     otherLocation = currentLocation;
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not at the departure airport " + departureAirport.getName() + " but at location " + otherLocation.toString());
                 }
-                currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(otherLocation, departureAirportLocation, travelledDistanceLeg);
+                currentLocation = SphericalPositionCalculator.INSTANCE.getPosition(otherLocation, departureAirportLocation, travelledDistanceLeg);
 
                 if (currentLocation.equals(departureAirportLocation)) { // Aircraft has arrived at the departure airport
                     currentAirport = departureAirport;
                     travelledDistanceLeg = 0;
                     System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + departureAirport.getName() + " airport");
                 }
-                info.setContent(currentLocation.X + "," + currentLocation.Y + "," + departureAirportLocation.X + "," + departureAirportLocation.Y + "," + aircraft.getSpeed());
+                info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + departureAirportLocation.getLatitude() + "," + departureAirportLocation.getLongitude() + "," + aircraft.getSpeed());
                 System.out.println("Aircraft " + myAgent.getLocalName() + " has current location " + currentLocation.toString() + " and departure " + departureAirportLocation.toString());
             }
             // Aircraft is at the departure airport
             if (currentAirport.equals(departureAirport)) {
-                currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(departureAirportLocation, arrivalAirportLocation, travelledDistanceLeg);
-                info.setContent(currentLocation.X + "," + currentLocation.Y + "," + arrivalAirportLocation.X + "," + arrivalAirportLocation.Y + "," + aircraft.getSpeed());
+                currentLocation = SphericalPositionCalculator.INSTANCE.getPosition(departureAirportLocation, arrivalAirportLocation, travelledDistanceLeg);
+                info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + arrivalAirportLocation.getLatitude() + "," + arrivalAirportLocation.getLongitude() + "," + aircraft.getSpeed());
                 System.out.println("Aircraft " + myAgent.getLocalName() + " has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
             }
 
