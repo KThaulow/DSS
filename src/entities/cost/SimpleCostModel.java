@@ -67,16 +67,16 @@ public class SimpleCostModel implements ICostModel
         
         if(departureAirportPosition != null && destinationAirportPosition != null)
             distToDestAirport = LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportPosition, destinationAirportPosition);
+
+        double totalDistance = distToDepAirport + distToDestAirport;
+                
+        double totalEET = totalDistance/aircraftSpeed;
+        double fuelConsumption = fuelBurnRate * totalEET;
         
-        double totalEET = distToDepAirport/aircraftSpeed;
-        double fuelConsumption = fuelBurnRate * (distToDepAirport + distToDestAirport);
-        
-        double weightedNumOfPassengers = numOfPassengers * NUM_OF_PASSENGERS_FACTOR;
         double weightedNumOfEmptySeats = numOfEmptySeats * NUM_OF_EMPTY_SEATS_FACTOR;
         double weightedDistToDepAirport = distToDepAirport * DIST_TO_DEPARTURE_AIRPORT_FACTOR;
-        double weightedTotalEET = totalEET * TOTAL_EET_FACTOR;
         double weightedFuelConsumption = fuelConsumption * FUEL_CONSUMPTION_FACTOR;
         
-        return weightedNumOfPassengers + weightedNumOfEmptySeats + weightedDistToDepAirport + weightedTotalEET + weightedFuelConsumption;
+        return weightedNumOfEmptySeats + weightedDistToDepAirport  + weightedFuelConsumption;
     }
 }
