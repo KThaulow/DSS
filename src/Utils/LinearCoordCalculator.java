@@ -12,7 +12,7 @@ import entities.Coord2D;
  * Represents a singleton utility for calculating the current position of an aircraft.
  * @author pla
  */
-public enum LinearCoordCalculator 
+public enum LinearCoordCalculator
 {
     /**
      * Gets the singleton instance of the calculator.
