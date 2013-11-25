@@ -10,6 +10,7 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import Utils.SphericalPositionCalculator;
 import entities.Aircraft;
 import entities.Airport;
 import entities.Coord2D;
@@ -199,7 +200,7 @@ public class AircraftAgent extends Agent {
                     otherLocation = currentLocation;
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not at the departure airport " + departureAirport.getName() + " but at location " + otherLocation.toString());
                 }
-                currentLocation = LinearCoordCalculator.INSTANCE.getCoordinates(otherLocation, departureAirportLocation, travelledDistanceLeg);
+                currentLocation = SphericalPositionCalculator.INSTANCE.getCoordinates(otherLocation, departureAirportLocation, travelledDistanceLeg);
 
                 if (currentLocation.equals(departureAirportLocation)) { // Aircraft has arrived at the departure airport
                     currentAirport = departureAirport;
