@@ -33,4 +33,6 @@ public class Settings {
     
     public static final int MS_TO_HOUR = 3600000;
     public static final int MS_TO_SECONDS = 1000;
+    
+    public static final int ROUTE_GENERATOR_MS_DELAY = 15000;
 }

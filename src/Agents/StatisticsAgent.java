@@ -17,9 +17,9 @@ import java.util.List;
 
 public class StatisticsAgent extends Agent {
 
-    File overbookedSeatsFile = new File("OverbookedSeats.txt");
-    File routeTimeFile = new File("RouteTime.txt");
-    File costFile = new File("FlightCost.txt");
+    File overbookedSeatsFile = new File("OverbookedSeats.csv");
+    File routeTimeFile = new File("RouteTime.csv");
+    File costFile = new File("FlightCost.csv");
 
     @Override
     protected void setup() {
