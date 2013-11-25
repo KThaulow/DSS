@@ -51,6 +51,8 @@ public class MainAgent extends Agent
             createAgent("rAgent"+i, "Agents.RouteAgent", routeAgentArgs.get(i));
         
         createAgent("GUIAgent", "Agents.GUIAgent", null);
+        
+        createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
     }
     
     private ArrayList<IAgentArgs> createAircraftAgentsArgs()
@@ -75,12 +77,11 @@ public class MainAgent extends Agent
     
     private ArrayList<IAgentArgs> createRouteAgentArgs()
     {
-        
         long now = new Date().getTime();
         ArrayList<IAgentArgs> routeAgentArgs = new ArrayList<>();
         
         Airport depAirport = AirportManager.getInstance().getAirprot("EKCH");
-        Airport arrAirport = AirportManager.getInstance().getAirprot("EKCH");
+        Airport arrAirport = AirportManager.getInstance().getAirprot("EDDF");
         Date earliestArrival = new Date(now + 3600 * 1000);
         Date latest = new Date(now + 3600 * 4 * 1000);
         routeAgentArgs.add(new RouteAgentArgs(0, 150, depAirport, arrAirport, earliestArrival, latest));

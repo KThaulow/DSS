@@ -26,9 +26,14 @@ public class AirportManager {
         airports.put("ESSA", new Airport(new Coord2D(59, 17), "Stockholm", "ESSA", 2));
         airports.put("ENGM", new Airport(new Coord2D(60, 11), "Oslo", "ENGM", 3));
         airports.put("EDDF", new Airport(new Coord2D(50, 8), "Frankfurt", "EDDF", 4));
-        airports.put("EGLL", new Airport(new Coord2D(51, 27), "Heathrow", "EGLL", 5));
+        airports.put("EGLL", new Airport(new Coord2D(51.471162, -0.452371), "Heathrow", "EGLL", 5));
 
     }
+    
+    public HashMap<String, Airport> getAllAirports() {
+        return airports;
+    
+}
 
     public Airport getAirprot(String icao) {       
         return airports.get(icao);

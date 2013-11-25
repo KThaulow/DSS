@@ -17,6 +17,7 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import static Utils.Settings.*;
+import gui.GUIMapInterface;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 /**
@@ -31,15 +32,17 @@ public class GUIAgent extends Agent {
     }
     
     GUIInterface guiInterface; // The gui interface
+    GUIMapInterface guiMapInterface; 
     
     @Override
     protected void setup() {
-        guiInterface = new GUIInterface();
+//        guiInterface = new GUIInterface();
+        guiMapInterface = new GUIMapInterface(); 
         registerToDF();
         System.out.println("Setup gui agent");
         //addBehaviour(new SomeBehaviour());
 //        addBehaviour(new RequestGui(this, 500));
-        addBehaviour(new RequestAirports());
+//        addBehaviour(new RequestAirports());        
         System.out.println("Request info listener added");
         addBehaviour(new RequestInfoListenerBehaviour());
         addBehaviour(new GetInfoFromAircraftBehaviour());
@@ -50,8 +53,8 @@ public class GUIAgent extends Agent {
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
-        sd.setType(typeOfGUIAgent);
-        sd.setName(nameOfGUIAgent);
+        sd.setType(TYPE_OF_GUI_AGENT);
+        sd.setName(NAME_OF_GUI_AGENT);
         dfd.addServices(sd);
         try {
             DFService.register(this, dfd);
@@ -86,7 +89,7 @@ public class GUIAgent extends Agent {
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
-                    sd.setType(typeOfAirportAgent); // Get all airports
+                    sd.setType(TYPE_OF_AIRPORT_AGENT); // Get all airports
                     template.addServices(sd);
                     try {
                         DFAgentDescription[] results = DFService.search(myAgent, template);
@@ -102,10 +105,10 @@ public class GUIAgent extends Agent {
                             System.out.println("Send message to all airports");
                             cfp.addReceiver(airports[i]);
                         }
-                        cfp.setConversationId(airportLocationConID);
+                        cfp.setConversationId(AIRPORT_LOCATION_CON_ID);
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(airportLocationConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRPORT_LOCATION_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
                         step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
                         System.out.println("CFP for all the airports coordinates");
                     } catch (FIPAException fe) {
@@ -114,7 +117,7 @@ public class GUIAgent extends Agent {
                     break; 
                     
                 case GET_COORDINATES_FROM_AIRPORTS: 
-                    System.out.println("GET_COORDINATES_FROM_AIRPORTS");
+                    System.out.println("GET_COORDINATES_FROM_AIRPORTS");                    
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {                        
                         // Reply received
@@ -124,7 +127,7 @@ public class GUIAgent extends Agent {
                             System.out.println("The coordinates are " + reply.getContent()); 
                             String[] coordinates = reply.getContent().split(",");
                             System.out.println("coordinates " + coordinates[0] + " " + coordinates[1]);
-                            guiInterface.drawAirport(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[0]), reply.getSender().getName());
+//                            guiInterface.drawAirport(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[0]), reply.getSender().getName());
                             repliesCnt++;
                         }
                         
@@ -155,7 +158,7 @@ public class GUIAgent extends Agent {
             AID[] aircrafts; 
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
-            sd.setType(typeOfAircraftAgent); // Get all airports
+            sd.setType(TYPE_OF_AIRCRAFT_AGENT); // Get all airports
             template.addServices(sd);
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);                 
@@ -170,7 +173,7 @@ public class GUIAgent extends Agent {
                     System.out.println("Send message to all aircrafts");
                     cfp.addReceiver(aircrafts[i]);
                 }
-                cfp.setConversationId(aircraftSubscriptionConID);
+                cfp.setConversationId(AIRCRAFT_SUBSCRIPTION_CON_ID);
                 myAgent.send(cfp);
 
                 } catch (FIPAException fe) {
@@ -183,16 +186,13 @@ public class GUIAgent extends Agent {
 
         @Override
         public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(aircraftStartConID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-            System.out.println("Get the info");
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRCRAFT_START_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {                        
                 // Reply received
                 // this is an offer                            
-                System.out.println("Aircraft name " + msg.getSender().getName());
-                System.out.println("Aircraft info " + msg.getContent()); 
+                System.out.println("GUI received aircraft name " + msg.getSender().getLocalName() + " and info: " + msg.getContent());
             } else {
-                System.out.println("No aircraft info");
                 block();
             }
             

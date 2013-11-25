@@ -10,24 +10,27 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*; 
-import Utils.Settings;
-import java.awt.Checkbox;
+import static Utils.Settings.*;
+import entities.Airport;
 import java.awt.Graphics2D;
-import java.awt.Paint;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
+import mediator.AirportManager;
+import org.openstreetmap.gui.jmapviewer.JMapViewer;
+import org.openstreetmap.gui.jmapviewer.events.JMVCommandEvent;
+import org.openstreetmap.gui.jmapviewer.interfaces.JMapViewerEventListener;
 
 /**
  *
  * @author Fuglsang
  */
-public class GUIInterface extends JPanel {
+public class GUIInterface extends JPanel implements JMapViewerEventListener {
     private JFrame frame = new JFrame();
     private JSplitPane  splitPaneV;
     private List<GUIComponentAirport> fillAirports;
@@ -36,22 +39,21 @@ public class GUIInterface extends JPanel {
          
     
     public GUIInterface() {   
-        fillAirports = new ArrayList<>(Settings.NUMBER_OF_AIRPORT_AGENTS);
-        fillAircrafts = new ArrayList<>(Settings.NUMBER_OF_AIRCRAFT_AGENTS); 
+        fillAirports = new ArrayList<>(NUMBER_OF_AIRPORT_AGENTS);
+        fillAircrafts = new ArrayList<>(NUMBER_OF_AIRCRAFT_AGENTS); 
         grid = new Grid(810, 560, fillAirports, fillAircrafts);
-        SettingsPanel settingsPanel = new SettingsPanel(290, 560, grid); 
+        SettingsPanel settingsPanel = new SettingsPanel(290, 560, grid);    
         
-//        grid.fillAirport(new GUIComponentAirport(new Point(78, 1), "A"));
-//        grid.fillAirport(new GUIComponentAirport(new Point(63, 27), "B"));
-//        grid.fillAirport(new GUIComponentAirport(new Point(29, 48), "C"));
-//        grid.fillAirport(new GUIComponentAirport(new Point(2, 5), "D"));
-//        grid.fillAirport(new GUIComponentAirport(new Point(15, 15), "E"));
-//
-//        grid.fillAircraft(new GUIComponentAircraft(new Point(3, 5), 150, 980));
-//        grid.fillAircraft(new GUIComponentAircraft(new Point(3, 5), 300, 1050));
-//        grid.fillAircraft(new GUIComponentAircraft(new Point(10, 20), 50, 700));
-//        grid.fillAircraft(new GUIComponentAircraft(new Point(40, 24), 150, 900));
-//        grid.fillAircraft(new GUIComponentAircraft(new Point(64, 17), 200, 900));
+//        Iterator it = AirportManager.getInstance().getAllAirports().values().iterator();
+//        while (it.hasNext()) {
+//            Airport airport = (Airport) it.next(); 
+//            GUIComponentAirport guiComponentAirport = new GUIComponentAirport(new Point2D.Double(airport.getLocation().X, airport.getLocation().Y), airport.getName()); 
+////            GUIComponentAirport guiComponentAirport = new GUIComponentAirport(new Point2D.Double(10, 10), airport.getName()); 
+//            fillAirports.add(guiComponentAirport); 
+//            grid.repaint();
+////            guiInterface.drawAirport(airport.getLocation(), airport.getName());
+//            System.out.println("Hej med dig " + airport.getLocation());
+//        }
         
         splitPaneV = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT, grid, settingsPanel);        
         splitPaneV.setDividerLocation(815);
@@ -63,15 +65,20 @@ public class GUIInterface extends JPanel {
         frame.setVisible(true); 
     }
     
-    public void drawAirport(double x, double y, String name) {
-        GUIComponentAirport airport = new GUIComponentAirport(new Point2D.Double(x, y), name); 
-        fillAirports.add(airport);
-        grid.repaint();
-    }
+//    public void drawAirport(Air) {
+//        GUIComponentAirport airport = new GUIComponentAirport(new Point2D.Double(coord2D.X, coord2D.Y), name); 
+//        fillAirports.add(airport);
+//        grid.repaint();
+//    }
 
     public void fillAircraft(GUIComponentAircraft aircraft) {
         fillAircrafts.add(aircraft); 
         grid.repaint();
+    }
+
+    @Override
+    public void processCommand(JMVCommandEvent command) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     private static class SettingsPanel extends JPanel implements ItemListener {
@@ -95,14 +102,6 @@ public class GUIInterface extends JPanel {
             gridCheckBox.setSelected(true);
             gridCheckBox.addItemListener(this);
             add(gridCheckBox); 
-            
-//            JSlider filledSeadCostSlider = new JSlider(-50, 50); 
-//            filledSeadCostSlider.setAlignmentX(Component.CENTER_ALIGNMENT);
-//            filledSeadCostSlider.setMajorTickSpacing(10);            
-//            filledSeadCostSlider.setMinorTickSpacing(5);
-//            filledSeadCostSlider.setPaintTicks(true);
-//            filledSeadCostSlider.setPaintLabels(true);
-//            add(filledSeadCostSlider); 
             
         }
         
