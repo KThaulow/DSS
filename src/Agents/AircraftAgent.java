@@ -117,8 +117,8 @@ public class AircraftAgent extends Agent {
                 String departureICAO = items.get(0);
                 String arrivalICAO = items.get(1);
                 int soldTickets = Integer.parseInt(items.get(2));
-                departureAirport = AirportManager.getInstance().getAirprot(departureICAO);
-                arrivalAirport = AirportManager.getInstance().getAirprot(arrivalICAO);
+                departureAirport = AirportManager.getInstance().getAirport(departureICAO);
+                arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
                 departureAirportLocation = departureAirport.getLocation();
                 arrivalAirportLocation = arrivalAirport.getLocation();
 
@@ -153,15 +153,15 @@ public class AircraftAgent extends Agent {
 
                 if (aircraftFunctional) {
                     reply.setPerformative(ACLMessage.INFORM);
-                    System.out.println("Aircraft " + myAgent.getName() + " has been assigned to route " + msg.getSender() + " and started");
+                    System.out.println("Aircraft " + myAgent.getLocalName() + "("+aircraft.getTailnumber()+") has been assigned to route " + msg.getSender().getLocalName() + "("+departureAirport.getName()+"-"+arrivalAirport.getName()+") and started");
                     travelledDistanceRoute = 0; // Reset travelled distance for route
                     travelledDistanceLeg = 0; // Reset travelled distance for leg
                     routeTimeSeconds = 0; // Reset route minutes
-
+                    aircraftFunctional = false;
                     addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
-                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional");
+                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional. Requested by "+msg.getSender());
                 }
 
                 myAgent.send(reply);
@@ -186,9 +186,9 @@ public class AircraftAgent extends Agent {
 
         @Override
         protected void onTick() {
-            distanceSinceLastUpdate = aircraft.getSpeed() / (MS_TO_HOUR / AIRCRAFT_START_TIMER_MS);
+            distanceSinceLastUpdate = aircraft.getSpeed() / (MS_TO_HOUR / (AIRCRAFT_START_TIMER_MS * TIME_FACTOR));
             travelledDistanceLeg += distanceSinceLastUpdate;
-            travelledDistanceRoute = distanceSinceLastUpdate;
+            travelledDistanceRoute += distanceSinceLastUpdate;
             routeTimeSeconds += AIRCRAFT_START_TIMER_MS / MS_TO_SECONDS;
 
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
@@ -208,13 +208,13 @@ public class AircraftAgent extends Agent {
                     System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + departureAirport.getName() + " airport");
                 }
                 info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + departureAirportLocation.getLatitude() + "," + departureAirportLocation.getLongitude() + "," + aircraft.getSpeed());
-                System.out.println("Aircraft " + myAgent.getLocalName() + " has current location " + currentLocation.toString() + " and departure " + departureAirportLocation.toString());
+                System.out.println("Aircraft " + myAgent.getLocalName() + " (" + aircraft.getTailnumber() + ") has current location " + currentLocation.toString() + " and departure " + departureAirportLocation.toString() + " (" + departureAirport.getName() + ")");
             }
             // Aircraft is at the departure airport
             if (currentAirport.equals(departureAirport)) {
                 currentLocation = SphericalPositionCalculator.INSTANCE.getPosition(departureAirportLocation, arrivalAirportLocation, travelledDistanceLeg);
                 info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + arrivalAirportLocation.getLatitude() + "," + arrivalAirportLocation.getLongitude() + "," + aircraft.getSpeed());
-                System.out.println("Aircraft " + myAgent.getLocalName() + " has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString());
+                System.out.println("Aircraft " + myAgent.getLocalName() + " (" + aircraft.getTailnumber() + ") has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString() + " (" + arrivalAirport.getName() + ")"+ " and departure " + departureAirport.getName());
             }
 
             for (AID infoListener : infoListeners) {
@@ -224,7 +224,7 @@ public class AircraftAgent extends Agent {
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
                 currentAirport = arrivalAirport;
-
+                aircraftFunctional = true;
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
 
                 stop();

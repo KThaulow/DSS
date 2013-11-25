@@ -40,6 +40,6 @@ public class SphericalPosition
 
     @Override
     public String toString() {
-        return "SphericalPosition{" + "latitude: " + latitude + ", longitude: " + longitude + '}';
+        return "[" + latitude + " ; " + longitude + "]";
     }
 }

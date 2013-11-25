@@ -17,6 +17,7 @@ import entities.agentargs.*;
 import java.util.Date;
 
 public class RouteAgent extends Agent {
+
     private Date earliestArrivalTime;
     private Date latestArrivalTime;
 
@@ -50,9 +51,9 @@ public class RouteAgent extends Agent {
             soldTickets = args.getNumOfPassengers();
             earliestArrivalTime = args.getEarliestArrivalTime();
             latestArrivalTime = args.getLatestArrivalTime();
-           
+
             registerToDF();
-            
+
             addBehaviour(new RequestBestAircraft());
 
         } else {
@@ -88,7 +89,6 @@ public class RouteAgent extends Agent {
         System.out.println("Route agent " + getAID().getName() + " terminating");
     }
 
-
     /**
      * This is the complex behaviour used to request aircraft agents to be
      * assigned to fly this route
@@ -121,7 +121,7 @@ public class RouteAgent extends Agent {
                         for (int i = 0; i < results.length; ++i) {
                             aircrafts[i] = results[i].getName();
                         }
-                        
+
                         numberOfAircrafts = aircrafts.length;
 
                         // Sent message to airport
@@ -145,11 +145,11 @@ public class RouteAgent extends Agent {
                 case GET_PROPOSAL_FROM_AIRCRAFTS:  // Receive all proposals from the planes in the current airport
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
-                        if (unavailableAircrafts != null) {
-                            if (unavailableAircrafts.contains(reply.getSender())) { // Break if plane is not functional
-                                break;
-                            }
+
+                        if (unavailableAircrafts.contains(reply.getSender())) { // Break if plane is not functional
+                            break;
                         }
+
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
@@ -195,6 +195,9 @@ public class RouteAgent extends Agent {
 
                         } else if (reply.getPerformative() == ACLMessage.CANCEL) {
                             unavailableAircrafts.add(bestPlane);
+                            bestPlane = null;
+                            
+                            step = BestAircraft.REQUEST_AIRCRAFT;
                         }
 
                     } else {
@@ -208,7 +211,7 @@ public class RouteAgent extends Agent {
         public boolean done() {
             if (step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) {
                 System.out.println("No aircraft was found for route " + myAgent.getLocalName());
-            } 
+            }
             return ((step == BestAircraft.ORDER_AIRCRAFT && bestPlane == null) || step == BestAircraft.IDLE);
         }
     }

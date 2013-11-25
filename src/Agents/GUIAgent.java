@@ -191,7 +191,7 @@ public class GUIAgent extends Agent {
             if (msg != null) {                        
                 // Reply received
                 // this is an offer                            
-                System.out.println("GUI received aircraft name " + msg.getSender().getLocalName() + " and info: " + msg.getContent());
+                //System.out.println("GUI received aircraft name " + msg.getSender().getLocalName() + " and info: " + msg.getContent());
             } else {
                 block();
             }

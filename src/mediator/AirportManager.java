@@ -33,7 +33,7 @@ public class AirportManager {
     
 }
 
-    public Airport getAirprot(String icao) {       
+    public Airport getAirport(String icao) {       
         return airports.get(icao);
     }    
     

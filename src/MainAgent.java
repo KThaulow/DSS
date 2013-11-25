@@ -53,23 +53,23 @@ public class MainAgent extends Agent {
 
         createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
         
-        addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
+        //addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
     }
 
     private ArrayList<IAgentArgs> createAircraftAgentsArgs() {
         ArrayList<IAgentArgs> acAgentArgs = new ArrayList<>();
-        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirprot("EKCH")));
-        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly"), AirportManager.getInstance().getAirprot("ENGM")));
-        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly"), AirportManager.getInstance().getAirprot("EDDF")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirport("EKCH")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly"), AirportManager.getInstance().getAirport("ENGM")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly"), AirportManager.getInstance().getAirport("EDDF")));
 
         return acAgentArgs;
     }
 
     private ArrayList<IAgentArgs> createAirportAgentsArgs() {
         ArrayList<IAgentArgs> airportAgentArgs = new ArrayList<>();
-        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirprot("EKCH")));
-        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirprot("ENGM")));
-        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirprot("EDDF")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EKCH")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("ENGM")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EDDF")));
 
         return airportAgentArgs;
     }
@@ -78,14 +78,14 @@ public class MainAgent extends Agent {
         long now = new Date().getTime();
         ArrayList<IAgentArgs> routeAgentArgs = new ArrayList<>();
 
-        Airport depAirport = AirportManager.getInstance().getAirprot("EKCH");
-        Airport arrAirport = AirportManager.getInstance().getAirprot("EDDF");
+        Airport depAirport = AirportManager.getInstance().getAirport("EKCH");
+        Airport arrAirport = AirportManager.getInstance().getAirport("EDDF");
         Date earliestArrival = new Date(now + 3600 * 1000);
         Date latest = new Date(now + 3600 * 4 * 1000);
         routeAgentArgs.add(new RouteAgentArgs(0, 150, depAirport, arrAirport, earliestArrival, latest));
 
-        Airport depAirport1 = AirportManager.getInstance().getAirprot("EDDF");
-        Airport arrAirport1 = AirportManager.getInstance().getAirprot("ENGM");
+        Airport depAirport1 = AirportManager.getInstance().getAirport("EDDF");
+        Airport arrAirport1 = AirportManager.getInstance().getAirport("ENGM");
         Date earliestArrival1 = new Date(now + 3600 * 1000);
         Date latest1 = new Date(now + 3600 * 4 * 1000);
         routeAgentArgs.add(new RouteAgentArgs(1, 150, depAirport1, arrAirport1, earliestArrival1, latest1));
@@ -93,6 +93,9 @@ public class MainAgent extends Agent {
         return routeAgentArgs;
     }
 
+    /**
+     * Generates a new route for every tick
+     */
     private class RouteGeneratorBehaviour extends TickerBehaviour {
 
         private int routeIncrementer = 0;
@@ -112,32 +115,32 @@ public class MainAgent extends Agent {
             now = new Date().getTime();
             switch (routeIncrementer) {
                 case 0:
-                    depAirport = AirportManager.getInstance().getAirprot("EDDF");
-                    arrAirport = AirportManager.getInstance().getAirprot("ENGM");
+                    depAirport = AirportManager.getInstance().getAirport("EDDF");
+                    arrAirport = AirportManager.getInstance().getAirport("EKCH");
                     earliestArrival = new Date(now + 3600 * 1000);
                     latest = new Date(now + 3600 * 4 * 1000);
                     routeID++;
                     routeIncrementer++;
                     break;
                 case 1:
-                    depAirport = AirportManager.getInstance().getAirprot("ENGM");
-                    arrAirport = AirportManager.getInstance().getAirprot("EDDF");
+                    depAirport = AirportManager.getInstance().getAirport("ENGM");
+                    arrAirport = AirportManager.getInstance().getAirport("EDDF");
                     earliestArrival = new Date(now + 3600 * 1000);
                     latest = new Date(now + 3600 * 4 * 1000);
                     routeID++;
                     routeIncrementer++;
                     break;
                 case 2:
-                    depAirport = AirportManager.getInstance().getAirprot("EKCH");
-                    arrAirport = AirportManager.getInstance().getAirprot("ENGM");
+                    depAirport = AirportManager.getInstance().getAirport("EKCH");
+                    arrAirport = AirportManager.getInstance().getAirport("ENGM");
                     earliestArrival = new Date(now + 3600 * 1000);
                     latest = new Date(now + 3600 * 4 * 1000);
                     routeID++;
                     routeIncrementer++;
                     break;
                 case 3:
-                    depAirport = AirportManager.getInstance().getAirprot("ENGM");
-                    arrAirport = AirportManager.getInstance().getAirprot("EKCH");
+                    depAirport = AirportManager.getInstance().getAirport("ENGM");
+                    arrAirport = AirportManager.getInstance().getAirport("EKCH");
                     earliestArrival = new Date(now + 3600 * 1000);
                     latest = new Date(now + 3600 * 4 * 1000);
                     routeID++;
