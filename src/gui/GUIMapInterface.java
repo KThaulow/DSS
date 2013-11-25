@@ -197,7 +197,7 @@ public class GUIMapInterface extends JFrame implements JMapViewerEventListener  
         Iterator it = AirportManager.getInstance().getAllAirports().values().iterator();
         while (it.hasNext()) {
             Airport airport = (Airport) it.next(); 
-            MapMarkerDot mapMarkerDot = new MapMarkerDot(franceLayer, airport.getName(), airport.getLocation().X, airport.getLocation().Y);
+            MapMarkerDot mapMarkerDot = new MapMarkerDot(franceLayer, airport.getName(), airport.getLocation().getLatitude(), airport.getLocation().getLongitude());
             map().addMapMarker(mapMarkerDot);
         }
 

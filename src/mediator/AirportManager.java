@@ -7,7 +7,7 @@
 package mediator;
 
 import entities.Airport;
-import entities.Coord2D;
+import entities.SphericalPosition;
 import java.util.HashMap;
 
 /**
@@ -19,15 +19,13 @@ public class AirportManager {
     private HashMap<String, Airport> airports;    
     
     private AirportManager() {
-        
         airports = new HashMap<>();
         
-        airports.put("EKCH", new Airport(new Coord2D(55, 12), "Copenhagen", "EKCH", 1));
-        airports.put("ESSA", new Airport(new Coord2D(59, 17), "Stockholm", "ESSA", 2));
-        airports.put("ENGM", new Airport(new Coord2D(60, 11), "Oslo", "ENGM", 3));
-        airports.put("EDDF", new Airport(new Coord2D(50, 8), "Frankfurt", "EDDF", 4));
-        airports.put("EGLL", new Airport(new Coord2D(51.471162, -0.452371), "Heathrow", "EGLL", 5));
-
+        airports.put("EKCH", new Airport(new SphericalPosition(55.6136111111, 12.645), "Copenhagen", "EKCH", 1));
+        airports.put("ESSA", new Airport(new SphericalPosition(59.6519012451, 17.9186000824), "Stockholm", "ESSA", 2));
+        airports.put("ENGM", new Airport(new SphericalPosition(60.1941986084, 11.100399971), "Oslo", "ENGM", 3));
+        airports.put("EDDF", new Airport(new SphericalPosition(50.0484008789, 8.57069969177), "Frankfurt", "EDDF", 4));
+        airports.put("EGLL", new Airport(new SphericalPosition(51.4706001282, -0.461941003799), "Heathrow", "EGLL", 5));
     }
     
     public HashMap<String, Airport> getAllAirports() {

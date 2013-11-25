@@ -7,7 +7,9 @@
 package entities.cost;
 
 import Utils.LinearCoordCalculator;
+import Utils.SphericalPositionCalculator;
 import entities.Coord2D;
+import entities.SphericalPosition;
 
 /**
  * Represents a simple proof-of-concept cost model.
@@ -17,9 +19,9 @@ public class SimpleCostModel implements ICostModel
 {
     private int numOfPassengers;
     private int aircraftCapacity;
-    private Coord2D currentAircraftPosition;
-    private Coord2D departureAirportPosition;
-    private Coord2D destinationAirportPosition;
+    private SphericalPosition currentAircraftPosition;
+    private SphericalPosition departureAirportPosition;
+    private SphericalPosition destinationAirportPosition;
     private double aircraftSpeed;
     private double fuelBurnRate;
     
@@ -39,7 +41,7 @@ public class SimpleCostModel implements ICostModel
      * @param acSpeed The speed of the aircraft. 
      * @param fuelBurnRate Fuel consumption per time unit.
      */
-    public SimpleCostModel(int numOfPassengers, int acCapacity, Coord2D currentAcPos, Coord2D depPos, Coord2D destPos, double acSpeed, double fuelBurnRate)
+    public SimpleCostModel(int numOfPassengers, int acCapacity, SphericalPosition currentAcPos, SphericalPosition depPos, SphericalPosition destPos, double acSpeed, double fuelBurnRate)
     {
         this.numOfPassengers = numOfPassengers;
         this.aircraftCapacity = acCapacity;
@@ -63,10 +65,10 @@ public class SimpleCostModel implements ICostModel
         double distToDestAirport = 0;
         
         if(currentAircraftPosition != null && departureAirportPosition != null)
-            distToDepAirport = LinearCoordCalculator.INSTANCE.calculateDistance(currentAircraftPosition, departureAirportPosition);
+            distToDepAirport = SphericalPositionCalculator.INSTANCE.calculateDistance(currentAircraftPosition, departureAirportPosition);
         
         if(departureAirportPosition != null && destinationAirportPosition != null)
-            distToDestAirport = LinearCoordCalculator.INSTANCE.calculateDistance(departureAirportPosition, destinationAirportPosition);
+            distToDestAirport = SphericalPositionCalculator.INSTANCE.calculateDistance(departureAirportPosition, destinationAirportPosition);
 
         double totalDistance = distToDepAirport + distToDestAirport;
                 
