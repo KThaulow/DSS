@@ -1,2 +1,3 @@
 ID,Route Time,Aircraft,Departure Airport,Arrival Airport,Cost,Current Location,Overbooked Seats
-0,14.0,KaspersFly,Frankfurt,Oslo,61913.537016234375,Frankfurt,0
+0,,KristiansFly,Copenhagen,Frankfurt,124436.13904143889,Frankfurt,-100
+1,14.0,KaspersFly,Frankfurt,Oslo,61913.537016234375,Frankfurt,0

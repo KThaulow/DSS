@@ -46,7 +46,7 @@ public enum CsvFile
     
     public int getNextId()
     {
-        return this.stats.isEmpty() ? 0 : this.stats.keySet().size() - 1;
+        return this.stats.isEmpty() ? 0 : this.stats.keySet().size();
     }
     
     public void addStats(int id, Stats stats)
