@@ -46,7 +46,7 @@ public enum CsvFile
     
     public int getNextId()
     {
-        return stats.size() + 1;
+        return stats.size();
     }
     
     public void addStats(int id, Stats stats)
