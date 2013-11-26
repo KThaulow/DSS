@@ -40,8 +40,13 @@ public enum CsvFile
     
     public void addStats(Stats stats)
     {
-        int id = this.stats.keySet().size() - 1;
+        int id = getNextId();
         this.stats.put(id, stats);
+    }
+    
+    public int getNextId()
+    {
+        return this.stats.isEmpty() ? 0 : this.stats.keySet().size() - 1;
     }
     
     public void addStats(int id, Stats stats)

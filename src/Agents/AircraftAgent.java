@@ -14,6 +14,7 @@ import Utils.SphericalPositionCalculator;
 import entities.Aircraft;
 import entities.Airport;
 import entities.SphericalPosition;
+import entities.Stats;
 import entities.agentargs.*;
 import entities.cost.*;
 import jade.core.AID;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import mediator.AirportManager;
+import mediator.CsvFile;
 
 public class AircraftAgent extends Agent {
 
@@ -36,6 +38,8 @@ public class AircraftAgent extends Agent {
     private int overbookedSeats;
     private String cost;
     private double routeTimeSeconds;
+    private Stats stats;
+    private int StatsID;
 
     private enum ArrivalAirport {
 
@@ -111,29 +115,37 @@ public class AircraftAgent extends Agent {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 System.out.println("Best aircraft request served");
-
-                if (aircraftAvailable) {
-                    // Message received. Process it
-                    String content = msg.getContent();
-                    List<String> items = Arrays.asList(content.split(","));
-                    String departureICAO = items.get(0);
-                    String arrivalICAO = items.get(1);
-                    int soldTickets = Integer.parseInt(items.get(2));
-                    departureAirport = AirportManager.getInstance().getAirport(departureICAO);
-                    arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
-                    departureAirportLocation = departureAirport.getLocation();
-                    arrivalAirportLocation = arrivalAirport.getLocation();
-
-                    overbookedSeats = soldTickets - aircraft.getCapacity();
-                    ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
-                    cost = costModel.calculateCost() + "";
-                } else {
-                    cost = Integer.MAX_VALUE+"";
-                }
                 ACLMessage reply = msg.createReply();
                 reply.setPerformative(ACLMessage.PROPOSE);
-                reply.setContent(cost);
 
+                String content = msg.getContent();
+                List<String> items = Arrays.asList(content.split(","));
+                String departureICAO = items.get(0);
+                String arrivalICAO = items.get(1);
+                int soldTickets = Integer.parseInt(items.get(2));
+                Airport departureAirportTemp = AirportManager.getInstance().getAirport(departureICAO);
+                Airport arrivalAirportTemp = AirportManager.getInstance().getAirport(arrivalICAO);
+                overbookedSeats = soldTickets - aircraft.getCapacity();
+                String costTemp = "-1";
+                
+                if (aircraftAvailable) {
+                    // Message received. Process it
+                    departureAirport = departureAirportTemp;
+                    arrivalAirport = arrivalAirportTemp;
+                    departureAirportLocation = departureAirport.getLocation();
+                    arrivalAirportLocation = arrivalAirport.getLocation();
+                    
+                    ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    cost = costTemp = costModel.calculateCost() + "";
+                    reply.setContent(cost);
+                } else {
+                    reply.setContent(costTemp);
+                }
+
+                StatsID = CsvFile.INSTANCE.getNextId();
+                stats = new Stats(StatsID, "", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), overbookedSeats + "");
+                addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
+                
                 myAgent.send(reply);
             } else {
                 block();
@@ -227,10 +239,10 @@ public class AircraftAgent extends Agent {
 
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
+                stats = new Stats(StatsID, routeTimeSeconds+"", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), overbookedSeats + "");
+                addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;
-                addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
-
                 stop();
             }
 
@@ -276,7 +288,8 @@ public class AircraftAgent extends Agent {
                 System.out.println("Info sent to " + statisticsAgent.getLocalName());
                 ACLMessage info = new ACLMessage(ACLMessage.INFORM);
                 info.addReceiver(statisticsAgent);
-                info.setContent(overbookedSeats + "," + routeTimeSeconds + "," + cost);
+                String statistics = stats.toCsvString();
+                info.setContent(statistics);
                 info.setConversationId(STATISTICS_CON_ID);
                 myAgent.send(info);
             } catch (FIPAException fe) {

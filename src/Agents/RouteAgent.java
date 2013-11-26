@@ -154,7 +154,7 @@ public class RouteAgent extends Agent {
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
                             double cost = Double.parseDouble(reply.getContent());
-                            if (bestPlane == null || cost < lowestCost) {
+                            if ((bestPlane == null || cost < lowestCost) && cost != -1) { // If aircraft is not available the cost is -1
                                 // This is the best offer at present
                                 lowestCost = cost;
                                 bestPlane = reply.getSender();
