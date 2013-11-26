@@ -125,7 +125,7 @@ public class AircraftAgent extends Agent {
                     arrivalAirportLocation = arrivalAirport.getLocation();
 
                     overbookedSeats = soldTickets - aircraft.getCapacity();
-                    ICostModel costModel = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     cost = costModel.calculateCost() + "";
                 } else {
                     cost = Integer.MAX_VALUE+"";
