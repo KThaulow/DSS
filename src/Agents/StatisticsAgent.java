@@ -66,12 +66,6 @@ public class StatisticsAgent extends Agent {
                 Stats s = new Stats(content);
                 
                 CsvFile.INSTANCE.addStats(s.getId(), s);
-                
-                try {
-                    CsvFile.INSTANCE.write();
-                } catch (IOException ex) {
-                    Logger.getLogger(StatisticsAgent.class.getName()).log(Level.SEVERE, null, ex);
-                }
             } else {
                 block();
             }

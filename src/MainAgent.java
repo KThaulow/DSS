@@ -6,10 +6,14 @@ import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import entities.agentargs.*;
 import jade.core.behaviours.TickerBehaviour;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import mediator.AircraftManager;
 import mediator.AirportManager;
+import mediator.CsvFile;
 
 public class MainAgent extends Agent {
 
@@ -182,5 +186,11 @@ public class MainAgent extends Agent {
     @Override
     protected void takeDown() {
         System.out.println("Shutting down main");
+        
+        try {
+            CsvFile.INSTANCE.write();
+        } catch (IOException ex) {
+            Logger.getLogger(MainAgent.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }
