@@ -1,6 +1,7 @@
 package Agents;
 
 import static Utils.Settings.*;
+import entities.Stats;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -10,10 +11,10 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import mediator.CsvFile;
 
 public class StatisticsAgent extends Agent {
 
@@ -62,33 +63,14 @@ public class StatisticsAgent extends Agent {
             ACLMessage reply = myAgent.receive(mt);
             if (reply != null) {
                 String content = reply.getContent();
-                List<String> items = Arrays.asList(content.split(","));
-                String overbookedSeats = items.get(0);
-                String routeTimeSeconds = items.get(1);
-                String overallCost = items.get(2);
-
-                try {
-                    FileWriter fileWriter = new FileWriter(overbookedSeatsFile, true);
-                    fileWriter.write(overbookedSeats+",");
-                    fileWriter.close();
-                } catch (IOException e) {
-                    System.out.println("Could not write to file "+overbookedSeatsFile.getName());
-                }
+                Stats s = new Stats(content);
+                
+                CsvFile.INSTANCE.addStats(s.getId(), s);
                 
                 try {
-                    FileWriter fileWriter = new FileWriter(routeTimeFile, true);
-                    fileWriter.write(routeTimeSeconds+",");
-                    fileWriter.close();
-                } catch (IOException e) {
-                    System.out.println("Could not write to file "+routeTimeFile.getName());
-                }
-                
-                try {
-                    FileWriter fileWriter = new FileWriter(costFile, true);
-                    fileWriter.write(overallCost+",");
-                    fileWriter.close();
-                } catch (IOException e) {
-                    System.out.println("Could not write to file "+costFile.getName());
+                    CsvFile.INSTANCE.write();
+                } catch (IOException ex) {
+                    Logger.getLogger(StatisticsAgent.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
                 block();
