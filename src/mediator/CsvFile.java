@@ -51,9 +51,19 @@ public enum CsvFile
     
     public void write() throws IOException
     {
-        try (FileWriter fileWriter = new FileWriter(statsFile, false)) 
+        FileWriter fileWriter = new FileWriter(statsFile, false);
+        
+        try
         {
             fileWriter.write(getCsvString());
+        }
+        catch(Exception c)
+        {
+            System.out.println("Unable to write CSV file.");
+        }
+        finally
+        {
+            fileWriter.close();
         }
     }
     
