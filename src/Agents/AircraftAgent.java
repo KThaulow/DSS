@@ -55,6 +55,7 @@ public class AircraftAgent extends Agent {
             currentAirport = acAgentArgs.getAirport();
             currentLocation = currentAirport.getLocation();
             aircraftFunctional = true;
+            aircraftAvailable = true;
 
             infoListeners = new ArrayList<>();
 
@@ -111,22 +112,25 @@ public class AircraftAgent extends Agent {
             if (msg != null) {
                 System.out.println("Best aircraft request served");
 
-                // Message received. Process it
-                String content = msg.getContent();
-                List<String> items = Arrays.asList(content.split(","));
-                String departureICAO = items.get(0);
-                String arrivalICAO = items.get(1);
-                int soldTickets = Integer.parseInt(items.get(2));
-                departureAirport = AirportManager.getInstance().getAirport(departureICAO);
-                arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
-                departureAirportLocation = departureAirport.getLocation();
-                arrivalAirportLocation = arrivalAirport.getLocation();
+                if (aircraftAvailable) {
+                    // Message received. Process it
+                    String content = msg.getContent();
+                    List<String> items = Arrays.asList(content.split(","));
+                    String departureICAO = items.get(0);
+                    String arrivalICAO = items.get(1);
+                    int soldTickets = Integer.parseInt(items.get(2));
+                    departureAirport = AirportManager.getInstance().getAirport(departureICAO);
+                    arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
+                    departureAirportLocation = departureAirport.getLocation();
+                    arrivalAirportLocation = arrivalAirport.getLocation();
 
-                overbookedSeats = soldTickets - aircraft.getCapacity();
-
+                    overbookedSeats = soldTickets - aircraft.getCapacity();
+                    ICostModel costModel = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    cost = costModel.calculateCost() + "";
+                } else {
+                    cost = Integer.MAX_VALUE+"";
+                }
                 ACLMessage reply = msg.createReply();
-                ICostModel costModel = new SimpleCostModel(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
-                cost = costModel.calculateCost() + "";
                 reply.setPerformative(ACLMessage.PROPOSE);
                 reply.setContent(cost);
 
@@ -153,15 +157,15 @@ public class AircraftAgent extends Agent {
 
                 if (aircraftFunctional) {
                     reply.setPerformative(ACLMessage.INFORM);
-                    System.out.println("Aircraft " + myAgent.getLocalName() + "("+aircraft.getTailnumber()+") has been assigned to route " + msg.getSender().getLocalName() + "("+departureAirport.getName()+"-"+arrivalAirport.getName()+") and started");
+                    System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
                     travelledDistanceRoute = 0; // Reset travelled distance for route
                     travelledDistanceLeg = 0; // Reset travelled distance for leg
                     routeTimeSeconds = 0; // Reset route minutes
-                    aircraftFunctional = false;
+                    aircraftAvailable = false;
                     addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
-                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional. Requested by "+msg.getSender());
+                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional. Requested by " + msg.getSender());
                 }
 
                 myAgent.send(reply);
@@ -214,7 +218,7 @@ public class AircraftAgent extends Agent {
             if (currentAirport.equals(departureAirport)) {
                 currentLocation = SphericalPositionCalculator.INSTANCE.getPosition(departureAirportLocation, arrivalAirportLocation, travelledDistanceLeg);
                 info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + arrivalAirportLocation.getLatitude() + "," + arrivalAirportLocation.getLongitude() + "," + aircraft.getSpeed());
-                System.out.println("Aircraft " + myAgent.getLocalName() + " (" + aircraft.getTailnumber() + ") has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString() + " (" + arrivalAirport.getName() + ")"+ " and departure " + departureAirport.getName());
+                System.out.println("Aircraft " + myAgent.getLocalName() + " (" + aircraft.getTailnumber() + ") has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString() + " (" + arrivalAirport.getName() + ")" + " and departure " + departureAirport.getName());
             }
 
             for (AID infoListener : infoListeners) {
@@ -224,7 +228,7 @@ public class AircraftAgent extends Agent {
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
                 currentAirport = arrivalAirport;
-                aircraftFunctional = true;
+                aircraftAvailable = true;
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
 
                 stop();
