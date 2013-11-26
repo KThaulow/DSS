@@ -56,7 +56,7 @@ public class Stats
     
     public String toCsvString()
     {
-        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + overbookedSeats;
+        return id + "," + routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + overbookedSeats;
     }
     
     public String getRouteTime() {
@@ -114,4 +114,11 @@ public class Stats
     public void setOverbookedSeats(String overbookedSeats) {
         this.overbookedSeats = overbookedSeats;
     }
+
+    @Override
+    public String toString() {
+        return toCsvString();
+    }
+    
+    
 }
