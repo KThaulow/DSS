@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mediator.CsvFile;
+import mediator.CsvFileRepository;
 
 public class StatisticsAgent extends Agent {
 
@@ -28,14 +29,14 @@ public class StatisticsAgent extends Agent {
         registerToDF();
 
         addBehaviour(new InfoListenerRequestServerBehaviour());
-
+        
+        allAircraftsFile = new CsvFile("AllAircraftStats.csv");
+        chosenAircraftsFile = new CsvFile("ChosenAircraftStats.csv");
+        
+        CsvFileRepository.INSTANCE.register(allAircraftsFile);
+        CsvFileRepository.INSTANCE.register(chosenAircraftsFile);
     }
 
-    // Free seats
-    // Off loaded passengers
-    // Time
-    // Overall cost
-    // Comma seperated
     private void registerToDF() {
         // Register the plane service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();

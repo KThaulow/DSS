@@ -117,18 +117,18 @@ public class AircraftAgent extends Agent {
                 ACLMessage reply = msg.createReply();
                 reply.setPerformative(ACLMessage.PROPOSE);
 
+                // Message received. Process it
                 String content = msg.getContent();
-                List<String> items = Arrays.asList(content.split(","));
-                String departureICAO = items.get(0);
-                String arrivalICAO = items.get(1);
-                int soldTickets = Integer.parseInt(items.get(2));
+                String[] items = content.split(",");
+                String departureICAO = items[0];
+                String arrivalICAO = items[1];
+                int soldTickets = Integer.parseInt(items[2]);
                 Airport departureAirportTemp = AirportManager.getInstance().getAirport(departureICAO);
                 Airport arrivalAirportTemp = AirportManager.getInstance().getAirport(arrivalICAO);
                 overbookedSeats = soldTickets - aircraft.getCapacity();
                 String costTemp = "-1";
                 
                 if (aircraftAvailable) {
-                    // Message received. Process it
                     departureAirport = departureAirportTemp;
                     arrivalAirport = arrivalAirportTemp;
                     departureAirportLocation = departureAirport.getLocation();
