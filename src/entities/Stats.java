@@ -12,7 +12,6 @@ package entities;
  */
 public class Stats 
 {
-    private int id;
     private String routeTime;
     private String aircraft;
     private String departureAirport;
@@ -21,9 +20,8 @@ public class Stats
     private String aircraftLocation;
     private String overbookedSeats;
     
-    public Stats(int id, String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String overbookedSeats) 
+    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String overbookedSeats) 
     {
-        this.id = id;
         this.routeTime = time;
         this.aircraft = aircraft;
         this.departureAirport = departureAirport;
@@ -36,27 +34,18 @@ public class Stats
     public Stats(String csvString)
     {
         String[] args = csvString.split(",");
-        this.id = Integer.parseInt(args[0]);
-        this.routeTime = args[1];
-        this.aircraft = args[2];
-        this.departureAirport = args[3];
-        this.destinationAirport = args[4];
-        this.cost = args[5];
-        this.aircraftLocation = args[6];
-        this.overbookedSeats = args[7];
-    }
-    
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.routeTime = args[0];
+        this.aircraft = args[1];
+        this.departureAirport = args[2];
+        this.destinationAirport = args[3];
+        this.cost = args[4];
+        this.aircraftLocation = args[5];
+        this.overbookedSeats = args[6];
     }
     
     public String toCsvString()
     {
-        return id + "," + routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + overbookedSeats;
+        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + overbookedSeats;
     }
     
     public String getRouteTime() {
