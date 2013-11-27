@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 import mediator.AircraftManager;
 import mediator.AirportManager;
 import mediator.CsvFile;
+import mediator.CsvFileRepository;
 
 public class MainAgent extends Agent {
 
@@ -188,7 +189,8 @@ public class MainAgent extends Agent {
         System.out.println("Shutting down main");
         
         try {
-            CsvFile.INSTANCE.write();
+            CsvFileRepository.INSTANCE.getCsvFile("AllAircraftStats").write();
+            CsvFileRepository.INSTANCE.getCsvFile("ChosenAircraftStats").write();
         } catch (IOException ex) {
             Logger.getLogger(MainAgent.class.getName()).log(Level.SEVERE, null, ex);
         }

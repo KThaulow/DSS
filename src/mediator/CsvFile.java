@@ -10,20 +10,17 @@ import entities.Stats;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 /**
  *
  * @author pla
  */
-public enum CsvFile 
+public class CsvFile 
 {
-    INSTANCE;
-    
-    private HashMap<Integer, Stats> stats;
+    private ArrayList<Stats> statsEntries;
     private File statsFile;
     
-    private static final String ID = "ID";
     private static final String ROUTE_TIME = "Route Time";
     private static final String AIRCRAFT_NAME = "Aircraft";
     private static final String DEP_AIRPORT = "Departure Airport";
@@ -32,26 +29,15 @@ public enum CsvFile
     private static final String CURRENT_LOCATION = "Current Location";
     private static final String OVERBOOKED_SEATS = "Overbooked Seats";
     
-    private CsvFile() 
+    public CsvFile(String filePath) 
     {
-        statsFile = new File("Stats.csv");
-        stats = new HashMap<>();
+        statsFile = new File(filePath);
+        statsEntries = new ArrayList<>();
     }
     
     public void addStats(Stats stats)
     {
-        int id = getNextId();
-        this.stats.put(id, stats);
-    }
-    
-    public int getNextId()
-    {
-        return stats.size();
-    }
-    
-    public void addStats(int id, Stats stats)
-    {
-        this.stats.put(id, stats);
+        statsEntries.add(stats);
     }
     
     public void write() throws IOException
@@ -72,11 +58,17 @@ public enum CsvFile
         }
     }
     
+    public String getNameWithoutExtension()
+    {
+        String fileName = statsFile.getName();
+        return fileName.substring(0, fileName.lastIndexOf("."));
+    }
+    
     private String getCsvString()
     {
         String content = getHeaderColumns() + "\n";
         
-        for(Stats s : stats.values())
+        for(Stats s : statsEntries)
             content += s + "\n";
         
         return content;
@@ -84,6 +76,6 @@ public enum CsvFile
     
     private String getHeaderColumns()
     {
-        return ID + "," + ROUTE_TIME + "," + AIRCRAFT_NAME + "," + DEP_AIRPORT + "," + DEST_AIRPORT + "," + COST + "," +CURRENT_LOCATION + "," + OVERBOOKED_SEATS;
+        return ROUTE_TIME + "," + AIRCRAFT_NAME + "," + DEP_AIRPORT + "," + DEST_AIRPORT + "," + COST + "," +CURRENT_LOCATION + "," + OVERBOOKED_SEATS;
     }
 }
