@@ -1,6 +1,5 @@
 package Agents;
 
-import Utils.LinearCoordCalculator;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.domain.DFService;
@@ -21,15 +20,13 @@ import jade.core.AID;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import mediator.AirportManager;
-import mediator.CsvFile;
 
 public class AircraftAgent extends Agent {
 
     private Airport currentAirport, departureAirport, arrivalAirport;
-    private double travelledDistanceRoute, travelledDistanceLeg;
+    private double travelledDistanceLeg;
     private SphericalPosition departureAirportLocation, arrivalAirportLocation, currentLocation;
     private boolean aircraftAvailable; // Is the aircraft in use by another route
     private boolean aircraftFunctional; // Is the aircraft functional
@@ -125,25 +122,23 @@ public class AircraftAgent extends Agent {
                 int soldTickets = Integer.parseInt(items[2]);
                 Airport departureAirportTemp = AirportManager.getInstance().getAirport(departureICAO);
                 Airport arrivalAirportTemp = AirportManager.getInstance().getAirport(arrivalICAO);
-                overbookedSeats = soldTickets - aircraft.getCapacity();
+                int overbookedSeats = soldTickets - aircraft.getCapacity();
                 String costTemp = "-1";
-                
+
                 if (aircraftAvailable) {
-                    departureAirport = departureAirportTemp;
-                    arrivalAirport = arrivalAirportTemp;
-                    departureAirportLocation = departureAirport.getLocation();
-                    arrivalAirportLocation = arrivalAirport.getLocation();
-                    
+                    SphericalPosition departureAirportLocation = departureAirportTemp.getLocation();
+                    SphericalPosition arrivalAirportLocation = arrivalAirportTemp.getLocation();
+
                     ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
-                    cost = costTemp = costModel.calculateCost() + "";
-                    reply.setContent(cost);
+                    costTemp = costModel.calculateCost() + "";
+                    reply.setContent(costTemp);
                 } else {
                     reply.setContent(costTemp);
                 }
 
                 stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), overbookedSeats + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
-                
+
                 myAgent.send(reply);
             } else {
                 block();
@@ -163,19 +158,36 @@ public class AircraftAgent extends Agent {
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
                 // Message received. Process it
+                // Message received. Process it
+                String content = msg.getContent();
+                String[] items = content.split(",");
+                String departureICAO = items[0];
+                String arrivalICAO = items[1];
+                int soldTickets = Integer.parseInt(items[2]);
+
                 ACLMessage reply = msg.createReply();
 
-                if (aircraftFunctional) {
+                if (aircraftFunctional && aircraftAvailable) {
                     reply.setPerformative(ACLMessage.INFORM);
-                    System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
-                    travelledDistanceRoute = 0; // Reset travelled distance for route
+
                     travelledDistanceLeg = 0; // Reset travelled distance for leg
                     routeTimeSeconds = 0; // Reset route minutes
                     aircraftAvailable = false;
+
+                    departureAirport = AirportManager.getInstance().getAirport(departureICAO);
+                    arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
+                    departureAirportLocation = departureAirport.getLocation();
+                    arrivalAirportLocation = arrivalAirport.getLocation();
+                    overbookedSeats = soldTickets - aircraft.getCapacity();
+                    ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    cost = costModel.calculateCost() + "";
+
+                    System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
+
                     addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
-                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional. Requested by " + msg.getSender());
+                    System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional or available. Requested by " + msg.getSender());
                 }
 
                 myAgent.send(reply);
@@ -192,7 +204,6 @@ public class AircraftAgent extends Agent {
 
         private SphericalPosition otherLocation;
         private double distanceSinceLastUpdate;
-        private boolean IsArrivedAtDeparture = false;
 
         public AircraftStartInformBehaviour(Agent a, long period) {
             super(a, period);
@@ -202,7 +213,6 @@ public class AircraftAgent extends Agent {
         protected void onTick() {
             distanceSinceLastUpdate = aircraft.getSpeed() / (MS_TO_HOUR / (AIRCRAFT_START_TIMER_MS * TIME_FACTOR));
             travelledDistanceLeg += distanceSinceLastUpdate;
-            travelledDistanceRoute += distanceSinceLastUpdate;
             routeTimeSeconds += AIRCRAFT_START_TIMER_MS / MS_TO_SECONDS;
 
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
@@ -237,7 +247,7 @@ public class AircraftAgent extends Agent {
 
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
-                stats = new Stats(routeTimeSeconds+"", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), overbookedSeats + "");
+                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), overbookedSeats + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;
@@ -275,7 +285,7 @@ public class AircraftAgent extends Agent {
 
         @Override
         public void action() {
-            System.out.println("Inform statistics agent");
+            //System.out.println("Inform statistics agent");
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
             sd.setType(TYPE_OF_STATISTICS_AGENT); // Get all aircrafts
@@ -283,7 +293,7 @@ public class AircraftAgent extends Agent {
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);
                 statisticsAgent = results[0].getName();
-                System.out.println("Info sent to " + statisticsAgent.getLocalName());
+                //System.out.println("Info sent to " + statisticsAgent.getLocalName());
                 ACLMessage info = new ACLMessage(ACLMessage.INFORM);
                 info.addReceiver(statisticsAgent);
                 String statistics = stats.toCsvString();

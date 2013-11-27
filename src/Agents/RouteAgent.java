@@ -176,7 +176,7 @@ public class RouteAgent extends Agent {
                     ACLMessage order = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                     order.addReceiver(bestPlane);
                     order.setConversationId(BEST_AIRCRAFT_CON_ID);
-                    order.setReplyWith(BEST_AIRCRAFT_CON_ID + System.currentTimeMillis());
+                    order.setContent(departureAirport.getIcao() + "," + arrivalAirport.getIcao() + "," + soldTickets); // Send the departure airport and sold tickets  
                     myAgent.send(order);
                     // Prepare the template to get the order reply
                     mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
