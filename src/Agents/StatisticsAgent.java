@@ -18,18 +18,17 @@ import mediator.CsvFile;
 
 public class StatisticsAgent extends Agent {
 
-    File overbookedSeatsFile = new File("OverbookedSeats.csv");
-    File routeTimeFile = new File("RouteTime.csv");
-    File costFile = new File("FlightCost.csv");
+    private CsvFile allAircraftsFile;
+    private CsvFile chosenAircraftsFile;
 
     @Override
     protected void setup() {
         System.out.println("Statistics-agent " + getAID().getName() + " is ready");
 
         registerToDF();
-        
+
         addBehaviour(new InfoListenerRequestServerBehaviour());
-        
+
     }
 
     // Free seats
@@ -64,8 +63,12 @@ public class StatisticsAgent extends Agent {
             if (reply != null) {
                 String content = reply.getContent();
                 Stats s = new Stats(content);
-                
-                CsvFile.INSTANCE.addStats(s.getId(), s);
+                if (s.getRouteTime().isEmpty()) {
+                    allAircraftsFile.addStats(s);
+                } else {
+                    chosenAircraftsFile.addStats(s);
+                }
+
             } else {
                 block();
             }

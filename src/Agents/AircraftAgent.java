@@ -39,7 +39,6 @@ public class AircraftAgent extends Agent {
     private String cost;
     private double routeTimeSeconds;
     private Stats stats;
-    private int StatsID;
 
     private enum ArrivalAirport {
 
@@ -142,8 +141,7 @@ public class AircraftAgent extends Agent {
                     reply.setContent(costTemp);
                 }
 
-                StatsID = CsvFile.INSTANCE.getNextId();
-                stats = new Stats(StatsID, "", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), overbookedSeats + "");
+                stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), overbookedSeats + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 
                 myAgent.send(reply);
@@ -239,7 +237,7 @@ public class AircraftAgent extends Agent {
 
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
-                stats = new Stats(StatsID, routeTimeSeconds+"", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), overbookedSeats + "");
+                stats = new Stats(routeTimeSeconds+"", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), overbookedSeats + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;
