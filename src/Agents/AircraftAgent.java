@@ -184,6 +184,7 @@ public class AircraftAgent extends Agent {
 
                     System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
 
+                    addBehaviour(new AircraftPresenceInformBehaviour(false)); // Inform airport that aircraft is departing
                     addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
                     reply.setPerformative(ACLMessage.CANCEL);
@@ -251,6 +252,7 @@ public class AircraftAgent extends Agent {
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;
+                addBehaviour(new AircraftPresenceInformBehaviour(true)); // Inform airport that aircraft is arriving
                 stop();
             }
 
@@ -299,6 +301,46 @@ public class AircraftAgent extends Agent {
                 String statistics = stats.toCsvString();
                 info.setContent(statistics);
                 info.setConversationId(STATISTICS_CON_ID);
+                myAgent.send(info);
+            } catch (FIPAException fe) {
+                fe.printStackTrace();
+            }
+        }
+    }
+    
+    /**
+     * Informs the departure and arrival airport of the aircrafts presence
+     */
+    private class AircraftPresenceInformBehaviour extends OneShotBehaviour{
+
+        private final boolean arrival;
+        
+        /**
+         * True if arrival. False if departure.
+         * @param arrival 
+         */
+        public AircraftPresenceInformBehaviour(boolean arrival) {
+            this.arrival = arrival;
+        }
+        
+        @Override
+        public void action() {
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sd = new ServiceDescription();
+            int currentAirportID = currentAirport.getId();
+            sd.setName(NAME_OF_AIRPORT_AGENT+currentAirportID); // Get current airport
+            template.addServices(sd);
+            try {
+                DFAgentDescription[] results = DFService.search(myAgent, template);
+                AID currentAirportAID = results[0].getName();
+                ACLMessage info = new ACLMessage(ACLMessage.INFORM);
+                info.addReceiver(currentAirportAID);
+                if(arrival){
+                    info.setContent("arrival");
+                } else {
+                    info.setContent("departure");
+                }
+                info.setConversationId(AIRCRAFT_PRESENCE_CON_ID);
                 myAgent.send(info);
             } catch (FIPAException fe) {
                 fe.printStackTrace();
