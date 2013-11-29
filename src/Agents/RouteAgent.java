@@ -193,7 +193,7 @@ public class RouteAgent extends Agent {
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;
 
-                        } else if (reply.getPerformative() == ACLMessage.CANCEL) {
+                        } else if (reply.getPerformative() == ACLMessage.REFUSE) {
                             unavailableAircrafts.add(bestPlane);
                             bestPlane = null;
                             

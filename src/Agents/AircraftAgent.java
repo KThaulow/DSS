@@ -187,7 +187,7 @@ public class AircraftAgent extends Agent {
                     addBehaviour(new AircraftPresenceInformBehaviour(false)); // Inform airport that aircraft is departing
                     addBehaviour(new AircraftStartInformBehaviour(myAgent, AIRCRAFT_START_TIMER_MS)); // Start flight
                 } else {
-                    reply.setPerformative(ACLMessage.CANCEL);
+                    reply.setPerformative(ACLMessage.REFUSE);
                     System.out.println("Aircraft " + myAgent.getLocalName() + " is not functional or available. Requested by " + msg.getSender());
                 }
 
