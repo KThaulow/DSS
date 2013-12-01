@@ -36,12 +36,7 @@ public class AircraftAgent extends Agent {
     private String cost;
     private double routeTimeSeconds;
     private Stats stats;
-
-    private enum ArrivalAirport {
-
-        REQUEST_AIRPORT_LOCATION, GET_AIRPORT_LOCATION, DONE;
-    }
-
+   
     @Override
     protected void setup() {
         System.out.println("Aircraft-agent " + getAID().getName() + " is ready");
@@ -100,7 +95,7 @@ public class AircraftAgent extends Agent {
     }
 
     /**
-     * Serves the reschedule request from the RouteAgent
+     * Serves the best aircraft request from the RouteAgent and replies with the cost of flying the route
      */
     private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
 
@@ -157,7 +152,6 @@ public class AircraftAgent extends Agent {
 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
-                // Message received. Process it
                 // Message received. Process it
                 String content = msg.getContent();
                 String[] items = content.split(",");

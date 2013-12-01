@@ -23,7 +23,7 @@ public class RouteAgent extends Agent {
 
     private enum BestAircraft {
 
-        REQUEST_AIRCRAFT, GET_PROPOSAL_FROM_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, IDLE;
+        REQUEST_AIRCRAFT_COST, GET_PROPOSAL_FROM_ALL_AIRCRAFTS, ORDER_AIRCRAFT, GET_RECEIPT, IDLE;
     }
 
     private enum AirportLocation {
@@ -99,7 +99,7 @@ public class RouteAgent extends Agent {
         private double lowestCost; // The lowest cost
         private int repliesCnt = 0; // The counter of replies from plane agents
         private MessageTemplate mt; // The template to receive replies
-        private BestAircraft step = BestAircraft.REQUEST_AIRCRAFT;
+        private BestAircraft step = BestAircraft.REQUEST_AIRCRAFT_COST;
         private List<AID> unavailableAircrafts = new ArrayList<>();
         private int numberOfAircrafts = 0;
 
@@ -108,7 +108,7 @@ public class RouteAgent extends Agent {
             AID[] aircrafts;
 
             switch (step) {
-                case REQUEST_AIRCRAFT: // Send the CFP (Call For Proposal) to all aircrafts
+                case REQUEST_AIRCRAFT_COST: // Send the CFP (Call For Proposal) to all aircrafts
 
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
@@ -134,7 +134,7 @@ public class RouteAgent extends Agent {
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
                         mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
-                        step = BestAircraft.GET_PROPOSAL_FROM_AIRCRAFTS;
+                        step = BestAircraft.GET_PROPOSAL_FROM_ALL_AIRCRAFTS;
 
                         System.out.println("CFP for best fitted aircraft send to all aircrafts");
                     } catch (FIPAException fe) {
@@ -142,7 +142,7 @@ public class RouteAgent extends Agent {
                     }
                     break;
 
-                case GET_PROPOSAL_FROM_AIRCRAFTS:  // Receive all proposals from the planes in the current airport
+                case GET_PROPOSAL_FROM_ALL_AIRCRAFTS:  // Receive all proposals from the planes in the current airport
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
 
@@ -197,7 +197,7 @@ public class RouteAgent extends Agent {
                             unavailableAircrafts.add(bestPlane);
                             bestPlane = null;
                             
-                            step = BestAircraft.REQUEST_AIRCRAFT;
+                            step = BestAircraft.REQUEST_AIRCRAFT_COST;
                         }
 
                     } else {

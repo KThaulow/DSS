@@ -28,7 +28,7 @@ public class StatisticsAgent extends Agent {
 
         registerToDF();
 
-        addBehaviour(new InfoListenerRequestServerBehaviour());
+        addBehaviour(new StatisticsInformServerBehaviour());
         
         allAircraftsFile = new CsvFile("AllAircraftStats.csv");
         chosenAircraftsFile = new CsvFile("ChosenAircraftStats.csv");
@@ -53,9 +53,9 @@ public class StatisticsAgent extends Agent {
     }
 
     /**
-     * Request listener(s) for aircraft info
+     * Adds the received record to the statistics repository
      */
-    private class InfoListenerRequestServerBehaviour extends CyclicBehaviour {
+    private class StatisticsInformServerBehaviour extends CyclicBehaviour {
 
         @Override
         public void action() {
