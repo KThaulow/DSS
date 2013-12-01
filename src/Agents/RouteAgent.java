@@ -188,7 +188,7 @@ public class RouteAgent extends Agent {
                     reply = myAgent.receive(mt);
                     if (reply != null) {
                         // Reschedule order reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
+                        if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aircraft = bestPlane;
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;

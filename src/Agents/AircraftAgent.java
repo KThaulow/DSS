@@ -36,7 +36,7 @@ public class AircraftAgent extends Agent {
     private String cost;
     private double routeTimeSeconds;
     private Stats stats;
-   
+
     @Override
     protected void setup() {
         System.out.println("Aircraft-agent " + getAID().getName() + " is ready");
@@ -95,7 +95,8 @@ public class AircraftAgent extends Agent {
     }
 
     /**
-     * Serves the best aircraft request from the RouteAgent and replies with the cost of flying the route
+     * Serves the best aircraft request from the RouteAgent and replies with the
+     * cost of flying the route
      */
     private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
 
@@ -162,7 +163,7 @@ public class AircraftAgent extends Agent {
                 ACLMessage reply = msg.createReply();
 
                 if (aircraftFunctional && aircraftAvailable) {
-                    reply.setPerformative(ACLMessage.INFORM);
+                    reply.setPerformative(ACLMessage.CONFIRM);
 
                     travelledDistanceLeg = 0; // Reset travelled distance for leg
                     routeTimeSeconds = 0; // Reset route minutes
@@ -186,6 +187,24 @@ public class AircraftAgent extends Agent {
                 }
 
                 myAgent.send(reply);
+            } else {
+                block();
+            }
+        }
+    }
+
+    /**
+     * Request listener(s) for aircraft info
+     */
+    private class InfoListenerRequestServerBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRCRAFT_SUBSCRIPTION_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+            ACLMessage reply = myAgent.receive(mt);
+            if (reply != null) {
+                infoListeners.add(reply.getSender());
+                System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
             } else {
                 block();
             }
@@ -255,24 +274,6 @@ public class AircraftAgent extends Agent {
     }
 
     /**
-     * Request listener(s) for aircraft info
-     */
-    private class InfoListenerRequestServerBehaviour extends CyclicBehaviour {
-
-        @Override
-        public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRCRAFT_SUBSCRIPTION_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-            ACLMessage reply = myAgent.receive(mt);
-            if (reply != null) {
-                infoListeners.add(reply.getSender());
-                System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
-            } else {
-                block();
-            }
-        }
-    }
-
-    /**
      * Informs the statistics agent with aircraft info
      */
     private class InformStatisticsBehaviour extends OneShotBehaviour {
@@ -301,35 +302,36 @@ public class AircraftAgent extends Agent {
             }
         }
     }
-    
+
     /**
      * Informs the departure and arrival airport of the aircrafts presence
      */
-    private class AircraftPresenceInformBehaviour extends OneShotBehaviour{
+    private class AircraftPresenceInformBehaviour extends OneShotBehaviour {
 
         private final boolean arrival;
-        
+
         /**
          * True if arrival. False if departure.
-         * @param arrival 
+         *
+         * @param arrival
          */
         public AircraftPresenceInformBehaviour(boolean arrival) {
             this.arrival = arrival;
         }
-        
+
         @Override
         public void action() {
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sd = new ServiceDescription();
             int currentAirportID = currentAirport.getId();
-            sd.setName(NAME_OF_AIRPORT_AGENT+currentAirportID); // Get current airport
+            sd.setName(NAME_OF_AIRPORT_AGENT + currentAirportID); // Get current airport
             template.addServices(sd);
             try {
                 DFAgentDescription[] results = DFService.search(myAgent, template);
                 AID currentAirportAID = results[0].getName();
                 ACLMessage info = new ACLMessage(ACLMessage.INFORM);
                 info.addReceiver(currentAirportAID);
-                if(arrival){
+                if (arrival) {
                     info.setContent("arrival");
                 } else {
                     info.setContent("departure");
