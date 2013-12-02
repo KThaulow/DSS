@@ -32,7 +32,7 @@ public class AircraftAgent extends Agent {
     private boolean aircraftFunctional; // Is the aircraft functional
     private List<AID> infoListeners;
     private Aircraft aircraft;
-    private int overbookedSeats;
+    private int bookedSeats;
     private String cost;
     private double routeTimeSeconds;
     private Stats stats;
@@ -115,24 +115,23 @@ public class AircraftAgent extends Agent {
                 String[] items = content.split(",");
                 String departureICAO = items[0];
                 String arrivalICAO = items[1];
-                int soldTickets = Integer.parseInt(items[2]);
+                bookedSeats = Integer.parseInt(items[2]);
                 Airport departureAirportTemp = AirportManager.getInstance().getAirport(departureICAO);
                 Airport arrivalAirportTemp = AirportManager.getInstance().getAirport(arrivalICAO);
-                int overbookedSeats = soldTickets - aircraft.getCapacity();
                 String costTemp = "-1";
 
                 if (aircraftAvailable) {
                     SphericalPosition departureAirportLocation = departureAirportTemp.getLocation();
                     SphericalPosition arrivalAirportLocation = arrivalAirportTemp.getLocation();
 
-                    ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new SimpleCostModel2(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     costTemp = costModel.calculateCost() + "";
                     reply.setContent(costTemp);
                 } else {
                     reply.setContent(costTemp);
                 }
 
-                stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), overbookedSeats + "");
+                stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
 
                 myAgent.send(reply);
@@ -158,7 +157,7 @@ public class AircraftAgent extends Agent {
                 String[] items = content.split(",");
                 String departureICAO = items[0];
                 String arrivalICAO = items[1];
-                int soldTickets = Integer.parseInt(items[2]);
+                bookedSeats = Integer.parseInt(items[2]);
 
                 ACLMessage reply = msg.createReply();
 
@@ -173,8 +172,7 @@ public class AircraftAgent extends Agent {
                     arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
                     departureAirportLocation = departureAirport.getLocation();
                     arrivalAirportLocation = arrivalAirport.getLocation();
-                    overbookedSeats = soldTickets - aircraft.getCapacity();
-                    ICostModel costModel = new SimpleCostModel2(soldTickets, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new SimpleCostModel2(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     cost = costModel.calculateCost() + "";
 
                     System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
@@ -205,9 +203,28 @@ public class AircraftAgent extends Agent {
             if (reply != null) {
                 infoListeners.add(reply.getSender());
                 System.out.println("Listener added " + reply.getSender() + " for aircraft agent " + myAgent.getLocalName());
+                addBehaviour(new InformStartLocationBehaviour()); // Send start location information                
             } else {
                 block();
             }
+        }
+    }
+
+    /**
+     * Send start location to listeners
+     */
+    private class InformStartLocationBehaviour extends OneShotBehaviour {
+
+        @Override
+        public void action() {
+            ACLMessage info = new ACLMessage(ACLMessage.INFORM);
+            info.setConversationId(AIRCRAFT_START_CON_ID);
+
+            for (AID infoListener : infoListeners) {
+                info.addReceiver(infoListener);
+            }
+            info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + aircraft.getSpeed());
+            myAgent.send(info);
         }
     }
 
@@ -245,13 +262,13 @@ public class AircraftAgent extends Agent {
                     travelledDistanceLeg = 0;
                     System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + departureAirport.getName() + " airport");
                 }
-                info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + departureAirportLocation.getLatitude() + "," + departureAirportLocation.getLongitude() + "," + aircraft.getSpeed());
+                info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + departureAirportLocation.getLatitude() + "," + departureAirportLocation.getLongitude() + "," + aircraft.getSpeed() + "," + 0); // Last parameter: 0 if ferry flight
                 System.out.println("Aircraft " + myAgent.getLocalName() + " (" + aircraft.getTailnumber() + ") has current location " + currentLocation.toString() + " and departure " + departureAirportLocation.toString() + " (" + departureAirport.getName() + ")");
             }
             // Aircraft is at the departure airport
             if (currentAirport.equals(departureAirport)) {
                 currentLocation = SphericalPositionCalculator.INSTANCE.getPosition(departureAirportLocation, arrivalAirportLocation, travelledDistanceLeg);
-                info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + arrivalAirportLocation.getLatitude() + "," + arrivalAirportLocation.getLongitude() + "," + aircraft.getSpeed());
+                info.setContent(currentLocation.getLatitude() + "," + currentLocation.getLongitude() + "," + arrivalAirportLocation.getLatitude() + "," + arrivalAirportLocation.getLongitude() + "," + aircraft.getSpeed() + "," + 1); // Last parameter: 1 if not ferry flight
                 System.out.println("Aircraft " + myAgent.getLocalName() + " (" + aircraft.getTailnumber() + ") has current location " + currentLocation.toString() + " and arrival " + arrivalAirportLocation.toString() + " (" + arrivalAirport.getName() + ")" + " and departure " + departureAirport.getName());
             }
 
@@ -261,7 +278,7 @@ public class AircraftAgent extends Agent {
 
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
-                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), overbookedSeats + "");
+                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;

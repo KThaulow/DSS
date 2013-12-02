@@ -57,8 +57,8 @@ public class MainAgent extends Agent {
         createAgent("GUIAgent", "Agents.GUIAgent", null);
 
         createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
-        
-        //addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
+
+        addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
     }
 
     private ArrayList<IAgentArgs> createAircraftAgentsArgs() {
@@ -66,6 +66,11 @@ public class MainAgent extends Agent {
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirport("EKCH")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly"), AirportManager.getInstance().getAirport("ENGM")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly"), AirportManager.getInstance().getAirport("EDDF")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("HenriksFly"), AirportManager.getInstance().getAirport("LFPG")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly1"), AirportManager.getInstance().getAirport("EDDM")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly1"), AirportManager.getInstance().getAirport("EGLC")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly1"), AirportManager.getInstance().getAirport("EHRD")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("HenriksFly1"), AirportManager.getInstance().getAirport("LTBA")));
 
         return acAgentArgs;
     }
@@ -75,6 +80,11 @@ public class MainAgent extends Agent {
         airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EKCH")));
         airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("ENGM")));
         airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EDDF")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EGLC")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EDDM")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("LFPG")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("EHRD")));
+        airportAgentArgs.add(new AirportAgentArgs(AirportManager.getInstance().getAirport("LTBA")));
 
         return airportAgentArgs;
     }
@@ -87,7 +97,7 @@ public class MainAgent extends Agent {
         Airport arrAirport = AirportManager.getInstance().getAirport("EDDF");
         Date earliestArrival = new Date(now + 3600 * 1000);
         Date latest = new Date(now + 3600 * 4 * 1000);
-        routeAgentArgs.add(new RouteAgentArgs(0, 150, depAirport, arrAirport, earliestArrival, latest));
+        routeAgentArgs.add(new RouteAgentArgs(0, 200, depAirport, arrAirport, earliestArrival, latest));
 
         Airport depAirport1 = AirportManager.getInstance().getAirport("EDDF");
         Airport arrAirport1 = AirportManager.getInstance().getAirport("ENGM");
@@ -118,41 +128,82 @@ public class MainAgent extends Agent {
         @Override
         protected void onTick() {
             now = new Date().getTime();
+            earliestArrival = new Date(now + 3600 * 1000);
+            latest = new Date(now + 3600 * 4 * 1000);
+            int bookedSeats = 0;
             switch (routeIncrementer) {
                 case 0:
                     depAirport = AirportManager.getInstance().getAirport("EDDF");
                     arrAirport = AirportManager.getInstance().getAirport("EKCH");
-                    earliestArrival = new Date(now + 3600 * 1000);
-                    latest = new Date(now + 3600 * 4 * 1000);
+                    bookedSeats = 100;
                     routeID++;
                     routeIncrementer++;
                     break;
                 case 1:
                     depAirport = AirportManager.getInstance().getAirport("ENGM");
                     arrAirport = AirportManager.getInstance().getAirport("EDDF");
-                    earliestArrival = new Date(now + 3600 * 1000);
-                    latest = new Date(now + 3600 * 4 * 1000);
+                    bookedSeats = 120;
                     routeID++;
                     routeIncrementer++;
                     break;
                 case 2:
                     depAirport = AirportManager.getInstance().getAirport("EKCH");
                     arrAirport = AirportManager.getInstance().getAirport("ENGM");
-                    earliestArrival = new Date(now + 3600 * 1000);
-                    latest = new Date(now + 3600 * 4 * 1000);
+                    bookedSeats = 150;
                     routeID++;
                     routeIncrementer++;
                     break;
                 case 3:
+                    depAirport = AirportManager.getInstance().getAirport("EGLC");
+                    arrAirport = AirportManager.getInstance().getAirport("EDDM");
+                    bookedSeats = 150;
+                    routeID++;
+                    routeIncrementer++;
+                    break;
+                case 4:
+                    depAirport = AirportManager.getInstance().getAirport("LFPG");
+                    arrAirport = AirportManager.getInstance().getAirport("EHRD");
+                    bookedSeats = 150;
+                    routeID++;
+                    routeIncrementer++;
+                    break;
+                case 5:
+                    depAirport = AirportManager.getInstance().getAirport("LTBA");
+                    arrAirport = AirportManager.getInstance().getAirport("EGLC");
+                    bookedSeats = 150;
+                    routeID++;
+                    routeIncrementer++;
+                    break;
+                case 6:
+                    depAirport = AirportManager.getInstance().getAirport("EDDM");
+                    arrAirport = AirportManager.getInstance().getAirport("LFPG");
+                    bookedSeats = 150;
+                    routeID++;
+                    routeIncrementer++;
+                    break;
+                case 7:
+                    depAirport = AirportManager.getInstance().getAirport("EHRD");
+                    arrAirport = AirportManager.getInstance().getAirport("LTBA");
+                    bookedSeats = 150;
+                    routeID++;
+                    routeIncrementer++;
+                    break;
+                case 8:
+                    depAirport = AirportManager.getInstance().getAirport("LFPG");
+                    arrAirport = AirportManager.getInstance().getAirport("LTBA");
+                    bookedSeats = 150;
+                    routeID++;
+                    routeIncrementer++;
+                    break;
+                case 9:
                     depAirport = AirportManager.getInstance().getAirport("ENGM");
                     arrAirport = AirportManager.getInstance().getAirport("EKCH");
-                    earliestArrival = new Date(now + 3600 * 1000);
-                    latest = new Date(now + 3600 * 4 * 1000);
+                    bookedSeats = 200;
                     routeID++;
                     routeIncrementer = 0;
                     break;
             }
-            createAgent("rAgent" + routeID, "Agents.RouteAgent", new RouteAgentArgs(routeID, 150, depAirport, arrAirport, earliestArrival, latest));
+            createAgent("rAgent" + routeID, "Agents.RouteAgent", new RouteAgentArgs(routeID, bookedSeats, depAirport, arrAirport, earliestArrival, latest));
         }
 
     }
@@ -187,7 +238,7 @@ public class MainAgent extends Agent {
     @Override
     protected void takeDown() {
         System.out.println("Shutting down main");
-        
+
         try {
             CsvFileRepository.INSTANCE.getCsvFile("AllAircraftStats").write();
             CsvFileRepository.INSTANCE.getCsvFile("ChosenAircraftStats").write();

@@ -7,7 +7,7 @@ package Utils;
 public class Settings {
     public static final String TYPE_OF_AIRCRAFT_AGENT = "aircraft";
     public static final String NAME_OF_AIRCRAFT_AGENT = "aircraftAgent";
-    public static final int AIRCRAFT_START_TIMER_MS = 1000;
+    public static final int AIRCRAFT_START_TIMER_MS = 100;
     
     public static final String TYPE_OF_ROUTE_AGENT = "route";
     public static final String NAME_OF_ROUTE_AGENT = "routeAgent";
@@ -37,5 +37,5 @@ public class Settings {
     
     public static final int TIME_FACTOR = 600;
     
-    public static final int ROUTE_GENERATOR_MS_DELAY = 25000;
+    public static final int ROUTE_GENERATOR_MS_DELAY = 5000;
 }

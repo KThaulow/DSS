@@ -23,6 +23,10 @@ public class AircraftManager {
         aircrafts.put("PetersFly", new Aircraft("PetersFly", 2, 125, 400, 1200));
         aircrafts.put("KristiansFly", new Aircraft("KristiansFly", 3, 250, 380, 3000));
         aircrafts.put("HenriksFly", new Aircraft("HenriksFly", 4, 75, 300, 700));
+        aircrafts.put("KaspersFly1", new Aircraft("KaspersFly1", 5, 150, 458, 1500));
+        aircrafts.put("PetersFly1", new Aircraft("PetersFly1", 6, 125, 400, 1200));
+        aircrafts.put("KristiansFly1", new Aircraft("KristiansFly1", 7, 250, 380, 3000));
+        aircrafts.put("HenriksFly1", new Aircraft("HenriksFly1", 8, 75, 300, 700));
     }
     
     public Aircraft getAircraft(String tailnumber) {

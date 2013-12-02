@@ -18,9 +18,10 @@ public class Stats
     private String destinationAirport;
     private String cost;
     private String aircraftLocation;
-    private String overbookedSeats;
+    private String bookedSeats;
+    private String availableSeats;
     
-    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String overbookedSeats) 
+    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String bookedSeats, String availableSeats) 
     {
         this.routeTime = time;
         this.aircraft = aircraft;
@@ -28,7 +29,8 @@ public class Stats
         this.destinationAirport = destinationAirport;
         this.cost = cost;
         this.aircraftLocation = aircraftLocation;
-        this.overbookedSeats = overbookedSeats;
+        this.bookedSeats = bookedSeats;
+        this.availableSeats = availableSeats;
     }
 
     public Stats(String csvString)
@@ -40,12 +42,13 @@ public class Stats
         this.destinationAirport = args[3];
         this.cost = args[4];
         this.aircraftLocation = args[5];
-        this.overbookedSeats = args[6];
+        this.bookedSeats = args[6];
+        this.availableSeats = args[7];
     }
     
     public String toCsvString()
     {
-        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + overbookedSeats;
+        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + bookedSeats + "," + availableSeats;
     }
     
     public String getRouteTime() {
@@ -96,12 +99,20 @@ public class Stats
         this.aircraftLocation = aircraftLocation;
     }
 
-    public String getOverbookedSeats() {
-        return overbookedSeats;
+    public String getBookedSeats() {
+        return bookedSeats;
     }
 
-    public void setOverbookedSeats(String overbookedSeats) {
-        this.overbookedSeats = overbookedSeats;
+    public void setBookedSeats(String overbookedSeats) {
+        this.bookedSeats = overbookedSeats;
+    }
+    
+    public String getAvailableSeats() {
+        return availableSeats;
+    }
+
+    public void setAvailableSeats(String overbookedSeats) {
+        this.availableSeats = overbookedSeats;
     }
 
     @Override
