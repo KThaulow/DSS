@@ -20,8 +20,9 @@ public class Stats
     private String aircraftLocation;
     private String bookedSeats;
     private String availableSeats;
+    private String fuelBurnRate;
     
-    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String bookedSeats, String availableSeats) 
+    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String bookedSeats, String availableSeats, String fuelBurnrate) 
     {
         this.routeTime = time;
         this.aircraft = aircraft;
@@ -31,6 +32,7 @@ public class Stats
         this.aircraftLocation = aircraftLocation;
         this.bookedSeats = bookedSeats;
         this.availableSeats = availableSeats;
+        this.fuelBurnRate = fuelBurnrate;
     }
 
     public Stats(String csvString)
@@ -44,11 +46,12 @@ public class Stats
         this.aircraftLocation = args[5];
         this.bookedSeats = args[6];
         this.availableSeats = args[7];
+        this.fuelBurnRate = args[8];
     }
     
     public String toCsvString()
     {
-        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + bookedSeats + "," + availableSeats;
+        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + bookedSeats + "," + availableSeats + "," + fuelBurnRate;
     }
     
     public String getRouteTime() {
@@ -113,6 +116,14 @@ public class Stats
 
     public void setAvailableSeats(String overbookedSeats) {
         this.availableSeats = overbookedSeats;
+    }
+    
+    public String getFuelBurnRate() {
+        return fuelBurnRate;
+    }
+
+    public void setFuelBurnRate(String fuelBurnRate) {
+        this.fuelBurnRate = fuelBurnRate;
     }
 
     @Override

@@ -131,7 +131,7 @@ public class AircraftAgent extends Agent {
                     reply.setContent(costTemp);
                 }
 
-                stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "");
+                stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "", aircraft.getFuelBurnRate() + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
 
                 myAgent.send(reply);
@@ -244,7 +244,7 @@ public class AircraftAgent extends Agent {
         protected void onTick() {
             distanceSinceLastUpdate = aircraft.getSpeed() / (MS_TO_HOUR / (AIRCRAFT_START_TIMER_MS * TIME_FACTOR));
             travelledDistanceLeg += distanceSinceLastUpdate;
-            routeTimeSeconds += AIRCRAFT_START_TIMER_MS / MS_TO_SECONDS;
+            routeTimeSeconds += (double) AIRCRAFT_START_TIMER_MS / MS_TO_SECONDS;
 
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
             info.setConversationId(AIRCRAFT_START_CON_ID);
@@ -278,7 +278,8 @@ public class AircraftAgent extends Agent {
 
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
-                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "");
+                System.out.println("Route time: "+routeTimeSeconds);
+                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "", aircraft.getFuelBurnRate() + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;
