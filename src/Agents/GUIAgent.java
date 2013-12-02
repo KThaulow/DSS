@@ -20,6 +20,10 @@ import static Utils.Settings.*;
 import gui.GUIMapInterface;
 import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 /**
  *
  * @author Fuglsang
@@ -31,13 +35,15 @@ public class GUIAgent extends Agent {
         REQUEST_AIRPORT_COORDINATES, GET_COORDINATES_FROM_AIRPORTS, DONE;
     }
     
-    GUIInterface guiInterface; // The gui interface
-    GUIMapInterface guiMapInterface; 
+    private GUIInterface guiInterface; // The gui interface
+    private GUIMapInterface guiMapInterface; 
+    private HashMap<String, String> aircratsAgentsMap; 
     
     @Override
     protected void setup() {
 //        guiInterface = new GUIInterface();
         guiMapInterface = new GUIMapInterface(); 
+        guiMapInterface.drawAirports();
         registerToDF();
         System.out.println("Setup gui agent");
         //addBehaviour(new SomeBehaviour());
@@ -46,6 +52,8 @@ public class GUIAgent extends Agent {
         System.out.println("Request info listener added");
         addBehaviour(new RequestInfoListenerBehaviour());
         addBehaviour(new GetInfoFromAircraftBehaviour());
+        
+        aircratsAgentsMap = new HashMap<>(); 
     }
     
     private void registerToDF() {
@@ -75,82 +83,6 @@ public class GUIAgent extends Agent {
         System.out.println("GUIAgent agent " + getAID().getName() + " terminating");
     }
     
-    private class RequestAirports extends Behaviour {        
-        private MessageTemplate mt; // The template to receive replies
-        private int repliesCnt = 0; // The counter of replies from airport agents        
-        private AirportsCoordinatesSteps step = AirportsCoordinatesSteps.REQUEST_AIRPORT_COORDINATES;
-
-        @Override
-        public void action() {  
-            int numberOfAirports = 0;
-            AID[] airports;
-            switch(step) {
-                case REQUEST_AIRPORT_COORDINATES:                                 
-                    // Template for getting all aircraft agents
-                    DFAgentDescription template = new DFAgentDescription();
-                    ServiceDescription sd = new ServiceDescription();
-                    sd.setType(TYPE_OF_AIRPORT_AGENT); // Get all airports
-                    template.addServices(sd);
-                    try {
-                        DFAgentDescription[] results = DFService.search(myAgent, template);
-                        numberOfAirports = results.length; 
-                        airports = new AID[results.length];
-                        for (int i = 0; i < results.length; ++i) {
-                            airports[i] = results[i].getName();
-                        }
-
-                        // Sent message to airport
-                        ACLMessage cfp = new ACLMessage(ACLMessage.REQUEST);                        
-                        for (int i = 0; i < airports.length; ++i) {
-                            System.out.println("Send message to all airports");
-                            cfp.addReceiver(airports[i]);
-                        }
-                        cfp.setConversationId(AIRPORT_LOCATION_CON_ID);
-                        myAgent.send(cfp);
-                        // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(AIRPORT_LOCATION_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.INFORM));
-                        step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS;
-                        System.out.println("CFP for all the airports coordinates");
-                    } catch (FIPAException fe) {
-                        fe.printStackTrace();
-                    }
-                    break; 
-                    
-                case GET_COORDINATES_FROM_AIRPORTS: 
-                    System.out.println("GET_COORDINATES_FROM_AIRPORTS");                    
-                    ACLMessage reply = myAgent.receive(mt);
-                    if (reply != null) {                        
-                        // Reply received
-                        if (reply.getPerformative() == ACLMessage.INFORM) {
-                            // this is an offer                            
-                            System.out.println("Coordinates received from " + reply.getSender().getName());
-                            System.out.println("The coordinates are " + reply.getContent()); 
-                            String[] coordinates = reply.getContent().split(",");
-                            System.out.println("coordinates " + coordinates[0] + " " + coordinates[1]);
-//                            guiInterface.drawAirport(Integer.parseInt(coordinates[0]), Integer.parseInt(coordinates[0]), reply.getSender().getName());
-                            repliesCnt++;
-                        }
-                        
-                        if (repliesCnt == numberOfAirports) {
-                            // We received all replies  
-                            step = AirportsCoordinatesSteps.DONE; 
-                        } else {
-                            step = AirportsCoordinatesSteps.GET_COORDINATES_FROM_AIRPORTS; 
-                        }
-                    } else {
-                        System.out.println("We are done");
-                        block();
-                    }
-                    break;
-            }
-        }
-
-        @Override
-        public boolean done() {
-            return (step == AirportsCoordinatesSteps.DONE); 
-        }
-    } 
-    
     private class RequestInfoListenerBehaviour extends OneShotBehaviour {
         
         @Override
@@ -164,7 +96,7 @@ public class GUIAgent extends Agent {
                 DFAgentDescription[] results = DFService.search(myAgent, template);                 
                 aircrafts = new AID[results.length];
                 for (int i = 0; i < results.length; ++i) {
-                    aircrafts[i] = results[i].getName();
+                    aircrafts[i] = results[i].getName(); 
                 }
 
                 // Sent message to airport
@@ -191,6 +123,11 @@ public class GUIAgent extends Agent {
             if (msg != null) {                        
                 // Reply received
                 // this is an offer                            
+//                System.out.println("GUI received aircraft name " + msg.getSender().getLocalName() + " and info: " + msg.getContent());
+//                List<String> items = Arrays.asList(msg.getContent().split(","));
+                aircratsAgentsMap.remove(msg.getSender().getLocalName()); 
+                aircratsAgentsMap.put(msg.getSender().getLocalName(), msg.getContent());
+                guiMapInterface.drawAircraft(aircratsAgentsMap); 
                 //System.out.println("GUI received aircraft name " + msg.getSender().getLocalName() + " and info: " + msg.getContent());
             } else {
                 block();

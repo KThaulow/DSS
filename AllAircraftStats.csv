@@ -1,7 +1,7 @@
 Route Time,Aircraft,Departure Airport,Arrival Airport,Cost,Current Location,Overbooked Seats
-,KristiansFly,Copenhagen,Frankfurt,124436.13904143889,Frankfurt,-100
-,PetersFly,Copenhagen,Frankfurt,39098.825418444976,Oslo,25
-,KaspersFly,Copenhagen,Frankfurt,11721.783291573302,Copenhagen,0
-,KristiansFly,Frankfurt,Oslo,47797.22767986305,Frankfurt,-100
-,PetersFly,Frankfurt,Oslo,90142.6231452754,Oslo,25
-,KaspersFly,Frankfurt,Oslo,-1,Copenhagen,0
+,PetersFly,,,90368.7745966538,,25
+,KristiansFly,,,47901.453527648235,,-100
+,KaspersFly,,,62174.75420054871,,0
+,PetersFly,,,39165.485748260486,,25
+,KristiansFly,,,125060.42307185654,,-100
+,KaspersFly,,,11773.072020409147,,0

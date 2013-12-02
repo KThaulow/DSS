@@ -1,1 +1,1 @@
-http://KP05.airsupport.local:7778/acc
+http://10.126.20.22:7778/acc

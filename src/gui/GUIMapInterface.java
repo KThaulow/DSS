@@ -6,8 +6,10 @@
 
 package gui;
 
+import com.sun.corba.se.impl.orbutil.graph.GraphImpl;
 import entities.Airport;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
@@ -17,7 +19,10 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -61,6 +66,9 @@ public class GUIMapInterface extends JFrame implements JMapViewerEventListener  
 
     private JLabel mperpLabelName=null;
     private JLabel mperpLabelValue = null;
+    
+    private Layer airportLayer=null; 
+    private Layer aircraftLayer=null; 
 
     /**
      * Constructs the {@code Demo}.
@@ -71,6 +79,8 @@ public class GUIMapInterface extends JFrame implements JMapViewerEventListener  
         setSize(400, 400);
         System.out.println("New App halløj");
         treeMap = new JMapViewerTree("Zones");
+        airportLayer = treeMap.addLayer("World");
+        aircraftLayer = new Layer("aircrafts"); 
 
         // Listen to the map viewer for user operations so components will
         // recieve events and update
@@ -193,13 +203,8 @@ public class GUIMapInterface extends JFrame implements JMapViewerEventListener  
 
         add(treeMap, BorderLayout.CENTER);
         
-        Layer franceLayer = treeMap.addLayer("World");
-        Iterator it = AirportManager.getInstance().getAllAirports().values().iterator();
-        while (it.hasNext()) {
-            Airport airport = (Airport) it.next(); 
-            MapMarkerDot mapMarkerDot = new MapMarkerDot(franceLayer, airport.getName(), airport.getLocation().getLatitude(), airport.getLocation().getLongitude());
-            map().addMapMarker(mapMarkerDot);
-        }
+        
+        
 
         //
         /*
@@ -269,6 +274,33 @@ public class GUIMapInterface extends JFrame implements JMapViewerEventListener  
     private static Coordinate c(double lat, double lon){
         return new Coordinate(lat, lon);
     }
+    
+    public void drawAirports() {
+        for (Airport airport : AirportManager.getInstance().getAllAirports().values()) { 
+            MapMarkerDot mapMarkerDot = new MapMarkerDot(airportLayer, "", airport.getLocation().getLatitude(), airport.getLocation().getLongitude());
+            map().addMapMarker(mapMarkerDot);
+        }
+    }
+    
+    public void drawAircraft(HashMap<String, String> aircrafts) {
+        map().removeAllMapMarkers();
+        map().removeAllMapPolygons();
+        drawAirports();
+        for(String string : aircrafts.keySet()) {
+            List<String> items = Arrays.asList(aircrafts.get(string).split(","));
+            double currentLocationX = Double.parseDouble(items.get(0)); 
+            double currentLocationY = Double.parseDouble(items.get(1)); 
+            double arrivalLocationX = Double.parseDouble(items.get(2)); 
+            double arrivalLocationY = Double.parseDouble(items.get(3));
+            
+            MapMarkerDot aircraftDot = new MapMarkerDot(aircraftLayer, string, currentLocationX, currentLocationY); 
+            aircraftDot.setBackColor(Color.RED);
+            aircraftDot.setColor(Color.RED);
+            MapPolygon mapPolygon = new MapPolygonImpl(c(currentLocationX, currentLocationY), c(arrivalLocationX, arrivalLocationY), c(arrivalLocationX, arrivalLocationY)); 
+            map().addMapPolygon(mapPolygon);
+            map().addMapMarker(aircraftDot);
+        }
+    }
 
     private void updateZoomParameters() {
         if (mperpLabelValue!=null)
@@ -284,4 +316,6 @@ public class GUIMapInterface extends JFrame implements JMapViewerEventListener  
             updateZoomParameters();
         }
     }
+
+    
 }
