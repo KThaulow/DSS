@@ -133,7 +133,8 @@ public class RouteAgent extends Agent {
                         cfp.setConversationId(BEST_AIRCRAFT_CON_ID);
                         myAgent.send(cfp);
                         // Prepare the template to get proposals
-                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.PROPOSE));
+                        MessageTemplate performatives = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.PROPOSE), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
+                        mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), performatives);
                         step = BestAircraft.GET_PROPOSAL_FROM_ALL_AIRCRAFTS;
 
                         System.out.println("CFP for best fitted aircraft send to all aircrafts");
@@ -154,7 +155,7 @@ public class RouteAgent extends Agent {
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
                             double cost = Double.parseDouble(reply.getContent());
-                            if ((bestPlane == null || cost < lowestCost) && cost != -1) { // If aircraft is not available the cost is -1
+                            if (bestPlane == null || cost < lowestCost) { // If aircraft is not available the cost is -1
                                 // This is the best offer at present
                                 lowestCost = cost;
                                 bestPlane = reply.getSender();

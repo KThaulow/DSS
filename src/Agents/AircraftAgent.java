@@ -108,14 +108,13 @@ public class AircraftAgent extends Agent {
             if (msg != null) {
                 System.out.println("Best aircraft request served");
                 ACLMessage reply = msg.createReply();
-                reply.setPerformative(ACLMessage.PROPOSE);
-
+               
                 // Message received. Process it
                 String content = msg.getContent();
                 String[] items = content.split(",");
                 String departureICAO = items[0];
                 String arrivalICAO = items[1];
-                bookedSeats = Integer.parseInt(items[2]);
+                int bookedSeats = Integer.parseInt(items[2]);
                 Airport departureAirportTemp = AirportManager.getInstance().getAirport(departureICAO);
                 Airport arrivalAirportTemp = AirportManager.getInstance().getAirport(arrivalICAO);
                 String costTemp = "-1";
@@ -124,11 +123,12 @@ public class AircraftAgent extends Agent {
                     SphericalPosition departureAirportLocation = departureAirportTemp.getLocation();
                     SphericalPosition arrivalAirportLocation = arrivalAirportTemp.getLocation();
 
-                    ICostModel costModel = new SimpleCostModel2(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new SimpleCostModel(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     costTemp = costModel.calculateCost() + "";
                     reply.setContent(costTemp);
+                    reply.setPerformative(ACLMessage.PROPOSE);
                 } else {
-                    reply.setContent(costTemp);
+                    reply.setPerformative(ACLMessage.REFUSE);
                 }
 
                 stats = new Stats("", aircraft.getTailnumber(), departureAirportTemp.getName(), arrivalAirportTemp.getName(), costTemp, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "", aircraft.getFuelBurnRate() + "");
@@ -172,7 +172,7 @@ public class AircraftAgent extends Agent {
                     arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
                     departureAirportLocation = departureAirport.getLocation();
                     arrivalAirportLocation = arrivalAirport.getLocation();
-                    ICostModel costModel = new SimpleCostModel2(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new SimpleCostModel(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     cost = costModel.calculateCost() + "";
 
                     System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
