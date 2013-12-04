@@ -26,7 +26,7 @@ public class AircraftManager {
         aircrafts.put("KaspersFly1", new Aircraft("KaspersFly1", 5, 72, 440, 1700));
         aircrafts.put("PetersFly1", new Aircraft("PetersFly1", 6, 162, 450, 2400));
         aircrafts.put("KristiansFly1", new Aircraft("KristiansFly1", 7, 70, 250, 550));
-        aircrafts.put("HenriksFly1", new Aircraft("HenriksFly1", 8, 148, 450, 4700));
+        aircrafts.put("HenriksFly1", new Aircraft("HenriksFly1", 8, 148, 450, 2300));
         aircrafts.put("KaspersFly2", new Aircraft("KaspersFly", 9, 265, 450, 4700));
         aircrafts.put("PetersFly2", new Aircraft("PetersFly", 10, 72, 440, 1700));
     }

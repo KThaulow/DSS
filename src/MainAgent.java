@@ -50,9 +50,9 @@ public class MainAgent extends Agent {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         }
 
-        for (int i = 0; i < routeAgentArgs.size(); i++) {
-            createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
-        }
+        //for (int i = 0; i < routeAgentArgs.size(); i++) {
+        //    createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
+        //}
 
         createAgent("GUIAgent", "Agents.GUIAgent", null);
 
@@ -174,7 +174,7 @@ public class MainAgent extends Agent {
                 case 5:
                     depAirport = AirportManager.getInstance().getAirport("ENGM");
                     arrAirport = AirportManager.getInstance().getAirport("EDDF");
-                    bookedSeats = 170;
+                    bookedSeats = 160;
                     routeID++;
                     routeIncrementer++;
                     break;
@@ -223,7 +223,7 @@ public class MainAgent extends Agent {
                 case 12:
                     depAirport = AirportManager.getInstance().getAirport("EDDM");
                     arrAirport = AirportManager.getInstance().getAirport("EHRD");
-                    bookedSeats = 165;
+                    bookedSeats = 160;
                     routeID++;
                     routeIncrementer++;
                     break;
