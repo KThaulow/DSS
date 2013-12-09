@@ -21,7 +21,6 @@ public class Stats
     private String bookedSeats;
     private String availableSeats;
     private String fuelBurnRate;
-
     private String distTravelled;
     
     public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String bookedSeats, String availableSeats, String fuelBurnrate, String distTravelled) 
@@ -50,11 +49,12 @@ public class Stats
         this.bookedSeats = args[6];
         this.availableSeats = args[7];
         this.fuelBurnRate = args[8];
+        this.distTravelled = args[9];
     }
     
     public String toCsvString()
     {
-        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + bookedSeats + "," + availableSeats + "," + fuelBurnRate;
+        return routeTime + "," + aircraft + "," + departureAirport + "," + destinationAirport + "," + cost + "," + aircraftLocation + "," + bookedSeats + "," + availableSeats + "," + fuelBurnRate + "," + distTravelled;
     }
     
     public String getRouteTime() {
