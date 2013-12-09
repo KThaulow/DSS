@@ -30,6 +30,7 @@ public class CsvFile
     private static final String BOOKED_SEATS = "Booked Seats";
     private static final String AVAILABLE_SEATS = "Available Seats";
     private static final String FUEL_BURN = "Fuel Burn";
+    private static final String DIST_TRAVELLED = "Distance Travelled";
     
     public CsvFile(String filePath) 
     {
@@ -78,6 +79,8 @@ public class CsvFile
     
     private String getHeaderColumns()
     {
-        return ROUTE_TIME + "," + AIRCRAFT_NAME + "," + DEP_AIRPORT + "," + DEST_AIRPORT + "," + COST + "," +CURRENT_LOCATION + "," + BOOKED_SEATS + "," + AVAILABLE_SEATS +"," + FUEL_BURN;
+        return ROUTE_TIME + "," + AIRCRAFT_NAME + "," + DEP_AIRPORT + "," 
+                + DEST_AIRPORT + "," + COST + "," +CURRENT_LOCATION + "," 
+                + BOOKED_SEATS + "," + AVAILABLE_SEATS +"," + FUEL_BURN + "," + DIST_TRAVELLED;
     }
 }

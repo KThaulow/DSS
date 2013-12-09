@@ -21,8 +21,10 @@ public class Stats
     private String bookedSeats;
     private String availableSeats;
     private String fuelBurnRate;
+
+    private String distTravelled;
     
-    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String bookedSeats, String availableSeats, String fuelBurnrate) 
+    public Stats(String time, String aircraft, String departureAirport, String destinationAirport, String cost, String aircraftLocation, String bookedSeats, String availableSeats, String fuelBurnrate, String distTravelled) 
     {
         this.routeTime = time;
         this.aircraft = aircraft;
@@ -33,6 +35,7 @@ public class Stats
         this.bookedSeats = bookedSeats;
         this.availableSeats = availableSeats;
         this.fuelBurnRate = fuelBurnrate;
+        this.distTravelled = distTravelled;
     }
 
     public Stats(String csvString)
@@ -126,10 +129,16 @@ public class Stats
         this.fuelBurnRate = fuelBurnRate;
     }
 
+    public String getDistTravelled() {
+        return distTravelled;
+    }
+
+    public void setDistTravelled(String distTravelled) {
+        this.distTravelled = distTravelled;
+    }
+    
     @Override
     public String toString() {
         return toCsvString();
-    }
-    
-    
+    }    
 }
