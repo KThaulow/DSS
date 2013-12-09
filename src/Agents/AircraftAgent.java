@@ -123,7 +123,7 @@ public class AircraftAgent extends Agent {
                     SphericalPosition departureAirportLocation = departureAirportTemp.getLocation();
                     SphericalPosition arrivalAirportLocation = arrivalAirportTemp.getLocation();
 
-                    ICostModel costModel = new PassengerOptimizedCostModel2(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new PassengerOptimizedCostModel(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     costTemp = costModel.calculateCost() + "";
                     reply.setContent(costTemp);
                     reply.setPerformative(ACLMessage.PROPOSE);
@@ -172,7 +172,7 @@ public class AircraftAgent extends Agent {
                     arrivalAirport = AirportManager.getInstance().getAirport(arrivalICAO);
                     departureAirportLocation = departureAirport.getLocation();
                     arrivalAirportLocation = arrivalAirport.getLocation();
-                    ICostModel costModel = new PassengerOptimizedCostModel2(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
+                    ICostModel costModel = new PassengerOptimizedCostModel(bookedSeats, aircraft.getCapacity(), currentLocation, departureAirportLocation, arrivalAirportLocation, aircraft.getSpeed(), aircraft.getFuelBurnRate());
                     cost = costModel.calculateCost() + "";
 
                     System.out.println("Aircraft " + myAgent.getLocalName() + "(" + aircraft.getTailnumber() + ") has been assigned to route " + msg.getSender().getLocalName() + "(" + departureAirport.getName() + "-" + arrivalAirport.getName() + ") and started");
@@ -235,6 +235,7 @@ public class AircraftAgent extends Agent {
 
         private SphericalPosition otherLocation;
         private double distanceSinceLastUpdate;
+        private double travelledDistanceRoute = 0;
 
         public AircraftStartInformBehaviour(Agent a, long period) {
             super(a, period);
@@ -244,6 +245,7 @@ public class AircraftAgent extends Agent {
         protected void onTick() {
             distanceSinceLastUpdate = aircraft.getSpeed() / (MS_TO_HOUR / (AIRCRAFT_START_TIMER_MS * TIME_FACTOR));
             travelledDistanceLeg += distanceSinceLastUpdate;
+            travelledDistanceRoute += distanceSinceLastUpdate;
             routeTimeSeconds += (double) AIRCRAFT_START_TIMER_MS / MS_TO_SECONDS;
 
             ACLMessage info = new ACLMessage(ACLMessage.INFORM);
@@ -279,7 +281,7 @@ public class AircraftAgent extends Agent {
             if (currentLocation.equals(arrivalAirportLocation)) {
                 System.out.println("Aircraft " + myAgent.getLocalName() + " with current location " + currentLocation.toString() + " has arrived at " + arrivalAirport.getName() + " airport");
                 System.out.println("Route time: "+routeTimeSeconds);
-                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "", aircraft.getFuelBurnRate() + "");
+                stats = new Stats(routeTimeSeconds + "", aircraft.getTailnumber(), departureAirport.getName(), arrivalAirport.getName(), cost, currentAirport.getName(), bookedSeats + "", aircraft.getCapacity() + "", aircraft.getFuelBurnRate() + "", travelledDistanceRoute + "");
                 addBehaviour(new InformStatisticsBehaviour()); // Send information to statistics agent
                 currentAirport = arrivalAirport;
                 aircraftAvailable = true;
