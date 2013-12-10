@@ -27,9 +27,9 @@ public class SimpleCostModel implements ICostModel
     
     private final double NUM_OF_PASSENGERS_FACTOR = -1;
     private final double NUM_OF_EMPTY_SEATS_FACTOR = 2;
-    private final double DIST_TO_DEPARTURE_AIRPORT_FACTOR = 11;
+    private final double DIST_TO_DEPARTURE_AIRPORT_FACTOR = 0.1;
     private final double TOTAL_EET_FACTOR = 12;
-    private final double FUEL_CONSUMPTION_FACTOR = 9.8;
+    private final double FUEL_CONSUMPTION_FACTOR = 0.1;
     
     /**
      * Constructs a very simple proof-of-concept cost model.

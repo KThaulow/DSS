@@ -28,9 +28,9 @@ public class Settings {
     public static final String STATISTICS_CON_ID = "statisticsInfo";
     public static final String AIRCRAFT_PRESENCE_CON_ID = "aircraftPresence";
     
-    public static final int NUMBER_OF_AIRCRAFT_AGENTS = 3;
-    public static final int NUMBER_OF_AIRPORT_AGENTS = 3;
-    public static final int NUMBER_OF_ROUTE_AGENTS = 1;    
+    public static final int NUMBER_OF_AIRCRAFT_AGENTS = 10;
+    public static final int NUMBER_OF_AIRPORT_AGENTS = 10;
+    public static final int NUMBER_OF_ROUTE_AGENTS = 20;    
     
     public static final int MS_TO_HOUR = 3600000;
     public static final int MS_TO_SECONDS = 1000;
