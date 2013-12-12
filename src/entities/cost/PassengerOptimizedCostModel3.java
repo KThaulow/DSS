@@ -13,7 +13,7 @@ import entities.SphericalPosition;
  *
  * @author pla
  */
-public class PassengerOptimizedCostModel implements ICostModel
+public class PassengerOptimizedCostModel3 implements ICostModel
 {
     private int numOfPassengers;
     private int aircraftCapacity;
@@ -23,12 +23,12 @@ public class PassengerOptimizedCostModel implements ICostModel
     private double aircraftSpeed;
     private double fuelBurnRate;
     
-    private final double NUM_OF_EMPTY_SEATS_FACTOR = 2;
+    private final double NUM_OF_EMPTY_SEATS_FACTOR = 1000;
     private final double DIST_TO_DEPARTURE_AIRPORT_FACTOR = 11;
     private final double FUEL_CONSUMPTION_FACTOR = 9.8;
     private final int NUM_OF_DISC_PASSENGERS_FACTOR = 200;
     
-    public PassengerOptimizedCostModel(int numOfPassengers, int acCapacity, SphericalPosition currentAcPos, SphericalPosition depPos, SphericalPosition destPos, double acSpeed, double fuelBurnRate)
+    public PassengerOptimizedCostModel3(int numOfPassengers, int acCapacity, SphericalPosition currentAcPos, SphericalPosition depPos, SphericalPosition destPos, double acSpeed, double fuelBurnRate)
     {
         this.numOfPassengers = numOfPassengers;
         this.aircraftCapacity = acCapacity;
