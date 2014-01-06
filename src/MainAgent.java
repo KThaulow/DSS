@@ -1,5 +1,6 @@
 
 import Utils.Settings;
+import entities.Aircraft;
 import entities.Airport;
 import jade.core.Agent;
 import jade.wrapper.AgentController;
@@ -9,6 +10,7 @@ import jade.core.behaviours.TickerBehaviour;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mediator.AircraftManager;
@@ -46,7 +48,7 @@ public class MainAgent extends Agent {
             createAgent("apAgent" + i, "Agents.AirportAgent", airportAgentArgs.get(i));
         }
 
-        for (int i = 0; i < aircraftAgentArgs.size(); i++) {
+        for (int i = 0; i < 174; i++) {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         }
 
@@ -63,7 +65,7 @@ public class MainAgent extends Agent {
 
     private ArrayList<IAgentArgs> createAircraftAgentsArgs() {
         ArrayList<IAgentArgs> acAgentArgs = new ArrayList<>();
-        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirport("EKCH")));
+        /*acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirport("EKCH")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly"), AirportManager.getInstance().getAirport("ENGM")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly"), AirportManager.getInstance().getAirport("EDDF")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("HenriksFly"), AirportManager.getInstance().getAirport("LFPG")));
@@ -73,7 +75,14 @@ public class MainAgent extends Agent {
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("HenriksFly1"), AirportManager.getInstance().getAirport("LTBA")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly2"), AirportManager.getInstance().getAirport("UUDD")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly2"), AirportManager.getInstance().getAirport("LIRA")));
-
+*/
+        
+        for(Aircraft aircraft : AircraftManager.getInstance().getAllAircrafts().values())
+        {
+            acAgentArgs.add(new AircraftAgentArgs(aircraft, AirportManager.getInstance().getAirport("EKCH")));
+        }
+        
+        
         return acAgentArgs;
     }
 

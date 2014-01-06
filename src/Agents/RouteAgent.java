@@ -102,6 +102,7 @@ public class RouteAgent extends Agent {
         private BestAircraft step = BestAircraft.REQUEST_AIRCRAFT_COST;
         private List<AID> unavailableAircrafts = new ArrayList<>();
         private int numberOfAircrafts = 0;
+        private long startTime, totalTime;
 
         @Override
         public void action() {
@@ -110,6 +111,8 @@ public class RouteAgent extends Agent {
             switch (step) {
                 case REQUEST_AIRCRAFT_COST: // Send the CFP (Call For Proposal) to all aircrafts
 
+                    startTime = System.currentTimeMillis();
+                    
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
@@ -146,11 +149,6 @@ public class RouteAgent extends Agent {
                 case GET_PROPOSAL_FROM_ALL_AIRCRAFTS:  // Receive all proposals from the planes in the current airport
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
-
-                        if (unavailableAircrafts.contains(reply.getSender())) { // Break if plane is not functional
-                            break;
-                        }
-
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
@@ -165,6 +163,8 @@ public class RouteAgent extends Agent {
                         repliesCnt++;
                         if (repliesCnt >= numberOfAircrafts) {
                             // We received all replies
+                            totalTime = System.currentTimeMillis() - startTime;
+                            System.out.println("Total time (ms) for route "+myAgent.getLocalName() + ": " + totalTime);
                             step = BestAircraft.ORDER_AIRCRAFT;
                         }
 
@@ -195,7 +195,6 @@ public class RouteAgent extends Agent {
                             step = BestAircraft.IDLE;
 
                         } else if (reply.getPerformative() == ACLMessage.REFUSE) {
-                            unavailableAircrafts.add(bestPlane);
                             bestPlane = null;
                             
                             step = BestAircraft.REQUEST_AIRCRAFT_COST;
