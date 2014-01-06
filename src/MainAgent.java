@@ -1,12 +1,16 @@
 
 import Utils.Settings;
+import static Utils.Settings.START_ROUTE_GENERATOR_CON_ID;
 import entities.Aircraft;
 import entities.Airport;
 import jade.core.Agent;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
 import entities.agentargs.*;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.lang.acl.MessageTemplate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,8 +35,10 @@ public class MainAgent extends Agent {
         } catch (Exception c) {
             containerName = "Main-Container";
         }
-
+       
+        
         setupAllAgents();
+        addBehaviour(new StartRouteGeneratorBehaviour());
     }
 
     /**
@@ -48,13 +54,13 @@ public class MainAgent extends Agent {
             createAgent("apAgent" + i, "Agents.AirportAgent", airportAgentArgs.get(i));
         }
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < aircraftAgentArgs.size(); i++) {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         }
 
-        for (int i = 0; i < routeAgentArgs.size(); i++) {
+        /*for (int i = 0; i < routeAgentArgs.size(); i++) {
             createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
-        }
+        }*/
 
         createAgent("GUIAgent", "Agents.GUIAgent", null);
 
@@ -65,7 +71,7 @@ public class MainAgent extends Agent {
 
     private ArrayList<IAgentArgs> createAircraftAgentsArgs() {
         ArrayList<IAgentArgs> acAgentArgs = new ArrayList<>();
-        /*acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirport("EKCH")));
+        acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly"), AirportManager.getInstance().getAirport("EKCH")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly"), AirportManager.getInstance().getAirport("ENGM")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KristiansFly"), AirportManager.getInstance().getAirport("EDDF")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("HenriksFly"), AirportManager.getInstance().getAirport("LFPG")));
@@ -75,12 +81,12 @@ public class MainAgent extends Agent {
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("HenriksFly1"), AirportManager.getInstance().getAirport("LTBA")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly2"), AirportManager.getInstance().getAirport("UUDD")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly2"), AirportManager.getInstance().getAirport("LIRA")));
-*/
+
         
-        for(Aircraft aircraft : AircraftManager.getInstance().getAllAircrafts().values())
+        /*for(Aircraft aircraft : AircraftManager.getInstance().getAllAircrafts().values())
         {
             acAgentArgs.add(new AircraftAgentArgs(aircraft, AirportManager.getInstance().getAirport("EKCH")));
-        }
+        }*/
         
         
         return acAgentArgs;
@@ -121,6 +127,24 @@ public class MainAgent extends Agent {
         return routeAgentArgs;
     }
 
+    /**
+     * Starts route generator behaviour
+     */
+    private class StartRouteGeneratorBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(START_ROUTE_GENERATOR_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+               addBehaviour(new RouteGeneratorBehaviour(myAgent, Settings.ROUTE_GENERATOR_MS_DELAY));
+            } else {
+                block();
+            }
+        }
+    }
+    
     /**
      * Generates a new route for every tick
      */
