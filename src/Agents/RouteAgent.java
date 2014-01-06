@@ -54,7 +54,6 @@ public class RouteAgent extends Agent {
             latestArrivalTime = args.getLatestArrivalTime();
 
             registerToDF();
-
             addBehaviour(new StartRouteBehaviour());
             //addBehaviour(new RequestBestAircraft());
 
@@ -99,9 +98,10 @@ public class RouteAgent extends Agent {
         @Override
         public void action() {
             MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(START_ROUTE_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
+ 
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null) {
+                System.out.println("Start request best aicraft");
                addBehaviour(new RequestBestAircraft());
             } else {
                 block();
@@ -124,8 +124,8 @@ public class RouteAgent extends Agent {
         private int numberOfAircrafts = 0;
         private long startTime, totalTime;
 
-        private static final String REMOTE_DF = "df@192.168.1.45:1099/JADE";
-        private static final String REMOTE_ADDRESS = "http://Kristian-Laptop:7778/acc";
+        private static final String REMOTE_DF = "df@192.168.1.41:1099/JADE"; // "df@192.168.1.45:1099/JADE";
+        private static final String REMOTE_ADDRESS = "http://Kristian-Yoga:7778/acc"; //"http://Kristian-Laptop:7778/acc";
         
         @Override
         public void action() {

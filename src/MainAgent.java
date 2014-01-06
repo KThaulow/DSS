@@ -44,21 +44,21 @@ public class MainAgent extends Agent {
         ArrayList<IAgentArgs> aircraftAgentArgs = createAircraftAgentsArgs();
         ArrayList<IAgentArgs> routeAgentArgs = createRouteAgentArgs();
 
-        for (int i = 0; i < airportAgentArgs.size(); i++) {
+        /*for (int i = 0; i < airportAgentArgs.size(); i++) {
             createAgent("apAgent" + i, "Agents.AirportAgent", airportAgentArgs.get(i));
         }
 
         for (int i = 0; i < 2; i++) {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
-        }
+        }*/
 
         for (int i = 0; i < routeAgentArgs.size(); i++) {
             createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
         }
 
-        createAgent("GUIAgent", "Agents.GUIAgent", null);
+        /*createAgent("GUIAgent", "Agents.GUIAgent", null);
 
-        createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
+        createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);*/
 
         //addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
     }
