@@ -127,6 +127,7 @@ public class RouteAgent extends Agent {
         private static final String REMOTE_DF = "df@192.168.1.41:1099/JADE"; // "df@192.168.1.45:1099/JADE";
         private static final String REMOTE_ADDRESS = "http://Kristian-Yoga:7778/acc"; //"http://Kristian-Laptop:7778/acc";
         
+       
         @Override
         public void action() {
             AID[] aircrafts;
