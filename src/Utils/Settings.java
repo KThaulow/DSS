@@ -27,6 +27,7 @@ public class Settings {
     public static final String AIRCRAFT_SUBSCRIPTION_CON_ID = "aircraftSubscription";
     public static final String STATISTICS_CON_ID = "statisticsInfo";
     public static final String AIRCRAFT_PRESENCE_CON_ID = "aircraftPresence";
+    public static final String START_ROUTE_CON_ID = "startRoute";
     
     public static final int NUMBER_OF_AIRCRAFT_AGENTS = 10;
     public static final int NUMBER_OF_AIRPORT_AGENTS = 10;

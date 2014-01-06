@@ -14,6 +14,7 @@ import java.util.List;
 import static Utils.Settings.*;
 import entities.Airport;
 import entities.agentargs.*;
+import jade.core.behaviours.CyclicBehaviour;
 import java.util.Date;
 
 public class RouteAgent extends Agent {
@@ -54,7 +55,7 @@ public class RouteAgent extends Agent {
 
             registerToDF();
 
-            addBehaviour(new RequestBestAircraft());
+            //addBehaviour(new RequestBestAircraft());
 
         } else {
             System.out.println("No arguments specified specified");
@@ -87,6 +88,24 @@ public class RouteAgent extends Agent {
         }
 
         System.out.println("Route agent " + getAID().getName() + " terminating");
+    }
+    
+    /**
+     * Listens for start requests
+     */
+    private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(START_ROUTE_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+               addBehaviour(new RequestBestAircraft());
+            } else {
+                block();
+            }
+        }
     }
 
     /**

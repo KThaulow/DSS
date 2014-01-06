@@ -48,13 +48,13 @@ public class MainAgent extends Agent {
             createAgent("apAgent" + i, "Agents.AirportAgent", airportAgentArgs.get(i));
         }
 
-        for (int i = 0; i < 174; i++) {
+        for (int i = 0; i < 2; i++) {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         }
 
-        //for (int i = 0; i < routeAgentArgs.size(); i++) {
-        //    createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
-        //}
+        for (int i = 0; i < routeAgentArgs.size(); i++) {
+            createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
+        }
 
         createAgent("GUIAgent", "Agents.GUIAgent", null);
 
