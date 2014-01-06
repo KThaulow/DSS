@@ -38,5 +38,5 @@ public class Settings {
     
     public static final int TIME_FACTOR = 600;
     
-    public static final int ROUTE_GENERATOR_MS_DELAY = 100;
+    public static final int ROUTE_GENERATOR_MS_DELAY = 5000;
 }

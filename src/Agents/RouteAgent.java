@@ -54,8 +54,8 @@ public class RouteAgent extends Agent {
             latestArrivalTime = args.getLatestArrivalTime();
 
             registerToDF();
-            addBehaviour(new StartRouteBehaviour());
-            //addBehaviour(new RequestBestAircraft());
+            //addBehaviour(new StartRouteBehaviour());
+            addBehaviour(new RequestBestAircraft());
 
         } else {
             System.out.println("No arguments specified specified");
@@ -123,10 +123,6 @@ public class RouteAgent extends Agent {
         private List<AID> unavailableAircrafts = new ArrayList<>();
         private int numberOfAircrafts = 0;
         private long startTime, totalTime;
-
-        private static final String REMOTE_DF = "df@192.168.1.41:1099/JADE"; // "df@192.168.1.45:1099/JADE";
-        private static final String REMOTE_ADDRESS = "http://Kristian-Yoga:7778/acc"; //"http://Kristian-Laptop:7778/acc";
-        
        
         @Override
         public void action() {
@@ -135,7 +131,7 @@ public class RouteAgent extends Agent {
             switch (step) {
                 case REQUEST_AIRCRAFT_COST: // Send the CFP (Call For Proposal) to all aircrafts
 
-                    startTime = System.currentTimeMillis();
+                    startTime = System.currentTimeMillis(); // todo: Remove
                     
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
@@ -143,10 +139,7 @@ public class RouteAgent extends Agent {
                     sd.setType(TYPE_OF_AIRCRAFT_AGENT); // Get all aircrafts
                     template.addServices(sd);
                     try {
-                        AID remoteDF = new AID();
-                        remoteDF.setName(REMOTE_DF);
-                        remoteDF.addAddresses(REMOTE_ADDRESS);
-                        DFAgentDescription[] results = DFService.search(myAgent, remoteDF, template);
+                        DFAgentDescription[] results = DFService.search(myAgent, template);
                         aircrafts = new AID[results.length];
                         for (int i = 0; i < results.length; ++i) {
                             aircrafts[i] = results[i].getName();
@@ -191,8 +184,6 @@ public class RouteAgent extends Agent {
                         repliesCnt++;
                         if (repliesCnt >= numberOfAircrafts) {
                             // We received all replies
-                            totalTime = System.currentTimeMillis() - startTime;
-                            System.out.println("Total time (ms) for route "+myAgent.getLocalName() + ": " + totalTime);
                             step = BestAircraft.ORDER_AIRCRAFT;
                         }
 
@@ -208,7 +199,8 @@ public class RouteAgent extends Agent {
                     order.setContent(departureAirport.getIcao() + "," + arrivalAirport.getIcao() + "," + soldTickets); // Send the departure airport and sold tickets  
                     myAgent.send(order);
                     // Prepare the template to get the order reply
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    MessageTemplate performatives = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), performatives);
                     step = BestAircraft.GET_RECEIPT;
                     System.out.println("Send reschedule order to plane " + bestPlane.getName());
                     break;
@@ -220,6 +212,8 @@ public class RouteAgent extends Agent {
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aircraft = bestPlane;
+                            totalTime = System.currentTimeMillis() - startTime; // todo: Remove
+                            System.out.println("Total time (ms) for route "+myAgent.getLocalName() + ": " + totalTime);
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;
 
