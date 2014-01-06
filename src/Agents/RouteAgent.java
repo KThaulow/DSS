@@ -55,8 +55,8 @@ public class RouteAgent extends Agent {
 
             registerToDF();
 
-            addBehaviour(new StartRouteBehaviour());
-            //addBehaviour(new RequestBestAircraft());
+            //addBehaviour(new StartRouteBehaviour());
+            addBehaviour(new RequestBestAircraft());
 
         } else {
             System.out.println("No arguments specified specified");
