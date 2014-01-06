@@ -60,7 +60,7 @@ public class MainAgent extends Agent {
 
         createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
 
-        addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
+        //addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
     }
 
     private ArrayList<IAgentArgs> createAircraftAgentsArgs() {

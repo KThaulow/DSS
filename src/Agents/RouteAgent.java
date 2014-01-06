@@ -55,6 +55,7 @@ public class RouteAgent extends Agent {
 
             registerToDF();
 
+            addBehaviour(new StartRouteBehaviour());
             //addBehaviour(new RequestBestAircraft());
 
         } else {
@@ -93,7 +94,7 @@ public class RouteAgent extends Agent {
     /**
      * Listens for start requests
      */
-    private class BestAircraftRequestsServerBehaviour extends CyclicBehaviour {
+    private class StartRouteBehaviour extends CyclicBehaviour {
 
         @Override
         public void action() {
@@ -123,6 +124,9 @@ public class RouteAgent extends Agent {
         private int numberOfAircrafts = 0;
         private long startTime, totalTime;
 
+        private static final String REMOTE_DF = "df@192.168.1.45:1099/JADE";
+        private static final String REMOTE_ADDRESS = "http://Kristian-Laptop:7778/acc";
+        
         @Override
         public void action() {
             AID[] aircrafts;
@@ -138,10 +142,14 @@ public class RouteAgent extends Agent {
                     sd.setType(TYPE_OF_AIRCRAFT_AGENT); // Get all aircrafts
                     template.addServices(sd);
                     try {
-                        DFAgentDescription[] results = DFService.search(myAgent, template);
+                        AID remoteDF = new AID();
+                        remoteDF.setName(REMOTE_DF);
+                        remoteDF.addAddresses(REMOTE_ADDRESS);
+                        DFAgentDescription[] results = DFService.search(myAgent, remoteDF, template);
                         aircrafts = new AID[results.length];
                         for (int i = 0; i < results.length; ++i) {
                             aircrafts[i] = results[i].getName();
+                            System.out.println("Aircraft "+results[i].getName()+" found");
                         }
 
                         numberOfAircrafts = aircrafts.length;
@@ -177,7 +185,7 @@ public class RouteAgent extends Agent {
                                 lowestCost = cost;
                                 bestPlane = reply.getSender();
                             }
-                            System.out.println("Proposals received from " + reply.getSender().getName() + " with cost " + cost);
+                            System.out.println("Proposals received from " + reply.getSender().getName() + "(" + reply.getSender().getAddressesArray()[0] + ") with cost " + cost);
                         }
                         repliesCnt++;
                         if (repliesCnt >= numberOfAircrafts) {
@@ -207,6 +215,7 @@ public class RouteAgent extends Agent {
                 case GET_RECEIPT: // Receive the best aircraft order reply
                     reply = myAgent.receive(mt);
                     if (reply != null) {
+                        System.out.println("Receipt reply received");
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aircraft = bestPlane;
