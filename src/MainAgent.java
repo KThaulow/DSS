@@ -1,7 +1,6 @@
 
 import Utils.Settings;
 import static Utils.Settings.START_ROUTE_GENERATOR_CON_ID;
-import entities.Aircraft;
 import entities.Airport;
 import jade.core.Agent;
 import jade.wrapper.AgentController;
@@ -14,12 +13,10 @@ import jade.lang.acl.MessageTemplate;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import mediator.AircraftManager;
 import mediator.AirportManager;
-import mediator.CsvFile;
 import mediator.CsvFileRepository;
 
 public class MainAgent extends Agent {
@@ -44,6 +41,7 @@ public class MainAgent extends Agent {
     /**
      * *
      * Creates and sets up all the agents
+     * Remember to enable route agents in one platform and the other agents in the other platform
      */
     private void setupAllAgents() {
         ArrayList<IAgentArgs> airportAgentArgs = createAirportAgentsArgs();
@@ -58,15 +56,13 @@ public class MainAgent extends Agent {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         }
 
-        /*for (int i = 0; i < routeAgentArgs.size(); i++) {
+        /*for (int i = 0; i < routeAgentArgs.size(); i++) { 
             createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
         }*/
 
         createAgent("GUIAgent", "Agents.GUIAgent", null);
 
         createAgent("StatisticsAgent", "Agents.StatisticsAgent", null);
-
-        //addBehaviour(new RouteGeneratorBehaviour(this, Settings.ROUTE_GENERATOR_MS_DELAY));
     }
 
     private ArrayList<IAgentArgs> createAircraftAgentsArgs() {
@@ -82,13 +78,6 @@ public class MainAgent extends Agent {
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("KaspersFly2"), AirportManager.getInstance().getAirport("UUDD")));
         acAgentArgs.add(new AircraftAgentArgs(AircraftManager.getInstance().getAircraft("PetersFly2"), AirportManager.getInstance().getAirport("LIRA")));
 
-        
-        /*for(Aircraft aircraft : AircraftManager.getInstance().getAllAircrafts().values())
-        {
-            acAgentArgs.add(new AircraftAgentArgs(aircraft, AirportManager.getInstance().getAirport("EKCH")));
-        }*/
-        
-        
         return acAgentArgs;
     }
 

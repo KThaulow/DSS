@@ -27,17 +27,15 @@ public class Settings {
     public static final String AIRCRAFT_SUBSCRIPTION_CON_ID = "aircraftSubscription";
     public static final String STATISTICS_CON_ID = "statisticsInfo";
     public static final String AIRCRAFT_PRESENCE_CON_ID = "aircraftPresence";
-    public static final String START_ROUTE_CON_ID = "startRoute";
     public static final String START_ROUTE_GENERATOR_CON_ID = "startRouteGenerator";
-    
-    public static final int NUMBER_OF_AIRCRAFT_AGENTS = 10;
-    public static final int NUMBER_OF_AIRPORT_AGENTS = 10;
-    public static final int NUMBER_OF_ROUTE_AGENTS = 20;    
     
     public static final int MS_TO_HOUR = 3600000;
     public static final int MS_TO_SECONDS = 1000;
     
     public static final int TIME_FACTOR = 600;
     
-    public static final int ROUTE_GENERATOR_MS_DELAY = 100;
+    public static final int ROUTE_GENERATOR_MS_DELAY = 5000;
+    
+    public static final String REMOTE_DF = "df@192.168.1.45:1099/JADE";
+    public static final String REMOTE_ADDRESS = "http://Kristian-Laptop:7778/acc";
 }

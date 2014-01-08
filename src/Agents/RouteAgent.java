@@ -14,7 +14,6 @@ import java.util.List;
 import static Utils.Settings.*;
 import entities.Airport;
 import entities.agentargs.*;
-import jade.core.behaviours.CyclicBehaviour;
 import java.util.Date;
 
 public class RouteAgent extends Agent {
@@ -55,7 +54,6 @@ public class RouteAgent extends Agent {
 
             registerToDF();
 
-            //addBehaviour(new StartRouteBehaviour());
             addBehaviour(new RequestBestAircraft());
 
         } else {
@@ -90,24 +88,6 @@ public class RouteAgent extends Agent {
 
         System.out.println("Route agent " + getAID().getName() + " terminating");
     }
-    
-    /**
-     * Listens for start requests
-     */
-    private class StartRouteBehaviour extends CyclicBehaviour {
-
-        @Override
-        public void action() {
-            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(START_ROUTE_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
-
-            ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
-               addBehaviour(new RequestBestAircraft());
-            } else {
-                block();
-            }
-        }
-    }
 
     /**
      * This is the complex behaviour used to request aircraft agents to be
@@ -123,9 +103,6 @@ public class RouteAgent extends Agent {
         private List<AID> unavailableAircrafts = new ArrayList<>();
         private int numberOfAircrafts = 0;
         private long startTime, totalTime;
-
-        private static final String REMOTE_DF = "df@192.168.1.45:1099/JADE";
-        private static final String REMOTE_ADDRESS = "http://Kristian-Laptop:7778/acc";
         
         @Override
         public void action() {
