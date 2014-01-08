@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import mediator.AircraftManager;
 import mediator.AirportManager;
-import mediator.CsvFile;
 import mediator.CsvFileRepository;
 
 public class MainAgent extends Agent {
@@ -50,9 +49,9 @@ public class MainAgent extends Agent {
             createAgent("acAgent" + i, "Agents.AircraftAgent", aircraftAgentArgs.get(i));
         }
 
-        //for (int i = 0; i < routeAgentArgs.size(); i++) {
-        //    createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
-        //}
+        for (int i = 0; i < routeAgentArgs.size(); i++) {
+            createAgent("rAgent" + i, "Agents.RouteAgent", routeAgentArgs.get(i));
+        }
 
         createAgent("GUIAgent", "Agents.GUIAgent", null);
 

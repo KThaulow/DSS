@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package entities.agentargs;
 
 import entities.Aircraft;
@@ -11,7 +5,6 @@ import entities.Airport;
 
 /**
  * Represents the possible arguments for the AircraftAgent.
- * @author pla
  */
 public class AircraftAgentArgs implements IAgentArgs
 {  

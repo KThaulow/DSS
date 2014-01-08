@@ -1,19 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package entities.cost;
 
-import Utils.LinearCoordCalculator;
 import Utils.SphericalPositionCalculator;
-import entities.Coord2D;
 import entities.SphericalPosition;
 
 /**
  * Represents a simple proof-of-concept cost model.
- * @author pla
  */
 public class SimpleCostModel1 implements ICostModel
 {

@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package entities;
 
 /**
@@ -11,7 +5,6 @@ package entities;
  * This class is supposed to be as light weight as possible,
  * like 'structs' as we know it from C#.
  * Hence the lack of mutators and accessors.
- * @author pla
  */
 public class Coord2D 
 {
