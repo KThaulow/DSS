@@ -1,1 +1,4 @@
-Route Time,Aircraft,Departure Airport,Arrival Airport,Cost,Current Location,Overbooked Seats
+Route Time,Aircraft,Departure Airport,Arrival Airport,Cost,Current Location,Booked Seats,Available Seats,Fuel Burn,Distance Travelled
+3.800000000000002,KaspersFly,COPENHAGEN/KASTRUP,OSLO/GARDERMOEN,14734.0,COPENHAGEN/KASTRUP,100,162,2400.0,285.0
+4.5,KristiansFly,FRANKFURT/MAIN,LONDON CITY,16831.0,FRANKFURT/MAIN,120,148,2300.0,337.5
+9.99999999999998,PetersFly1,MUNICH,PARIS/CHARLES DE GAULLE,58065.0,PARIS/CHARLES DE GAULLE,150,162,2400.0,375.0

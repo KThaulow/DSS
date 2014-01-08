@@ -14,6 +14,7 @@ import java.util.List;
 import static Utils.Settings.*;
 import entities.Airport;
 import entities.agentargs.*;
+import jade.core.behaviours.CyclicBehaviour;
 import java.util.Date;
 
 public class RouteAgent extends Agent {
@@ -53,7 +54,7 @@ public class RouteAgent extends Agent {
             latestArrivalTime = args.getLatestArrivalTime();
 
             registerToDF();
-
+            //addBehaviour(new StartRouteBehaviour());
             addBehaviour(new RequestBestAircraft());
 
         } else {
@@ -88,6 +89,25 @@ public class RouteAgent extends Agent {
 
         System.out.println("Route agent " + getAID().getName() + " terminating");
     }
+    
+    /**
+     * Listens for start requests
+     */
+    private class StartRouteBehaviour extends CyclicBehaviour {
+
+        @Override
+        public void action() {
+            MessageTemplate mt = MessageTemplate.and(MessageTemplate.MatchConversationId(START_ROUTE_CON_ID), MessageTemplate.MatchPerformative(ACLMessage.REQUEST));
+ 
+            ACLMessage msg = myAgent.receive(mt);
+            if (msg != null) {
+                System.out.println("Start request best aicraft");
+               addBehaviour(new RequestBestAircraft());
+            } else {
+                block();
+            }
+        }
+    }
 
     /**
      * This is the complex behaviour used to request aircraft agents to be
@@ -102,7 +122,8 @@ public class RouteAgent extends Agent {
         private BestAircraft step = BestAircraft.REQUEST_AIRCRAFT_COST;
         private List<AID> unavailableAircrafts = new ArrayList<>();
         private int numberOfAircrafts = 0;
-
+        private long startTime, totalTime;
+       
         @Override
         public void action() {
             AID[] aircrafts;
@@ -110,6 +131,8 @@ public class RouteAgent extends Agent {
             switch (step) {
                 case REQUEST_AIRCRAFT_COST: // Send the CFP (Call For Proposal) to all aircrafts
 
+                    startTime = System.currentTimeMillis(); // todo: Remove
+                    
                     // Template for getting all aircraft agents
                     DFAgentDescription template = new DFAgentDescription();
                     ServiceDescription sd = new ServiceDescription();
@@ -120,6 +143,7 @@ public class RouteAgent extends Agent {
                         aircrafts = new AID[results.length];
                         for (int i = 0; i < results.length; ++i) {
                             aircrafts[i] = results[i].getName();
+                            System.out.println("Aircraft "+results[i].getName()+" found");
                         }
 
                         numberOfAircrafts = aircrafts.length;
@@ -146,11 +170,6 @@ public class RouteAgent extends Agent {
                 case GET_PROPOSAL_FROM_ALL_AIRCRAFTS:  // Receive all proposals from the planes in the current airport
                     ACLMessage reply = myAgent.receive(mt);
                     if (reply != null) {
-
-                        if (unavailableAircrafts.contains(reply.getSender())) { // Break if plane is not functional
-                            break;
-                        }
-
                         // Reply received
                         if (reply.getPerformative() == ACLMessage.PROPOSE) {
                             // this is an offer
@@ -160,7 +179,7 @@ public class RouteAgent extends Agent {
                                 lowestCost = cost;
                                 bestPlane = reply.getSender();
                             }
-                            System.out.println("Proposals received from " + reply.getSender().getName() + " with cost " + cost);
+                            System.out.println("Proposals received from " + reply.getSender().getName() + "(" + reply.getSender().getAddressesArray()[0] + ") with cost " + cost);
                         }
                         repliesCnt++;
                         if (repliesCnt >= numberOfAircrafts) {
@@ -180,7 +199,8 @@ public class RouteAgent extends Agent {
                     order.setContent(departureAirport.getIcao() + "," + arrivalAirport.getIcao() + "," + soldTickets); // Send the departure airport and sold tickets  
                     myAgent.send(order);
                     // Prepare the template to get the order reply
-                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), MessageTemplate.MatchInReplyTo(order.getReplyWith()));
+                    MessageTemplate performatives = MessageTemplate.or(MessageTemplate.MatchPerformative(ACLMessage.CONFIRM), MessageTemplate.MatchPerformative(ACLMessage.REFUSE));
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId(BEST_AIRCRAFT_CON_ID), performatives);
                     step = BestAircraft.GET_RECEIPT;
                     System.out.println("Send reschedule order to plane " + bestPlane.getName());
                     break;
@@ -188,14 +208,16 @@ public class RouteAgent extends Agent {
                 case GET_RECEIPT: // Receive the best aircraft order reply
                     reply = myAgent.receive(mt);
                     if (reply != null) {
+                        System.out.println("Receipt reply received");
                         // Reschedule order reply received
                         if (reply.getPerformative() == ACLMessage.CONFIRM) {
                             aircraft = bestPlane;
+                            totalTime = System.currentTimeMillis() - startTime; // todo: Remove
+                            System.out.println("Total time (ms) for route "+myAgent.getLocalName() + ": " + totalTime);
                             System.out.println(reply.getSender().getName() + " succesfully rescheduled.\nCost = " + lowestCost);
                             step = BestAircraft.IDLE;
 
                         } else if (reply.getPerformative() == ACLMessage.REFUSE) {
-                            unavailableAircrafts.add(bestPlane);
                             bestPlane = null;
                             
                             step = BestAircraft.REQUEST_AIRCRAFT_COST;
